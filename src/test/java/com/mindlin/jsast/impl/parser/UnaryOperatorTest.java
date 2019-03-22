@@ -109,17 +109,35 @@ public class UnaryOperatorTest {
 	}
 	
 	@Test
-	public void testInvalidUnary() {
-		final String msg = "Did not throw error on illegal expression";
-		assertExceptionalExpression("++'foo'", msg);
-		assertExceptionalExpression("++4", msg);
-		assertExceptionalExpression("++true", msg);
-		assertExceptionalExpression("++null", msg);
-		assertExceptionalExpression("'foo'++", msg);
-		assertExceptionalExpression("4++", msg);
-		assertExceptionalExpression("true++", msg);
-		assertExceptionalExpression("null++", msg);
-		
+	public void testInvalidUpdateTargetStringLiteral() {
+		final String message = "Cannot update string literal";
+		assertExceptionalExpression("++'foo'", message);
+		assertExceptionalExpression("'foo'++", message);
+	}
+	
+	@Test
+	public void testInvalidUpdateTargetNumericLiteral() {
+		final String message = "Cannot update numeric literal";
+		assertExceptionalExpression("++4", message);
+		assertExceptionalExpression("4++", message);
+	}
+	
+	@Test
+	public void testInvalidUpdateTargetBooleanLiteral() {
+		final String message = "Cannot update boolean literal";
+		assertExceptionalExpression("++true", message);
+		assertExceptionalExpression("true++", message);
+	}
+	
+	@Test
+	public void testInvalidUpdateTargetNullLiteral() {
+		final String message = "Cannot update null literal";
+		assertExceptionalExpression("++null", message);
+		assertExceptionalExpression("null++", message);
+	}
+	
+	@Test
+	public void testInvalidStrictDeleteUnqualifiedIdentifier() {
 		assertExceptionalExpression("delete foo", "Cannot delete unqualified identifier in strict mode", true);
 	}
 }
