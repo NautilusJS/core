@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.mindlin.jsast.exception.JSSyntaxException;
-import com.mindlin.jsast.fs.SourceFile.NominalSourceFile;
 import com.mindlin.jsast.impl.lexer.JSLexer;
 import com.mindlin.jsast.impl.parser.JSParser.Context;
 import com.mindlin.jsast.tree.CastExpressionTree;
@@ -33,15 +32,6 @@ import com.mindlin.jsast.tree.type.TypeTree;
 
 public class TypeTest {
 	
-	@SuppressWarnings("unchecked")
-	static <T extends TypeTree> T parseType(String expr, Kind expectedKind) {
-		JSLexer lexer = new JSLexer(new NominalSourceFile(getTestName(), expr));
-		T result = (T) new JSParser().parseType(lexer, new Context());
-		assertTrue("Did not read whole statement", lexer.isEOF());
-		assertEquals(expectedKind, result.getKind());
-		return result;
-	}
-	
 	static void assertExceptionalType(String expr, String errMsg) {
 		try {
 			JSLexer lexer = new JSLexer(expr);
@@ -51,13 +41,15 @@ public class TypeTest {
 		}
 	}
 	
-	static void assertIdentifierType(String name, int numGenerics, TypeTree type) {
+	static IdentifierTypeTree assertIdentifierType(String name, int numGenerics, TypeTree type) {
 		assertEquals(Kind.IDENTIFIER_TYPE, type.getKind());
 		assertIdentifier(name, ((IdentifierTypeTree)type).getName());
 		if (numGenerics == 0)
 			assertNull(((IdentifierTypeTree)type).getGenerics());
 		else
 			assertEquals(numGenerics, ((IdentifierTypeTree)type).getGenerics().size());
+		
+		return (IdentifierTypeTree) type;
 	}
 	
 	@Test
