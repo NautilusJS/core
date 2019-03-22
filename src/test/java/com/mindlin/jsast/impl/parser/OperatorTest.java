@@ -3,10 +3,13 @@ package com.mindlin.jsast.impl.parser;
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.BinaryExpressionTree;
 import com.mindlin.jsast.tree.ConditionalExpressionTree;
+import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.FunctionCallTree;
 import com.mindlin.jsast.tree.NewTree;
 import com.mindlin.jsast.tree.Tree.Kind;
@@ -60,6 +63,10 @@ public class OperatorTest {
 	public void testFunctionCall() {
 		FunctionCallTree expr = parseExpression("a(b)", Kind.FUNCTION_INVOCATION);
 		assertIdentifier("a", expr.getCallee());
+		
+		List<? extends ExpressionTree> arguments = expr.getArguments();
+		assertEquals(1, arguments.size());
+		assertIdentifier("b", arguments.get(0));
 	}
 	
 	@Test
