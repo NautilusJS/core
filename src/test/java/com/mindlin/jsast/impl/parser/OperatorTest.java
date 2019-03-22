@@ -58,7 +58,9 @@ public class OperatorTest {
 		BinaryExpressionTree callee = (BinaryExpressionTree) expr.getCallee();
 		assertIdentifier("foo", callee.getLeftOperand());
 		assertIdentifier("bar", callee.getRightOperand());
-		assertEquals(1, expr.getArguments().size());
-		assertIdentifier("baz", expr.getArguments().get(0));
+		
+		List<? extends ExpressionTree> arguments = expr.getArguments();
+		assertEquals(1, arguments.size());
+		assertIdentifier("baz", arguments.get(0));
 	}
 }

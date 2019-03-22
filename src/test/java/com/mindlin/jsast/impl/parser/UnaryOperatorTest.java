@@ -80,13 +80,13 @@ public class UnaryOperatorTest {
 	
 	@Test
 	public void testTypeofLiteral() {
-		UnaryTree expr = parseExpression("typeof 'foo'", Tree.Kind.TYPEOF);
+		UnaryTree expr = parseExpression("typeof 'foo'", Kind.TYPEOF);
 		assertLiteral("foo", expr.getExpression());
 	}
 
 	@Test
 	public void testDelete() {
-		UnaryTree expr = parseExpression("delete a", Tree.Kind.DELETE);
+		UnaryTree expr = parseExpression("delete a", Kind.DELETE);
 		assertIdentifier("a", expr.getExpression());
 	}
 	

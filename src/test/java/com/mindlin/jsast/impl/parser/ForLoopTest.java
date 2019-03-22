@@ -23,9 +23,10 @@ public class ForLoopTest {
 		
 		VariableDeclarationTree declaration = (VariableDeclarationTree) loop.getVariable();
 		assertEquals(VariableDeclarationKind.VAR, declaration.getDeclarationStyle());
-		assertEquals(1, declaration.getDeclarations().size());
+		List<VariableDeclaratorTree> declarations = declaration.getDeclarations();
+		assertEquals(1, declarations.size());
 		
-		VariableDeclaratorTree declarator = declaration.getDeclarations().get(0);
+		VariableDeclaratorTree declarator = declarations.get(0);
 		assertNull(declarator.getInitializer());
 		assertIdentifier("i", declarator.getName());
 		

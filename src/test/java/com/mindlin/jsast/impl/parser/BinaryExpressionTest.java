@@ -72,7 +72,6 @@ public class BinaryExpressionTest {
 		
 		ParenthesizedTree _left = assertKind(Kind.PARENTHESIZED, expr.getLeftOperand());
 		BinaryExpressionTree left = assertKind(Kind.ADDITION, _left.getExpression());
-		assertEquals(Tree.Kind.ADDITION, left.getKind());
 		assertIdentifier("a", left.getLeftOperand());
 		assertIdentifier("b", left.getRightOperand());
 	}

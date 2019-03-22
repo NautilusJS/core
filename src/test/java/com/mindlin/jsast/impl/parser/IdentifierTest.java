@@ -18,6 +18,7 @@ public class IdentifierTest {
 		IdentifierTree id = parseExpression(identifier, Kind.IDENTIFIER);
 		assertIdentifier(expected, id);
 	}
+	
 	@Test
 	public void testSimpleIdentifier() {
 		testIdentifier("a", "a");

@@ -111,13 +111,16 @@ public class JSParserTest {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends StatementTree> T parseStatement(String stmt) {
-		return (T) new JSParser().parseStatement(createLexer(stmt), new Context());
+		return parseStatement(stmt, null);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends StatementTree> T parseStatement(String stmt, Kind kind) {
 		T result = (T) new JSParser().parseStatement(createLexer(stmt), new Context());
-		assertEquals(kind, result.getKind());
+		
+		if (kind != null)
+			assertEquals(kind, result.getKind());
+		
 		return result;
 	}
 	
@@ -128,16 +131,17 @@ public class JSParserTest {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends ExpressionTree> T parseExpression(String expr) {
-		JSLexer lexer = createLexer(expr);
-		T result = (T) new JSParser().parseNextExpression(lexer, new Context());
-		assertTrue("Not all of expression was consumed. Read until " + lexer.getPosition(), lexer.isEOF());
-		return result;
+		return parseExpression(expr, null);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends ExpressionTree> T parseExpression(String expr, Kind kind) {
 		T result = (T) new JSParser().parseNextExpression(createLexer(expr), new Context());
 		assertEquals(kind, result.getKind());
+		
+		if (kind != null)
+			assertEquals(kind, result.getKind());
+		
 		return result;
 	}
 	
@@ -146,12 +150,16 @@ public class JSParserTest {
 		Context context = new Context();
 		if (yield)
 			context.pushGenerator();
+		
 		if (in)
 			context.allowIn();
 		else
 			context.disallowIn();
+		
 		context.allowAwait(await);
+		
 		T result = (T) new JSParser().parseNextExpression(createLexer(expr), context);
+		
 		assertEquals(kind, result.getKind());
 		return result;
 	}
