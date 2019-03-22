@@ -4048,7 +4048,7 @@ public class JSParser {
 		if (kind == null)
 			return this.parseUnaryPostfix(src, context);
 		
-		final SourcePosition start = src.getNextStart();
+		final SourcePosition start = src.skip(lookahead).getStart();
 		
 		ExpressionTree expression;
 		//TODO: better ASI check?
