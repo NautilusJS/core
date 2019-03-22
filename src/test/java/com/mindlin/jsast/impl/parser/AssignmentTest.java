@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 import org.junit.Test;
 
+import com.mindlin.jsast.exception.JSException;
 import com.mindlin.jsast.tree.AssignmentTree;
-import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.Tree.Kind;
 
 public class AssignmentTest {
@@ -26,12 +26,23 @@ public class AssignmentTest {
 		assertIdentifier("z", yzAssignment.getValue());
 	}
 	
-	@Test
-	public void testAssignmentToLiteral() {
-		String errorMessagePrefix = "Assignment may not be made to ";
-//		assertExceptionalExpression("y++=x", errorMessagePrefix + "numeric literals");
-		assertExceptionalExpression("'hello'=x", errorMessagePrefix + "string literals");
-		assertExceptionalExpression("true=x", errorMessagePrefix + "boolean literals");
-		assertExceptionalExpression("~x=y", errorMessagePrefix + "opaque expressions");
+	@Test(expected=JSException.class)
+	public void testInvalidAssignmentToStringLiteral() {
+		parseExpression("'hello' = x'");
+	}
+	
+	@Test(expected=JSException.class)
+	public void testInvalidAssignmentToBooleanLiteral() {
+		parseExpression("true = x'");
+	}
+	
+	@Test(expected=JSException.class)
+	public void testInvalidAssignmentToNumericLiteral() {
+		parseExpression("5 = x'");
+	}
+	
+	@Test(expected=JSException.class)
+	public void testInvalidAssignmentToOpaqueExpression() {
+		parseExpression("~x = y'");
 	}
 }

@@ -213,8 +213,8 @@ public class LambdaTest {
 	}
 	
 	@Test
-	public void testMultipleParamsOptional() {
-		FunctionExpressionTree lambda = parseExpression("(x?, y?)=>x", Kind.FUNCTION_EXPRESSION);
+	public void testMultipleParamsOneOptional() {
+		FunctionExpressionTree lambda = parseExpression("(x, y?)=>x", Kind.FUNCTION_EXPRESSION);
 		
 		List<ParameterTree> params = lambda.getParameters();
 		assertEquals(2, params.size());
@@ -230,20 +230,22 @@ public class LambdaTest {
 		assertEquals(param1.getModifiers(), Modifiers.OPTIONAL);
 		assertNull(param1.getInitializer());
 		assertIdentifier("y", param1.getName());
+	}
+	
+	@Test
+	public void testMultipleParamsMultipleOptional() {
+		FunctionExpressionTree lambda = parseExpression("(x?, y?)=>x", Kind.FUNCTION_EXPRESSION);
 		
-		
-		lambda = parseExpression("(x, y?)=>x", Kind.FUNCTION_EXPRESSION);
-		
-		params = lambda.getParameters();
+		List<ParameterTree> params = lambda.getParameters();
 		assertEquals(2, params.size());
 		
-		param0 = params.get(0);
+		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
 		assertEquals(param0.getModifiers(), Modifiers.NONE);
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
-		param1 = params.get(1);
+		ParameterTree param1 = params.get(1);
 		assertFalse(param1.isRest());
 		assertEquals(param1.getModifiers(), Modifiers.OPTIONAL);
 		assertNull(param1.getInitializer());

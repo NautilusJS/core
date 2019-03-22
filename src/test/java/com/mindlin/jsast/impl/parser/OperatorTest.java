@@ -22,6 +22,23 @@ public class OperatorTest {
 	}
 	
 	@Test
+	public void testNewNoArgs() {
+		NewTree newExpr = parseExpression("new X()", Kind.NEW);
+		assertIdentifier("X", newExpr.getCallee());
+		
+		List<? extends ExpressionTree> arguments = newExpr.getArguments();
+		assertNotNull("new-with-parens should return empty arguments list", arguments);
+		assertEquals(0, arguments.size());
+	}
+	
+	@Test
+	public void testNewWithoutParens() {
+		NewTree newExpr = parseExpression("new X", Kind.NEW);
+		assertIdentifier("X", newExpr.getCallee());
+		assertNull("new-without-parens should return null arguments list", newExpr.getArguments());
+	}
+	
+	@Test
 	public void testChainedNews() {
 		NewTree newExpr = parseExpression("new new X()", Kind.NEW);
 		NewTree nested = assertKind(Kind.NEW, newExpr.getCallee());
@@ -32,16 +49,11 @@ public class OperatorTest {
 	public void testNewParams() {
 		NewTree newExpr = parseExpression("new X(a,b)", Kind.NEW);
 		assertIdentifier("X", newExpr.getCallee());
-		assertEquals(2, newExpr.getArguments().size());
-		assertIdentifier("a", newExpr.getArguments().get(0));
-		assertIdentifier("b", newExpr.getArguments().get(1));
-	}
-	
-	@Test
-	public void testNewWithoutParens() {
-		NewTree newExpr = parseExpression("new X", Kind.NEW);
-		assertIdentifier("X", newExpr.getCallee());
-		assertNull(newExpr.getArguments());
+		
+		List<? extends ExpressionTree> arguments = newExpr.getArguments();
+		assertEquals(2, arguments.size());
+		assertIdentifier("a", arguments.get(0));
+		assertIdentifier("b", arguments.get(1));
 	}
 	
 	@Test
