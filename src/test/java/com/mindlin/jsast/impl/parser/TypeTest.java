@@ -3,6 +3,8 @@ package com.mindlin.jsast.impl.parser;
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.mindlin.jsast.exception.JSSyntaxException;
@@ -12,7 +14,7 @@ import com.mindlin.jsast.tree.CastExpressionTree;
 import com.mindlin.jsast.tree.MemberExpressionTree;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ParameterTree;
-import com.mindlin.jsast.tree.PropertyDeclarationTree;
+import com.mindlin.jsast.tree.PropertySignatureTree;
 import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.type.ArrayTypeTree;
 import com.mindlin.jsast.tree.type.CompositeTypeTree;
@@ -21,12 +23,14 @@ import com.mindlin.jsast.tree.type.ConstructorTypeTree;
 import com.mindlin.jsast.tree.type.FunctionTypeTree;
 import com.mindlin.jsast.tree.type.IdentifierTypeTree;
 import com.mindlin.jsast.tree.type.IndexSignatureTree;
+import com.mindlin.jsast.tree.type.InferTypeTree;
 import com.mindlin.jsast.tree.type.UnaryTypeTree;
 import com.mindlin.jsast.tree.type.MappedTypeTree;
 import com.mindlin.jsast.tree.type.MemberTypeTree;
 import com.mindlin.jsast.tree.type.ObjectTypeTree;
 import com.mindlin.jsast.tree.type.SpecialTypeTree.SpecialType;
 import com.mindlin.jsast.tree.type.TupleTypeTree;
+import com.mindlin.jsast.tree.type.TypeElementTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
 
@@ -104,9 +108,14 @@ public class TypeTest {
 	
 	@Test
 	public void testQualifiedReference() {
-		IdentifierTypeTree type = parseType("A.B.C<T>", Kind.IDENTIFIER_TYPE);
+		MemberTypeTree type = parseType("A.B.C<T>", Kind.MEMBER_TYPE);
 		
-		fail("Check not implemented");
+		MemberTypeTree base = assertKind(Kind.MEMBER_TYPE, type.getBaseType());
+		assertIdentifierType("A", 0, base.getBaseType());
+		assertIdentifierType("B", 0, base.getName());
+		
+		IdentifierTypeTree name = assertIdentifierType("C", 1, type.getName());
+		assertIdentifierType("T", 0, name.getGenerics().get(0));
 	}
 	
 	@Test
@@ -243,8 +252,8 @@ public class TypeTest {
 		assertIdentifierType("T", 0, type.getCheckType());
 		
 		ArrayTypeTree limit = assertKind(Kind.ARRAY_TYPE, type.getLimitType());
-		TypeTree limit1 = assertKind(Kind.INFER_TYPE, limit.getBaseType());
-		fail("Not implemented");
+		InferTypeTree limit1 = assertKind(Kind.INFER_TYPE, limit.getBaseType());
+		assertIdentifier("E", limit1.getParameter().getName());
 		
 		assertIdentifierType("E", 0, type.getConecquent());
 		
@@ -329,9 +338,8 @@ public class TypeTest {
 	@Test
 	public void testSimpleObjectType() {
 		ObjectTypeTree type = parseType("{ a: Foo }", Kind.OBJECT_TYPE);
-		assertEquals(1, type.getDeclaredMembers().size());
 		
-		PropertyDeclarationTree prop0 = assertKind(Kind.PROPERTY_DECLARATION, type.getDeclaredMembers().get(0));
+		PropertySignatureTree prop0 = assertSingleElementKind(Kind.PROPERTY_SIGNATURE, type.getDeclaredMembers());
 		assertIdentifier("a", prop0.getName());
 		assertIdentifierType("Foo", 0, prop0.getType());
 	}
