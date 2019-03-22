@@ -24,8 +24,7 @@ public class OperatorTest {
 	@Test
 	public void testChainedNews() {
 		NewTree newExpr = parseExpression("new new X()", Kind.NEW);
-		assertEquals(Kind.NEW, newExpr.getCallee().getKind());
-		NewTree nested = (NewTree) newExpr.getCallee();
+		NewTree nested = assertKind(Kind.NEW, newExpr.getCallee());
 		assertIdentifier("X", nested.getCallee());
 	}
 	
@@ -54,8 +53,7 @@ public class OperatorTest {
 	@Test
 	public void testFunctionCallWithSelect() {
 		FunctionCallTree expr = parseExpression("foo.bar(baz)", Kind.FUNCTION_INVOCATION);
-		assertEquals(Kind.MEMBER_SELECT, expr.getCallee().getKind());
-		BinaryExpressionTree callee = (BinaryExpressionTree) expr.getCallee();
+		BinaryExpressionTree callee = assertKind(Kind.MEMBER_SELECT, expr.getCallee());
 		assertIdentifier("foo", callee.getLeftOperand());
 		assertIdentifier("bar", callee.getRightOperand());
 		

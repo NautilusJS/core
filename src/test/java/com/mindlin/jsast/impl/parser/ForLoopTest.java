@@ -21,7 +21,7 @@ public class ForLoopTest {
 	public void testForInLoop() {
 		ForEachLoopTree loop = parseStatement("for(var i in [1,2,3]);", Kind.FOR_IN_LOOP);
 		
-		VariableDeclarationTree declaration = (VariableDeclarationTree) loop.getVariable();
+		VariableDeclarationTree declaration = assertKind(Kind.VARIABLE_DECLARATION, loop.getVariable());
 		assertEquals(VariableDeclarationKind.VAR, declaration.getDeclarationStyle());
 		List<VariableDeclaratorTree> declarations = declaration.getDeclarations();
 		assertEquals(1, declarations.size());

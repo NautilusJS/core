@@ -53,7 +53,7 @@ public class VariableDeclarationTest {
 	
 	@Test
 	public void testComplexVariableDeclaration() {
-		VariableDeclarationTree decl = (VariableDeclarationTree) parseStatement("var foo : number = 5, bar = foo + 1;");
+		VariableDeclarationTree decl = parseStatement("var foo : number = 5, bar = foo + 1;", Kind.VARIABLE_DECLARATION);
 		assertEquals(2, decl.getDeclarations().size());
 
 		VariableDeclaratorTree declarator0 = decl.getDeclarations().get(0);

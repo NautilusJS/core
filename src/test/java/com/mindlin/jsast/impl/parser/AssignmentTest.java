@@ -20,9 +20,8 @@ public class AssignmentTest {
 	public void testChainedAssignment() {
 		AssignmentTree assignment = parseExpression("x=y=z", Kind.ASSIGNMENT);
 		assertIdentifier("x", assignment.getVariable());
-		assertEquals(Tree.Kind.ASSIGNMENT, assignment.getValue().getKind());
 		
-		AssignmentTree yzAssignment = (AssignmentTree) assignment.getValue();
+		AssignmentTree yzAssignment = assertKind(Kind.ASSIGNMENT, assignment.getValue());
 		assertIdentifier("y", yzAssignment.getVariable());
 		assertIdentifier("z", yzAssignment.getValue());
 	}
