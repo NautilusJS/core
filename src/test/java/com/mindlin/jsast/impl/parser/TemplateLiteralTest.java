@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.mindlin.jsast.tree.BinaryExpressionTree;
 import com.mindlin.jsast.tree.ExpressionTree;
+import com.mindlin.jsast.tree.TaggedTemplateLiteralTree;
 import com.mindlin.jsast.tree.TemplateElementTree;
 import com.mindlin.jsast.tree.TemplateLiteralTree;
 import com.mindlin.jsast.tree.Tree.Kind;
@@ -54,5 +55,24 @@ public class TemplateLiteralTest {
 		List<ExpressionTree> exprs = template.getExpressions();
 		assertEquals(1, exprs.size());
 		assertLiteral("world!", exprs.get(0));
+	}
+	
+	@Test
+	public void testTagged() {
+		TaggedTemplateLiteralTree expr = parseExpression("tag `string text ${expression} string text`", Kind.TAGGED_TEMPLATE);
+		assertIdentifier("tag", expr.getTag());
+		
+		
+		TemplateLiteralTree template = expr.getQuasi();
+		
+		List<TemplateElementTree> quasis = template.getQuasis();
+		assertEquals(2, quasis.size());
+		
+		assertEquals("string text ", quasis.get(0).getCooked());
+		assertEquals(" string text", quasis.get(1).getCooked());
+		
+		List<? extends ExpressionTree> exprs = template.getExpressions();
+		assertEquals(1, exprs.size());
+		assertLiteral("expression", exprs.get(0));
 	}
 }
