@@ -2,10 +2,14 @@ package com.mindlin.jsast.impl.parser;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.ImportDeclarationTree;
 import com.mindlin.jsast.tree.ImportSpecifierTree;
+import com.mindlin.jsast.tree.Tree.Kind;
+
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 public class ImportStatementTest {
 
@@ -41,13 +45,23 @@ public class ImportStatementTest {
 	
 	//Things that *should* work
 	//Examples taken from developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
+
+	@Test
+	public void testImportRaw() {
+		ImportDeclarationTree impt = parseStatement("import 'module-name';", Kind.IMPORT);
+		assertLiteral("module-name", impt.getSource());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(0, specifiers.size());
+	}
+	
 	@Test
 	public void testImportDefaultMember() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import defaultMember from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import defaultMember from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(1, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(1, specifiers.size());
 		
-		ImportSpecifierTree specifier = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier = specifiers.get(0);
 		assertIdentifier("defaultMember", specifier.getImported());
 		assertIdentifier("defaultMember", specifier.getAlias());
 		assertEquals(specifier.getImported(), specifier.getAlias());
@@ -56,11 +70,12 @@ public class ImportStatementTest {
 	
 	@Test
 	public void testImportWildcard() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import * as name from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import * as name from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(1, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(1, specifiers.size());
 		
-		ImportSpecifierTree specifier = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier = specifiers.get(0);
 		assertIdentifier("*", specifier.getImported());
 		assertIdentifier("name", specifier.getAlias());
 		assertFalse(specifier.isDefault());
@@ -68,100 +83,106 @@ public class ImportStatementTest {
 	
 	@Test
 	public void testImportSingleNamed() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import { member } from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import { member } from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(1, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(1, specifiers.size());
 		
-		ImportSpecifierTree specifier = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier = specifiers.get(0);
 		assertIdentifier("member", specifier.getImported());
 		assertIdentifier("member", specifier.getAlias());
 		assertEquals(specifier.getImported(), specifier.getAlias());
 		assertFalse(specifier.isDefault());
 	}
+	
 	@Test
 	public void testImportSingleAliased() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import { member as alias } from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import { member as alias } from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(1, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(1, specifiers.size());
 		
-		ImportSpecifierTree specifier0 = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier0 = specifiers.get(0);
 		assertIdentifier("member", specifier0.getImported());
 		assertIdentifier("alias", specifier0.getAlias());
 		assertFalse(specifier0.isDefault());
 	}
+	
 	@Test
 	public void testImportMultipleNamed() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import { member1 , member2 } from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import { member1 , member2 } from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(2, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(2, specifiers.size());
 		
-		ImportSpecifierTree specifier0 = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier0 = specifiers.get(0);
 		assertIdentifier("member1", specifier0.getImported());
 		assertIdentifier("member1", specifier0.getAlias());
 		assertEquals(specifier0.getImported(), specifier0.getAlias());
 		assertFalse(specifier0.isDefault());
 		
-		ImportSpecifierTree specifier1 = impt.getSpecifiers().get(1);
+		ImportSpecifierTree specifier1 = specifiers.get(1);
 		assertIdentifier("member2", specifier1.getImported());
 		assertIdentifier("member2", specifier1.getAlias());
 		assertEquals(specifier1.getImported(), specifier1.getAlias());
 		assertFalse(specifier1.isDefault());
 	}
+	
 	@Test
 	public void testImportMultipleMixed() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import { member1 , member2 as alias2 } from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import { member1 , member2 as alias2 } from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(2, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(2, specifiers.size());
 		
-		ImportSpecifierTree specifier0 = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier0 = specifiers.get(0);
 		assertIdentifier("member1", specifier0.getImported());
 		assertIdentifier("member1", specifier0.getAlias());
 		assertEquals(specifier0.getImported(), specifier0.getAlias());
 		assertFalse(specifier0.isDefault());
 		
-		ImportSpecifierTree specifier1 = impt.getSpecifiers().get(1);
+		ImportSpecifierTree specifier1 = specifiers.get(1);
 		assertIdentifier("member2", specifier1.getImported());
 		assertIdentifier("alias2", specifier1.getAlias());
 		assertFalse(specifier1.isDefault());
 	}
+	
 	@Test
 	public void testImportDefaultAndSingleNamed() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import defaultMember, { member } from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import defaultMember, { member } from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(2, impt.getSpecifiers().size());
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(2, specifiers.size());
 		
-		ImportSpecifierTree specifier0 = impt.getSpecifiers().get(0);
+		ImportSpecifierTree specifier0 = specifiers.get(0);
 		assertIdentifier("defaultMember", specifier0.getImported());
 		assertIdentifier("defaultMember", specifier0.getAlias());
 		assertEquals(specifier0.getImported(), specifier0.getAlias());
 		assertTrue(specifier0.isDefault());
 		
-		ImportSpecifierTree specifier1 = impt.getSpecifiers().get(1);
+		ImportSpecifierTree specifier1 = specifiers.get(1);
 		assertIdentifier("member", specifier1.getImported());
 		assertIdentifier("member", specifier1.getAlias());
 		assertEquals(specifier1.getImported(), specifier1.getAlias());
 		assertFalse(specifier1.isDefault());
 	}
+	
 	@Test
 	public void testImportDefaultAndWildcardAliased() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import defaultMember, * as name from 'module-name';");
+		ImportDeclarationTree impt = parseStatement("import defaultMember, * as name from 'module-name';", Kind.IMPORT);
 		assertLiteral("module-name", impt.getSource());
-		assertEquals(2, impt.getSpecifiers().size());
-		ImportSpecifierTree specifier0 = impt.getSpecifiers().get(0);
+		List<? extends ImportSpecifierTree> specifiers = impt.getSpecifiers();
+		assertEquals(2, specifiers.size());
+		
+		ImportSpecifierTree specifier0 = specifiers.get(0);
 		assertIdentifier("defaultMember", specifier0.getImported());
 		assertIdentifier("defaultMember", specifier0.getAlias());
 		assertEquals(specifier0.getImported(), specifier0.getAlias());
 		assertTrue(specifier0.isDefault());
 		
-		ImportSpecifierTree specifier1 = impt.getSpecifiers().get(1);
+		ImportSpecifierTree specifier1 = specifiers.get(1);
 		assertIdentifier("*", specifier1.getImported());
 		assertIdentifier("name", specifier1.getAlias());
 		assertFalse(specifier1.isDefault());
-	}
-	@Test
-	public void testImportRaw() {
-		ImportDeclarationTree impt = (ImportDeclarationTree)parseStatement("import 'module-name';");
-		assertLiteral("module-name", impt.getSource());
-		assertEquals(0, impt.getSpecifiers().size());
 	}
 }
