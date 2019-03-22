@@ -274,24 +274,28 @@ public class TypeTest {
 	@Test
 	public void testEmptyTuple() {
 		TupleTypeTree type = parseType("[]", Kind.TUPLE_TYPE);
-		assertEquals(0, type.getSlotTypes().size());
+		List<? extends TypeTree> slots = type.getSlotTypes();
+		assertEquals(0, slots.size());
 	}
 	
 	@Test
 	public void test1Tuple() {
 		TupleTypeTree type = parseType("[Foo]", Kind.TUPLE_TYPE);
-		assertEquals(1, type.getSlotTypes().size());
-		assertIdentifierType("Foo", 0, type.getSlotTypes().get(0));
+		List<? extends TypeTree> slots = type.getSlotTypes();
+		assertEquals(1, slots.size());
+		
+		assertIdentifierType("Foo", 0, slots.get(0));
 	}
 	
 	@Test
 	//TODO: redundant?
 	public void testPrimitiveTupleType() {
 		TupleTypeTree type = parseType("[string, number]", Kind.TUPLE_TYPE);
-		assertEquals(2, type.getSlotTypes().size());
+		List<? extends TypeTree> slots = type.getSlotTypes();
+		assertEquals(2, slots.size());
 		
-		assertSpecialType(SpecialType.STRING, type.getSlotTypes().get(0));
-		assertSpecialType(SpecialType.NUMBER, type.getSlotTypes().get(1));
+		assertSpecialType(SpecialType.STRING, slots.get(0));
+		assertSpecialType(SpecialType.NUMBER, slots.get(1));
 	}
 	
 	@Test
