@@ -2064,7 +2064,7 @@ public class JSParser {
 						return new IdentifierTypeTreeImpl(ident.getStart(), ident.getEnd(), ident, Collections.emptyList());
 					}
 					case VOID:
-						return this.parseLiteralType(src, context);
+						return this.parsePrimitiveType(src, context);
 					case FUNCTION:
 						//Function
 						return this.parseFunctionType(src, context);
