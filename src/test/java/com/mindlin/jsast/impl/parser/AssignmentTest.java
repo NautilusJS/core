@@ -26,23 +26,23 @@ public class AssignmentTest {
 		assertIdentifier("z", yzAssignment.getValue());
 	}
 	
-	@Test(expected=JSException.class)
+	@Test
 	public void testInvalidAssignmentToStringLiteral() {
-		parseExpression("'hello' = x'");
+		assertExceptionalExpression("'hello' = x", "Illegal assignment to string literal");
 	}
-	
-	@Test(expected=JSException.class)
+
+	@Test
 	public void testInvalidAssignmentToBooleanLiteral() {
-		parseExpression("true = x'");
+		assertExceptionalExpression("true = x", "Illegal assignment to string literal");
 	}
-	
-	@Test(expected=JSException.class)
+
+	@Test
 	public void testInvalidAssignmentToNumericLiteral() {
-		parseExpression("5 = x'");
+		assertExceptionalExpression("5 = x", "Illegal assignment to string literal");
 	}
-	
-	@Test(expected=JSException.class)
+
+	@Test
 	public void testInvalidAssignmentToOpaqueExpression() {
-		parseExpression("~x = y'");
+		assertExceptionalExpression("~x = y", "Illegal assignment to opaque expression");
 	}
 }
