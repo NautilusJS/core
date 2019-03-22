@@ -3,6 +3,8 @@ package com.mindlin.jsast.impl.parser;
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.ArrayLiteralTree;
