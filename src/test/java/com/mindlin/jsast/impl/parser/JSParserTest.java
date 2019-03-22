@@ -2,21 +2,25 @@ package com.mindlin.jsast.impl.parser;
 
 import static com.mindlin.jsast.impl.TestUtils.assertNumberEquals;
 import static org.junit.Assert.*;
+//import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.opentest4j.AssertionFailedError;
 
 import com.mindlin.jsast.exception.JSSyntaxException;
+import com.mindlin.jsast.exception.JSUnsupportedException;
 import com.mindlin.jsast.fs.SourceFile.NominalSourceFile;
 import com.mindlin.jsast.impl.lexer.JSLexer;
 import com.mindlin.jsast.impl.parser.JSParser.Context;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.IdentifierTree;
+import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.NumericLiteralTree;
-import com.mindlin.jsast.tree.PatternTree;
 import com.mindlin.jsast.tree.StatementTree;
 import com.mindlin.jsast.tree.StringLiteralTree;
 import com.mindlin.jsast.tree.Tree;
@@ -42,24 +46,48 @@ public class JSParserTest {
 	 * @param expr
 	 */
 	protected static final void assertLiteral(Number value, ExpressionTree expr) {
-		assertEquals(Kind.NUMERIC_LITERAL, expr.getKind());
-		Number actual = ((NumericLiteralTree)expr).getValue();
+		NumericLiteralTree exprN = assertKind(Kind.NUMERIC_LITERAL, expr);
+		Number actual = exprN.getValue();
 		assertNumberEquals(actual, value);
 	}
 	
 	protected static final void assertIdentifier(String name, Tree expr) {
-		assertEquals(Kind.IDENTIFIER, expr.getKind());
-		assertEquals(name, ((IdentifierTree)expr).getName());
-	}
-	
-	protected static final void assertIdentifier(String name, PatternTree expr) {
-		assertEquals(Kind.IDENTIFIER, expr.getKind());
-		assertEquals(name, ((IdentifierTree)expr).getName());
+		IdentifierTree id = assertKind(Kind.IDENTIFIER, expr);
+		assertEquals(name, id.getName());
 	}
 	
 	protected static final void assertIdentifier(String name, IdentifierTree expr) {
-		assertEquals(Kind.IDENTIFIER, expr.getKind());
-		assertEquals(name, ((IdentifierTree)expr).getName());
+		assertNotNull(expr);
+		assertEquals(Kind.IDENTIFIER, expr.getKind());//TODO: this should never fail
+		assertEquals(name, expr.getName());
+	}
+	
+	/**
+	 * Compare modifiers.
+	 * <br/>
+	 * <strong>Note:</strong> Expected value after actual value here, because we use varargs.
+	 * @param actual Actual modifiers
+	 * @param expected Expected modifiers (union)
+	 */
+	protected static final void assertModifiers(Modifiers actual, Modifiers...expected) {
+		assertModifiers(actual, Modifiers.union(expected));
+	}
+	
+	/**
+	 * Compare modifiers.
+	 * <br/>
+	 * <strong>Note:</strong> Expected value after actual value here, because we use varargs.
+	 * @param actual Actual modifiers
+	 * @param expected Expected modifiers (union)
+	 */
+	protected static final void assertModifiers(Modifiers actual, Modifiers expected) {
+		assertNotNull(actual);
+		Objects.requireNonNull(expected);
+		
+		if (actual.equals(expected))
+			return;
+		
+		throw new AssertionFailedError("Modifier mismatch", actual, expected);
 	}
 	
 	/**
@@ -102,21 +130,23 @@ public class JSParserTest {
 	}
 	
 	protected static void assertExceptionalStatement(String stmt, String errorMsg) {
-		try {
-			parseStatement(stmt);
-			fail(errorMsg);
-		} catch (JSSyntaxException e) {
-		}
+		assertThrows(
+				JSSyntaxException.class,
+				() -> parseStatement(stmt, null, true),
+				errorMsg);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T extends StatementTree> T parseStatement(String stmt) {
-		return parseStatement(stmt, null);
-	}
-	
-	@SuppressWarnings("unchecked")
 	public static <T extends StatementTree> T parseStatement(String stmt, Kind kind) {
-		T result = (T) new JSParser().parseStatement(createLexer(stmt), new Context());
+		return parseStatement(stmt, Objects.requireNonNull(kind), true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	static <T extends StatementTree> T parseStatement(String stmt, Kind kind, boolean complete) {
+		JSLexer lexer = createLexer(stmt);
+		T result = (T) new JSParser().parseStatement(lexer, new Context());
+		
+		if (complete)
+			assertTrue(lexer.isEOF(), () -> "Not all of statement was consumed. Read until " + lexer.getPosition());
 		
 		if (kind != null)
 			assertEquals(kind, result.getKind());
@@ -124,28 +154,18 @@ public class JSParserTest {
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected static <T extends ExpressionTree> T parseExpressionIncomplete(String expr) {
-		return (T) new JSParser().parseNextExpression(createLexer(expr), new Context());
-	}
-	
-	@SuppressWarnings("unchecked")
 	public static <T extends ExpressionTree> T parseExpression(String expr) {
-		return parseExpression(expr, null);
+		return parseExpression(expr, null, true);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <T extends ExpressionTree> T parseExpression(String expr, Kind kind) {
-		T result = (T) new JSParser().parseNextExpression(createLexer(expr), new Context());
-		assertEquals(kind, result.getKind());
-		
-		if (kind != null)
-			assertEquals(kind, result.getKind());
-		
-		return result;
+		return parseExpression(expr, Objects.requireNonNull(kind), true);
 	}
 	
-	@SuppressWarnings("unchecked")
+	protected static <T extends ExpressionTree> T parseExpression(String expr, Kind kind, boolean complete) {
+		return parseExpression(expr, kind, new Context(), complete);
+	}
+	
 	public static <T extends ExpressionTree> T parseExpressionWith(String expr, boolean in, boolean yield, boolean await, Kind kind) {
 		Context context = new Context();
 		if (yield)
@@ -158,15 +178,57 @@ public class JSParserTest {
 		
 		context.allowAwait(await);
 		
-		T result = (T) new JSParser().parseNextExpression(createLexer(expr), context);
-		
-		assertEquals(kind, result.getKind());
-		return result;
+		return parseExpression(expr, kind, context, true);
 	}
 	
 	@SuppressWarnings("unchecked")
+	static <T extends ExpressionTree> T parseExpression(String expr, Kind kind, Context context, boolean complete) {
+		JSLexer lexer = createLexer(expr);
+		
+		T result;
+		try {
+			result = (T) new JSParser().parseNextExpression(lexer, context);
+		} catch (JSUnsupportedException e) {
+			fail(e.getLocalizedMessage());
+			throw e;
+		}
+		
+		if (complete)
+			assertTrue(lexer.isEOF(), () -> "Not all of expression was consumed. Read until " + lexer.getPosition());
+		
+		if (kind != null)
+			assertEquals(kind, result.getKind());
+		
+		return result;
+	}
+	
 	public static <T extends TypeTree> T parseType(String type) {
-		return (T) new JSParser().parseType(createLexer(type), new Context());
+		return parseType(type, null, true);
+	}
+	
+	public static <T extends TypeTree> T parseType(String expr, Kind expectedKind) {
+		return parseType(expr, Objects.requireNonNull(expectedKind), true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	static <T extends TypeTree> T parseType(String expr, Kind expectedKind, boolean complete) {
+		JSLexer lexer = createLexer(expr);
+		
+		T result;
+		try {
+			result = (T) new JSParser().parseType(lexer, new Context());
+		} catch (JSUnsupportedException e) {
+			fail(e.getLocalizedMessage());
+			throw e;
+		}
+		
+		if (complete)
+			assertTrue(lexer.isEOF(), () -> "Not all of type expression was consumed. Read until " + lexer.getPosition());
+		
+		if (expectedKind != null)
+			assertEquals(expectedKind, result.getKind());
+		
+		return result;
 	}
 	
 	public static String getTestName() {
