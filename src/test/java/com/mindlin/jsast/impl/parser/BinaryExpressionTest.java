@@ -21,6 +21,7 @@ public class BinaryExpressionTest {
 	@Test
 	public void testNormalLTR() {
 		// Non-commutative ltr associativity
+		// Should be ((a << b) << c)
 		BinaryExpressionTree expr = parseExpression("a<<b<<c", Kind.LEFT_SHIFT);
 		assertIdentifier("c", expr.getRightOperand());
 		BinaryExpressionTree left = assertKind(Kind.LEFT_SHIFT, expr.getLeftOperand());
@@ -30,6 +31,7 @@ public class BinaryExpressionTest {
 
 	@Test
 	public void testExponentiationRTL() {
+		// Should be (a ** (b ** c))
 		BinaryExpressionTree expr = parseExpression("a**b**c", Kind.EXPONENTIATION);
 		assertIdentifier("a", expr.getLeftOperand());
 		
@@ -46,10 +48,32 @@ public class BinaryExpressionTest {
 	}
 	
 	@Test
+	public void testChainedArrayAccess() {
+		BinaryExpressionTree expr = parseExpression("a[b][c]", Kind.ARRAY_ACCESS);
+		
+		BinaryExpressionTree inner = assertKind(Kind.ARRAY_ACCESS, expr.getLeftOperand());
+		assertIdentifier("a", inner.getLeftOperand());
+		assertIdentifier("b", inner.getRightOperand());
+		
+		assertIdentifier("c", expr.getRightOperand());
+	}
+	
+	@Test
 	public void testMemberSelect() {
 		BinaryExpressionTree expr = parseExpression("a.b", Kind.MEMBER_SELECT);
 		assertIdentifier("a", expr.getLeftOperand());
 		assertIdentifier("b", expr.getRightOperand());
+	}
+	
+	@Test
+	public void testChainedMemberSelect() {
+		BinaryExpressionTree expr = parseExpression("a.b.c", Kind.MEMBER_SELECT);
+		
+		BinaryExpressionTree inner = assertKind(Kind.MEMBER_SELECT, expr.getLeftOperand());
+		assertIdentifier("a", inner.getLeftOperand());
+		assertIdentifier("b", inner.getRightOperand());
+		
+		assertIdentifier("c", expr.getRightOperand());
 	}
 	
 	@Test
