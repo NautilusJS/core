@@ -3,6 +3,8 @@ package com.mindlin.jsast.impl.parser;
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.mindlin.jsast.impl.lexer.JSLexer;
@@ -20,35 +22,46 @@ public class StatementTest {
 	@Test
 	public void testConsumeSemicolons() {
 		JSParser parser = new JSParser();
-		JSLexer lexer = new JSLexer("a;");
+		JSLexer lexer = createLexer("a;");
 		assertNotNull(parser.parseStatement(lexer, new Context()));
 		assertNull(parser.parseStatement(lexer, new Context()));
 	}
 	
 	@Test
 	public void testEmptySwitch() {
-		SwitchTree st = parseStatement("switch(foo){}");
+		SwitchTree st = parseStatement("switch(foo){}", Kind.SWITCH);
 		assertIdentifier("foo", st.getExpression());
 		assertEquals(0, st.getCases().size());
 	}
 	
 	@Test
 	public void testSwitchDefault() {
-		SwitchTree st = parseStatement("switch(foo){"
+		final String code = "switch (foo) {"
 				+ "default:"
-				+ "}");
+				+ "}";
+		
+		SwitchTree st = parseStatement(code, Kind.SWITCH);
 		assertIdentifier("foo", st.getExpression());
-		assertEquals(1, st.getCases().size());
+		
+		List<? extends SwitchCaseTree> cases = st.getCases();
+		assertEquals(1, cases.size());
+		
+		SwitchCaseTree case0 = cases.get(0);
+		assertTrue(case0.isDefault());
 	}
 	
 	@Test
 	public void testSwitchSingleCase() {
-		SwitchTree st = parseStatement("switch(foo){"
+		final String code = "switch (foo) {"
 				+ "case 'a':"
 				+ "bar();"
-				+ "}");
+				+ "}";
+		
+		SwitchTree st = parseStatement(code, Kind.SWITCH);
 		assertIdentifier("foo", st.getExpression());
+		
 		assertEquals(1, st.getCases().size());
+		//TODO: check cases
 	}
 	
 	@Test
@@ -65,7 +78,7 @@ public class StatementTest {
 	
 	@Test
 	public void testUnlabeledBreak() {
-		BreakTree breakTree = parseStatement("break;", Tree.Kind.BREAK);
+		BreakTree breakTree = parseStatement("break;", Kind.BREAK);
 		assertNull(breakTree.getLabel());
 	}
 	
