@@ -24,6 +24,8 @@ public interface TypeTreeVisitor<R, D> {
 	
 	R visitIdentifierType(IdentifierTypeTree node, D d);
 	
+	R visitInferType(InferTypeTree node, D d);
+	
 	R visitInterfaceType(ObjectTypeTree node, D d);
 	
 	R visitIntersectionType(CompositeTypeTree node, D d);

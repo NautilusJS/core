@@ -11,7 +11,7 @@ import com.mindlin.jsast.tree.Tree;
 public interface ArrayTypeTree extends TypeTree {
 	/**
 	 * Get base type of array.
-	 * @return
+	 * @return base type
 	 */
 	TypeTree getBaseType();
 	
