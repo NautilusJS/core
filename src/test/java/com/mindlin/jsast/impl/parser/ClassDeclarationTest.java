@@ -18,14 +18,14 @@ public class ClassDeclarationTest {
 	public void testSimpleClassDeclaration() {
 		ClassDeclarationTree clazz = parseStatement("class Foo{}", Kind.CLASS_DECLARATION);
 		assertIdentifier("Foo", clazz.getName());
-		assertEquals(clazz.getModifiers(), Modifiers.NONE);
+		assertModifiers(clazz.getModifiers(), Modifiers.NONE);
 	}
 	
 	@Test
 	public void testEmptyAbstractClass() {
 		ClassDeclarationTree clazz = parseStatement("abstract class Foo {}", Kind.CLASS_DECLARATION);
 		assertIdentifier("Foo", clazz.getName());
-		assertEquals(clazz.getModifiers(), Modifiers.ABSTRACT);
+		assertModifiers(clazz.getModifiers(), Modifiers.ABSTRACT);
 	}
 	
 	@Test

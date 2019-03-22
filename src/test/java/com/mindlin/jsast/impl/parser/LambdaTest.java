@@ -11,6 +11,7 @@ import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ParameterTree;
 import com.mindlin.jsast.tree.ReturnTree;
 import com.mindlin.jsast.tree.Tree.Kind;
+import com.mindlin.jsast.tree.type.SpecialTypeTree.SpecialType;
 
 import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 
@@ -38,7 +39,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
@@ -54,7 +56,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 	}
@@ -68,7 +71,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertTrue(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 	}
@@ -82,13 +86,15 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
 		ParameterTree param1 = params.get(1);
 		assertFalse(param1.isRest());
-		assertEquals(param1.getModifiers(), Modifiers.NONE);
+		assertModifiers(param1.getModifiers(), Modifiers.NONE);
+		assertNull(param1.getType());
 		assertNull(param1.getInitializer());
 		assertIdentifier("y", param1.getName());
 	}
@@ -110,13 +116,15 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
 		ParameterTree param1 = params.get(1);
 		assertTrue(param1.isRest());
-		assertEquals(param1.getModifiers(), Modifiers.NONE);
+		assertModifiers(param1.getModifiers(), Modifiers.NONE);
+		assertNull(param1.getType());
 		assertNull(param1.getInitializer());
 		assertIdentifier("y", param1.getName());
 	}
@@ -130,9 +138,9 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertSpecialType(SpecialType.STRING, param0.getType());
 		assertNull(param0.getInitializer());
-		//TODO check type
 		assertIdentifier("x", param0.getName());
 	}
 	
@@ -145,13 +153,15 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertSpecialType(SpecialType.STRING, param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
 		ParameterTree param1 = params.get(1);
 		assertFalse(param1.isRest());
-		assertEquals(param1.getModifiers(), Modifiers.NONE);
+		assertModifiers(param1.getModifiers(), Modifiers.NONE);
+		assertSpecialType(SpecialType.NUMBER, param1.getType());
 		assertNull(param1.getInitializer());
 		assertIdentifier("y", param1.getName());
 	}
@@ -165,7 +175,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertLiteral(5, param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 	}
@@ -179,7 +190,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.OPTIONAL);
+		assertModifiers(param0.getModifiers(), Modifiers.OPTIONAL);
+		assertSpecialType(SpecialType.STRING, param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 	}
@@ -193,7 +205,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertSpecialType(SpecialType.NUMBER, param0.getType());
 		assertLiteral(5, param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 	}
@@ -207,7 +220,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.OPTIONAL);
+		assertModifiers(param0.getModifiers(), Modifiers.OPTIONAL);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 	}
@@ -221,13 +235,15 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.OPTIONAL);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
 		ParameterTree param1 = params.get(1);
 		assertFalse(param1.isRest());
-		assertEquals(param1.getModifiers(), Modifiers.OPTIONAL);
+		assertModifiers(param1.getModifiers(), Modifiers.OPTIONAL);
+		assertNull(param1.getType());
 		assertNull(param1.getInitializer());
 		assertIdentifier("y", param1.getName());
 	}
@@ -241,13 +257,15 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.OPTIONAL);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
 		ParameterTree param1 = params.get(1);
 		assertFalse(param1.isRest());
-		assertEquals(param1.getModifiers(), Modifiers.OPTIONAL);
+		assertModifiers(param1.getModifiers(), Modifiers.OPTIONAL);
+		assertNull(param1.getType());
 		assertNull(param1.getInitializer());
 		assertIdentifier("y", param1.getName());
 	}
@@ -261,13 +279,15 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertLiteral(5, param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
 		ParameterTree param1 = params.get(1);
 		assertFalse(param1.isRest());
-		assertEquals(param1.getModifiers(), Modifiers.NONE);
+		assertModifiers(param1.getModifiers(), Modifiers.NONE);
+		assertNull(param1.getType());
 		assertLiteral(6, param1.getInitializer());
 		assertIdentifier("y", param1.getName());
 	}
@@ -281,7 +301,8 @@ public class LambdaTest {
 		
 		ParameterTree param0 = params.get(0);
 		assertFalse(param0.isRest());
-		assertEquals(param0.getModifiers(), Modifiers.NONE);
+		assertModifiers(param0.getModifiers(), Modifiers.NONE);
+		assertNull(param0.getType());
 		assertNull(param0.getInitializer());
 		assertIdentifier("x", param0.getName());
 		
@@ -295,7 +316,8 @@ public class LambdaTest {
 		
 		ParameterTree param1_1 = params1.get(0);
 		assertFalse(param1_1.isRest());
-		assertEquals(param1_1.getModifiers(), Modifiers.NONE);
+		assertModifiers(param1_1.getModifiers(), Modifiers.NONE);
+		assertNull(param1_1.getType());
 		assertNull(param1_1.getInitializer());
 		assertIdentifier("y", param1_1.getName());
 		
