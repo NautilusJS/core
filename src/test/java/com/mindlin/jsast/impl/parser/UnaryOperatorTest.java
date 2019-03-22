@@ -98,7 +98,7 @@ public class UnaryOperatorTest {
 	
 	@Test
 	public void testLonelyVoid() {
-		UnaryTree expr = parseExpression("void;", Kind.VOID);
+		UnaryTree expr = parseExpression("void", Kind.VOID);
 		assertNull(expr.getExpression());
 	}
 	
