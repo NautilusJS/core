@@ -13,16 +13,17 @@ import com.mindlin.jsast.tree.ObjectLiteralTree;
 import com.mindlin.jsast.tree.Tree.Kind;
 
 public class ArrayLiteralTest {
+	
 	@Test
 	public void testEmpty() {
-		ArrayLiteralTree arr = parseExpression("[]");
+		ArrayLiteralTree arr = parseExpression("[]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(0, elements.size());
 	}
 
 	@Test
 	public void testSingleValue() {
-		ArrayLiteralTree arr = parseExpression("[1]");
+		ArrayLiteralTree arr = parseExpression("[1]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(1, elements.size());
 		assertLiteral(1, elements.get(0));
@@ -30,7 +31,7 @@ public class ArrayLiteralTest {
 
 	@Test
 	public void testSingleUndefined() {
-		ArrayLiteralTree arr = parseExpression("[,]");
+		ArrayLiteralTree arr = parseExpression("[,]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(1, elements.size());
 		assertNull(elements.get(0));
@@ -38,7 +39,7 @@ public class ArrayLiteralTest {
 
 	@Test
 	public void testCommaAfterValue() {
-		ArrayLiteralTree arr = parseExpression("[1,]");
+		ArrayLiteralTree arr = parseExpression("[1,]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(1, elements.size());
 		assertLiteral(1, elements.get(0));
@@ -46,7 +47,7 @@ public class ArrayLiteralTest {
 
 	@Test
 	public void testCommaBeforeValue() {
-		ArrayLiteralTree arr = parseExpression("[,1]");
+		ArrayLiteralTree arr = parseExpression("[,1]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(2, elements.size());
 		assertNull(elements.get(0));
@@ -55,7 +56,7 @@ public class ArrayLiteralTest {
 
 	@Test
 	public void testMultipleValues() {
-		ArrayLiteralTree arr = parseExpression("[1,2]");
+		ArrayLiteralTree arr = parseExpression("[1,2]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(2, elements.size());
 		assertLiteral(1, elements.get(0));
@@ -64,7 +65,7 @@ public class ArrayLiteralTest {
 
 	@Test
 	public void testNestedArrayLiteral() {
-		ArrayLiteralTree arr = parseExpression("[[]]");
+		ArrayLiteralTree arr = parseExpression("[[]]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(1, elements.size());
 		ArrayLiteralTree nested = (ArrayLiteralTree) elements.get(0);
@@ -73,7 +74,7 @@ public class ArrayLiteralTest {
 	
 	@Test
 	public void testNestedObjectLiteral() {
-		ArrayLiteralTree arr = parseExpression("[{}]");
+		ArrayLiteralTree arr = parseExpression("[{}]", Kind.ARRAY_LITERAL);
 		List<? extends ExpressionTree> elements = arr.getElements();
 		assertEquals(1, elements.size());
 		

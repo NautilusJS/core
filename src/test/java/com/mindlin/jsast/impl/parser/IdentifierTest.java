@@ -11,8 +11,6 @@ import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.Tree.Kind;
 
-import org.junit.Assert;
-
 public class IdentifierTest {
 	static void testIdentifier(String expected, String identifier) {
 		IdentifierTree id = parseExpression(identifier, Kind.IDENTIFIER);
