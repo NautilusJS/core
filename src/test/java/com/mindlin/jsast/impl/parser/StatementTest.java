@@ -10,9 +10,10 @@ import com.mindlin.jsast.impl.parser.JSParser.Context;
 import com.mindlin.jsast.tree.BreakTree;
 import com.mindlin.jsast.tree.ContinueTree;
 import com.mindlin.jsast.tree.LabeledStatementTree;
+import com.mindlin.jsast.tree.SwitchCaseTree;
 import com.mindlin.jsast.tree.SwitchTree;
-import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.WithTree;
+import com.mindlin.jsast.tree.Tree.Kind;
 
 public class StatementTest {
 	
@@ -58,7 +59,7 @@ public class StatementTest {
 	
 	@Test
 	public void testDebuggerStatement() {
-		parseStatement("debugger;", Tree.Kind.DEBUGGER);
+		parseStatement("debugger;", Kind.DEBUGGER);
 		//There is literally nothing to test
 	}
 	
@@ -70,44 +71,44 @@ public class StatementTest {
 	
 	@Test
 	public void testUnlabeledContinue() {
-		ContinueTree continueTree = parseStatement("continue;", Tree.Kind.CONTINUE);
+		ContinueTree continueTree = parseStatement("continue;", Kind.CONTINUE);
 		assertNull(continueTree.getLabel());
 	}
 	
 	@Test
 	public void testLabeledBreak() {
-		BreakTree breakTree = parseStatement("break everything;", Tree.Kind.BREAK);
+		BreakTree breakTree = parseStatement("break everything;", Kind.BREAK);
 		assertIdentifier("everything", breakTree.getLabel());
 	}
 	
 	@Test
 	public void testLabeledContinue() {
-		ContinueTree continueTree = parseStatement("continue later;", Tree.Kind.CONTINUE);
+		ContinueTree continueTree = parseStatement("continue later;", Kind.CONTINUE);
 		assertIdentifier("later", continueTree.getLabel());
 	}
 	
 	@Test
 	public void testWith() {
-		WithTree with = parseStatement("with(0);", Tree.Kind.WITH);
+		WithTree with = parseStatement("with(0);", Kind.WITH);
 		
 		assertLiteral(0, with.getScope());
 	}
 	
 	@Test
 	public void testLabelledStatements() {
-		LabeledStatementTree labelled = parseStatement("x:;", Tree.Kind.LABELED_STATEMENT);
+		LabeledStatementTree labelled = parseStatement("x:;", Kind.LABELED_STATEMENT);
 		
 		assertIdentifier("x", labelled.getName());
-		assertKind(Tree.Kind.EMPTY_STATEMENT, labelled.getStatement());
+		assertKind(Kind.EMPTY_STATEMENT, labelled.getStatement());
 		
 		
-		labelled = parseStatement("x:y:;", Tree.Kind.LABELED_STATEMENT);
+		labelled = parseStatement("x:y:;", Kind.LABELED_STATEMENT);
 		
 		assertIdentifier("x", labelled.getName());
 		
-		labelled = assertKind(Tree.Kind.LABELED_STATEMENT, labelled.getStatement());
+		labelled = assertKind(Kind.LABELED_STATEMENT, labelled.getStatement());
 		assertIdentifier("y", labelled.getName());
 		
-		assertKind(Tree.Kind.EMPTY_STATEMENT, labelled.getStatement());
+		assertKind(Kind.EMPTY_STATEMENT, labelled.getStatement());
 	}
 }
