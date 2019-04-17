@@ -39,7 +39,7 @@ public class LiteralType<T> implements Type {
 	
 	@Override
 	public int hashCode() {
-		return value.hashCode() ^ kind.hashCode();
+		return Objects.hash(this.kind, this.value);
 	}
 	
 	@Override
