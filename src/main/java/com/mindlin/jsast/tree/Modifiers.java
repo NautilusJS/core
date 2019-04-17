@@ -1,16 +1,22 @@
 package com.mindlin.jsast.tree;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import com.mindlin.jsast.impl.util.ObjectCache;
 
-public class Modifiers implements Comparable<Modifiers> {
 /**
  * Declaration modifiers.
  * 
  * @author mailmindlin
  */
+public class Modifiers implements Comparable<Modifiers>, Iterable<Modifiers> {
 	protected static final ObjectCache<Modifiers> CACHE = new ObjectCache<>();
 	
 	public static final long FLAG_PUBLIC    = 1L << 0;
@@ -197,6 +203,14 @@ public class Modifiers implements Comparable<Modifiers> {
 	}
 	
 	/**
+	 * 
+	 * @return Collection of components
+	 */
+	public Collection<? extends Modifiers> components() {
+		return new Components();
+	}
+	
+	/**
 	 * Get if any flags are set
 	 * @return If any flags are set
 	 */
@@ -300,5 +314,126 @@ public class Modifiers implements Comparable<Modifiers> {
 		PUBLIC,
 		PROTECTED,
 		PRIVATE,
+	}
+	
+	protected class Components extends AbstractCollection<Modifiers> {
+		@Override
+		public int size() {
+			return Long.bitCount(Modifiers.this.getFlags());
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return !Modifiers.this.any();
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			return (o instanceof Modifiers) && ((Modifiers) o).subtract(Modifiers.this).any();
+		}
+
+		@Override
+		public Iterator<Modifiers> iterator() {
+			return new ComponentIterator();
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean retainAll(Collection<?> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void clear() {
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public int hashCode() {
+			return Modifiers.this.hashCode();
+		}
+		
+	}
+	
+	protected class ComponentIterator implements ListIterator<Modifiers> {
+		protected static final int MAX_IDX = Long.BYTES * 8;
+		private int index = -1;
+		
+		protected boolean validIdx(int idx) {
+			return (0 <= idx) && (idx < MAX_IDX); 
+		}
+		
+		@Override
+		public int nextIndex() {
+			if (this.index >= MAX_IDX)
+				return MAX_IDX;
+			
+			// Mask out all bits <= `index`
+			long mask = (this.index < 0) ? 0 : (1L << this.index);
+			long masked = Modifiers.this.getFlags() & ~mask;
+			return Long.numberOfTrailingZeros(masked);
+		}
+		
+		@Override
+		public int previousIndex() {
+			if (this.index <= 0)
+				return -1;
+			// Mask out all bits >= `index`
+			long mask = (this.index > MAX_IDX) ? ~0L : (1L << this.index);
+			long masked = Modifiers.this.getFlags() & mask;
+			return 63 - Long.numberOfLeadingZeros(masked);
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return this.validIdx(this.nextIndex());
+		}
+
+		@Override
+		public Modifiers next() {
+			this.index = this.nextIndex();
+			if (!this.validIdx(this.index))
+				throw new NoSuchElementException();
+			
+			return Modifiers.wrap(1L << this.index);
+		}
+		
+		@Override
+		public boolean hasPrevious() {
+			return this.validIdx(this.previousIndex());
+		}
+		
+		@Override
+		public Modifiers previous() {
+			this.index = this.previousIndex();
+			if (!this.validIdx(this.index))
+				throw new NoSuchElementException();
+			
+			return Modifiers.wrap(1L << this.index);
+		}
+		
+		@Override
+		public void set(Modifiers e) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void add(Modifiers e) {
+			throw new UnsupportedOperationException();
+		}
 	}
 }
