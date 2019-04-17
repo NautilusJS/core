@@ -12,6 +12,7 @@ public enum IntrinsicType implements Type {
 	NULL,
 	UNDEFINED,
 	NEVER,
+	UNKNOWN,
 	;
 	
 	@Override
