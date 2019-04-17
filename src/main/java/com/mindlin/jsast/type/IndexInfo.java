@@ -45,6 +45,6 @@ public class IndexInfo {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(readonly, keyType, valueType);
+		return Objects.hash(this.readonly, this.keyType, this.valueType);
 	}
 }
