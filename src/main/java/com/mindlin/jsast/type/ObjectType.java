@@ -5,7 +5,7 @@ import java.util.Collection;
 public interface ObjectType extends Type, GenericType {
 	/**
 	 * Get the 'this' type parameter
-	 * @return
+	 * @return 'this' type parameter
 	 */
 	TypeParameter thisType();
 	
