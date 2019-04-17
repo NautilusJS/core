@@ -6,6 +6,11 @@ import java.util.List;
 import com.mindlin.jsast.impl.util.ObjectCache;
 
 public class Modifiers implements Comparable<Modifiers> {
+/**
+ * Declaration modifiers.
+ * 
+ * @author mailmindlin
+ */
 	protected static final ObjectCache<Modifiers> CACHE = new ObjectCache<>();
 	
 	public static final long FLAG_PUBLIC    = 1L << 0;
@@ -193,10 +198,20 @@ public class Modifiers implements Comparable<Modifiers> {
 	
 	/**
 	 * Get if any flags are set
-	 * @return
+	 * @return If any flags are set
 	 */
 	public boolean any() {
 		return this.flags != 0;
+	}
+	
+	/**
+	 * 
+	 * @param other
+	 * @return If all modifiers in `other` are contained by `this` (`this` is a superset of `other`).
+	 */
+	public boolean contains(Modifiers other) {
+		Objects.requireNonNull(other);
+		return !other.subtract(this).any();
 	}
 	
 	public Modifiers combine(Modifiers other) {
@@ -274,6 +289,11 @@ public class Modifiers implements Comparable<Modifiers> {
 	@Override
 	public int compareTo(Modifiers other) {
 		return Long.compare(this.flags, other.flags);
+	}
+
+	@Override
+	public Iterator<Modifiers> iterator() {
+		return new ComponentIterator();
 	}
 	
 	public static enum AccessModifier {
