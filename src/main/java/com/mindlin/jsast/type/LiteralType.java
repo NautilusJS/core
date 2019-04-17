@@ -24,10 +24,8 @@ public class LiteralType<T> implements Type {
 	protected T value;
 	
 	public LiteralType(Type.Kind kind, T value) {
-		Objects.nonNull(kind);
-		Objects.nonNull(value);
-		this.kind = kind;
-		this.value = value;
+		this.kind = Objects.requireNonNull(kind);
+		this.value = Objects.requireNonNull(value);
 	}
 	
 	public T getValue() {
