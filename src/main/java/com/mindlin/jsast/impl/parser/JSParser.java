@@ -1026,7 +1026,6 @@ public class JSParser {
 	/**
 	 * @param inFor If this variable declaration is in a for loop
 	 */
-	@JSKeywordParser({ JSKeyword.CONST, JSKeyword.LET, JSKeyword.VAR })
 	protected VariableDeclarationTree parseVariableDeclaration(boolean inFor, JSLexer src, Context context) {
 		Token keywordToken = expect(TokenKind.KEYWORD, src, context);
 		VariableDeclarationKind style;
@@ -2544,7 +2543,6 @@ public class JSParser {
 	 * 		while ( Expression[+In, ?Yield, ?Await] ) Statement[?Yield, ?Await, ?Return]
 	 * </pre>
 	 */
-	@JSKeywordParser({JSKeyword.WHILE})
 	protected WhileLoopTree parseWhileLoop(JSLexer src, Context context) {
 		Token whileKeywordToken = expectKeyword(JSKeyword.WHILE, src, context);
 		
@@ -2566,7 +2564,6 @@ public class JSParser {
 	 * 		do Statement[?Yield, ?Await, ?Return] while ( Expression[+In, ?Yield, ?Await] ) ;
 	 * </pre>
 	 */
-	@JSKeywordParser({JSKeyword.DO})
 	protected DoWhileLoopTree parseDoWhileLoop(JSLexer src, Context context) {
 		Token doKeywordToken = expectKeyword(JSKeyword.DO, src, context);
 		
