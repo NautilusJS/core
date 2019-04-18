@@ -159,27 +159,27 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		//Write access modifier; public is implied
 		Modifiers modifiers = method.getModifiers();
 		if (modifiers.getAccess() == AccessModifier.PUBLIC)
-			out.append("public").append(options.space);
+			out.append("public").space();
 		else if (modifiers.getAccess() == AccessModifier.PROTECTED)
-			out.append("protected").append(options.space);
+			out.append("protected").space();
 		else if (modifiers.getAccess() == AccessModifier.PRIVATE)
-			out.append("private").append(options.space);
+			out.append("private").space();
 		
 		if (modifiers.isStatic())
-			out.append("static").append(options.space);
+			out.append("static").space();
 		
 		if (modifiers.isAbstract())
-			out.append("abstract").append(options.space);
+			out.append("abstract").space();
 		
 		//Pretty sure that 'readonly' isn't a valid modifier here
 		if (modifiers.isGetter())
-			out.append("get").append(options.space);
+			out.append("get").space();
 		else if (modifiers.isSetter())
-			out.append("set").append(options.space);
+			out.append("set").space();
 		else if (modifiers.isGenerator())
 			out.append("*").optionalSpace();
 		else if (modifiers.isAsync())
-			out.append("async").append(options.space);
+			out.append("async").space();
 		
 		method.getName().accept(this, out);
 		
@@ -342,7 +342,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	
 	@Override
 	public Void visitAwait(AwaitTree node, WriterHelper out) {
-		out.append("await").append(options.space);
+		out.append("await").space();
 		node.getExpression().accept(this, out);
 		return null;
 	}
@@ -569,7 +569,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	public Void visitClassDeclaration(ClassDeclarationTree node, WriterHelper out) {
 		out.append("class");
 		if (node.getName() != null) {
-			out.append(options.space);
+			out.space();
 			node.getName().accept(this, out);
 			
 			//Write generics list
@@ -616,22 +616,22 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 			out.append("declare");
 		
 		if (modifiers.isPublic())
-			out.append("public").append(options.space);
+			out.append("public").space();
 		if (modifiers.isPrivate())
-			out.append("private").append(options.space);
+			out.append("private").space();
 		if (modifiers.isProtected())
-			out.append("protected").append(options.space);
+			out.append("protected").space();
 		
 		if (modifiers.isStatic())
-			out.append("static").append(options.space);
+			out.append("static").space();
 		
 		if (modifiers.isAbstract())
-			out.append("abstract").append(options.space);
+			out.append("abstract").space();
 		
 		if (modifiers.isReadonly())
-			out.append("readonly").append(options.space);
+			out.append("readonly").space();
 		if (modifiers.isAsync())
-			out.append("async").append(options.space);
+			out.append("async").space();
 	}
 
 	@Override
@@ -648,7 +648,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	public Void visitContinue(ContinueTree node, WriterHelper out) {
 		out.append("continue");
 		if (node.getLabel() != null) {
-			out.append(options.space);
+			out.space();
 			node.getLabel().accept(this, out);
 		}
 		out.finishStatement(true);
@@ -713,7 +713,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 
 	@Override
 	public Void visitEnumDeclaration(EnumDeclarationTree node, WriterHelper out) {
-		out.append("enum").append(options.space);
+		out.append("enum").space();
 		node.getName().accept(this, out);
 		out.append('{');
 		out.pushIndent();
@@ -729,7 +729,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 
 	@Override
 	public Void visitExport(ExportTree node, WriterHelper out) {
-		out.append("export").append(options.space);
+		out.append("export").space();
 		
 		out.pushContext();
 		out.doFinishWithNewline(false);
@@ -857,7 +857,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		if (!node.isArrow()) {
 			out.append("function");
 			if (node.getName() != null) {
-				out.append(options.space);
+				out.space();
 				node.getName().accept(this, out);
 			}
 			
@@ -982,7 +982,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		List<ImportSpecifierTree> specifiers = node.getSpecifiers();
 		StringLiteralTree source = node.getSource();
 		
-		out.append("import").append(options.space);
+		out.append("import").space();
 		
 		if (!specifiers.isEmpty()) {
 			Iterator<ImportSpecifierTree> si = specifiers.iterator();
@@ -1034,7 +1034,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	public Void visitInterfaceDeclaration(InterfaceDeclarationTree node, WriterHelper out) {
 		out.append("interface");
 		if (node.getName() != null) {
-			out.append(options.space);
+			out.space();
 			node.getName().accept(this, out);
 		}
 		
