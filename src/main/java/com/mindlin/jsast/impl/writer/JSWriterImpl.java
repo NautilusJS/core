@@ -109,18 +109,15 @@ import com.mindlin.jsast.tree.type.UnaryTypeTree;
 import com.mindlin.jsast.writer.JSWriter;
 import com.mindlin.jsast.writer.JSWriterOptions;
 
-public class JSWriterImpl implements JSWriter, TreeVisitor<Void, JSWriterImpl.WriterHelper> {
-	protected final JSWriterOptions options;
-	
+public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, TreeVisitor<Void, WriterHelper> {
 	public JSWriterImpl(JSWriterOptions options) {
-		//TODO clone
-		this.options = options;
+		super(options);
 	}
 	
 	@Override
 	public void write(CompilationUnitTree tree, Writer output) throws IOException {
 		try {
-			WriterHelper wh = new WriterHelper(output);
+			WriterHelper wh = new WriterHelper(this.options, output);
 			tree.accept(this, wh);
 		} catch (RuntimeException e) {
 			if (e.getCause() != null)
@@ -274,70 +271,6 @@ public class JSWriterImpl implements JSWriter, TreeVisitor<Void, JSWriterImpl.Wr
 			if (!isType)
 				out.newline();
 		}
-	}
-	
-	/**
-	 * Write a comma-separated list with the given values
-	 * @param values
-	 * @param out
-	 */
-	public void writeList(List<? extends Tree> values, WriterHelper out) {
-		boolean isFirst = true;
-		for (Tree value : values) {
-			if (!isFirst)
-				out.append(',').optionalSpace();
-			else
-				isFirst = false;
-			
-			if (value != null)
-				value.accept(this, out);
-		}
-	}
-	
-	public <T> void writeList(List<T> values, WriterHelper out, BiConsumer<T, WriterHelper> serializer, Consumer<WriterHelper> delimiter) {
-		boolean isFirst = true;
-		for (T value : values) {
-			if (!isFirst)
-				delimiter.accept(out);
-			else
-				isFirst = false;
-			
-			serializer.accept(value, out);
-		}
-	}
-	
-	@Override
-	public Void visitSpecialType(SpecialTypeTree node, WriterHelper out) {
-		out.beginRegion(node.getStart());
-		String name;
-		switch (node.getType()) {
-			case BOOLEAN:
-				name = "boolean";
-				break;
-			case NEVER:
-				name = "never";
-				break;
-			case NULL:
-				name = "null";
-				break;
-			case NUMBER:
-				name = "number";
-				break;
-			case STRING:
-				name = "string";
-				break;
-			case UNDEFINED:
-				name = "undefined";
-				break;
-			case VOID:
-				name = "void";
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown type: " + node.getType());
-		}
-		out.append(name);
-		out.endRegion(node.getEnd());
-		return null;
 	}
 
 	@Override
