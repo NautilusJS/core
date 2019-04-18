@@ -1218,6 +1218,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 				case '\'':
 					if (singleQuotes)
 						break;
+					//$FALL-THROUGH$
 				default:
 					out.append(c);
 					continue;
