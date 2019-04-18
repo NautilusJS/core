@@ -1,16 +1,11 @@
 package com.mindlin.jsast.impl.writer;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.impl.util.Characters;
 import com.mindlin.jsast.tree.ArrayLiteralTree;
 import com.mindlin.jsast.tree.ArrayPatternTree;
@@ -28,6 +23,7 @@ import com.mindlin.jsast.tree.ClassTreeBase.ClassExpressionTree;
 import com.mindlin.jsast.tree.CompilationUnitTree;
 import com.mindlin.jsast.tree.ComputedPropertyKeyTree;
 import com.mindlin.jsast.tree.ConditionalExpressionTree;
+import com.mindlin.jsast.tree.ConstructorDeclarationTree;
 import com.mindlin.jsast.tree.ContinueTree;
 import com.mindlin.jsast.tree.DebuggerTree;
 import com.mindlin.jsast.tree.DirectiveTree;
@@ -49,6 +45,7 @@ import com.mindlin.jsast.tree.ImportSpecifierTree;
 import com.mindlin.jsast.tree.LabeledStatementTree;
 import com.mindlin.jsast.tree.MemberExpressionTree;
 import com.mindlin.jsast.tree.MethodDeclarationTree;
+import com.mindlin.jsast.tree.MethodSignatureTree;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.Modifiers.AccessModifier;
 import com.mindlin.jsast.tree.NewTree;
@@ -59,10 +56,14 @@ import com.mindlin.jsast.tree.ObjectLiteralTree;
 import com.mindlin.jsast.tree.ObjectPatternTree;
 import com.mindlin.jsast.tree.ParameterTree;
 import com.mindlin.jsast.tree.ParenthesizedTree;
+import com.mindlin.jsast.tree.PropertyDeclarationTree;
 import com.mindlin.jsast.tree.PropertyName;
+import com.mindlin.jsast.tree.PropertySignatureTree;
 import com.mindlin.jsast.tree.RegExpLiteralTree;
 import com.mindlin.jsast.tree.ReturnTree;
 import com.mindlin.jsast.tree.SequenceExpressionTree;
+import com.mindlin.jsast.tree.SignatureDeclarationTree.CallSignatureTree;
+import com.mindlin.jsast.tree.SignatureDeclarationTree.ConstructSignatureTree;
 import com.mindlin.jsast.tree.SpreadElementTree;
 import com.mindlin.jsast.tree.StatementTree;
 import com.mindlin.jsast.tree.StringLiteralTree;
@@ -94,6 +95,7 @@ import com.mindlin.jsast.tree.type.EnumMemberTree;
 import com.mindlin.jsast.tree.type.FunctionTypeTree;
 import com.mindlin.jsast.tree.type.IdentifierTypeTree;
 import com.mindlin.jsast.tree.type.IndexSignatureTree;
+import com.mindlin.jsast.tree.type.InferTypeTree;
 import com.mindlin.jsast.tree.type.InterfaceDeclarationTree;
 import com.mindlin.jsast.tree.type.LiteralTypeTree;
 import com.mindlin.jsast.tree.type.MappedTypeTree;
@@ -261,12 +263,12 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	
 	protected void writeInterfaceBody(List<? extends TypeElementTree> properties, WriterHelper out, boolean isType) {
 		if (isType && properties.size() == 1) {
-			writeInterfaceProperty(properties.get(0), out);
+			writeTypeElement(properties.get(0), out);
 			return;
 		}
 		
 		for (TypeElementTree property : properties) {
-			writeInterfaceProperty(property, out);
+			writeTypeElement(property, out);
 			out.append(';');
 			if (!isType)
 				out.newline();
@@ -288,13 +290,6 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		out.append('[');
 		writeList(node.getElements(), out);
 		out.append(']');
-		return null;
-	}
-
-	@Override
-	public Void visitArrayType(ArrayTypeTree node, WriterHelper out) {
-		node.getBaseType().accept(this, out);
-		out.append("[]");
 		return null;
 	}
 
@@ -1487,23 +1482,23 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	}
 
 	@Override
-	public Void visitMemberExpression(MemberExpressionTree node, WriterHelper d) {
-		return this.visitBinary(node, d);
+	public Void visitMemberExpression(MemberExpressionTree node, WriterHelper out) {
+		return this.visitBinary(node, out);
 	}
 
 	@Override
-	public Void visitLiteralType(LiteralTypeTree<?> node, WriterHelper d) {
-		return node.getValue().accept(this, d);
+	public Void visitLiteralType(LiteralTypeTree<?> node, WriterHelper out) {
+		return node.getValue().accept(this, out);
 	}
 
 	@Override
-	public Void visitFunctionDeclaration(FunctionDeclarationTree node, WriterHelper d) {
+	public Void visitFunctionDeclaration(FunctionDeclarationTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Void visitDirective(DirectiveTree node, WriterHelper d) {
+	public Void visitDirective(DirectiveTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1521,32 +1516,103 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	}
 
 	@Override
-	public Void visitTaggedTemplate(TaggedTemplateLiteralTree node, WriterHelper d) {
+	public Void visitTaggedTemplate(TaggedTemplateLiteralTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Void visitConditionalType(ConditionalTypeTree node, WriterHelper d) {
+	public Void visitConditionalType(ConditionalTypeTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Void visitConstructorType(ConstructorTypeTree node, WriterHelper d) {
+	public Void visitConstructorType(ConstructorTypeTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Void visitUnaryType(UnaryTypeTree node, WriterHelper d) {
+	public Void visitUnaryType(UnaryTypeTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Void visitMappedType(MappedTypeTree node, WriterHelper d) {
+	public Void visitMappedType(MappedTypeTree node, WriterHelper out) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Void visitArrayType(ArrayTypeTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitInferType(InferTypeTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitSpecialType(SpecialTypeTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitConstructorDeclaration(ConstructorDeclarationTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitIndexSignature(IndexSignatureTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitMethodDeclaration(MethodDeclarationTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitPropertyDeclaration(PropertyDeclarationTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitCallSignature(CallSignatureTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitConstructSignature(ConstructSignatureTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitMethodSignature(MethodSignatureTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitPropertySignature(PropertySignatureTree node, WriterHelper out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void write(Tree value, WriterHelper out) {
+		value.accept(this, out);
 	}
 }
