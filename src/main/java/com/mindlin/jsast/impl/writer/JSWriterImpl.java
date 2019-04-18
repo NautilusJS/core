@@ -129,10 +129,14 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	}
 	
 	void writeTypeMaybe(TypeTree type, WriterHelper out) {
-		if (type == null)
-			return;
-		out.append(':').optionalSpace();
-		type.accept(this, out);
+		if (type != null)
+			this.writeTypeAnnotation(type, out);
+	}
+	
+	void writeTypeAnnotation(TypeTree node, WriterHelper out) {
+		out.append(':');
+		out.optionalSpace();
+		node.accept(this, out);
 	}
 	
 	void writeTypeParameter(TypeParameterDeclarationTree param, WriterHelper out) {
@@ -199,65 +203,67 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		}
 	}
 	
+	void writeIndexSignature(IndexSignatureTree node, WriterHelper out) {
+		//TODO: modifiers
+		out.append('[');
+		TypeParameterDeclarationTree key = node.getIndexType();
+		key.getName().accept(this, out);
 		
+		this.writeTypeAnnotation(key.getSupertype(), out);
 		
+		out.append(']');
 		
-		
-		
-		
-		
-		
-	}
-
-	protected String stringify(Number value) {
-		double dValue = value.doubleValue();
-		if (!Double.isFinite(dValue)) {
-			if (Double.isNaN(dValue))
-				return "NaN";
-			if (Double.isInfinite(dValue))
-				return (dValue == Double.POSITIVE_INFINITY) ? "Infinity" : "-Infinity";
-			throw new IllegalArgumentException("Unknown non-finite value " + value);
-		}
-		
-		String result = value.toString();
-		if (result.length() < 3)
-			return result;
-		
-		//TODO finish
-		return result;
+		this.writeTypeAnnotation(node.getReturnType(), out);
 	}
 	
-	void writeInterfaceProperty(TypeElementTree property, WriterHelper out) {
-		switch (property.getKind()) {
+	void writeCallSignature(CallSignatureTree node, WriterHelper out) {
+		this.writeTypeParametersMaybe(node.getTypeParameters(), out);
+		
+		this.writeFunctionParameters(node.getParameters(), false, out);
+		
+		this.writeTypeMaybe(node.getReturnType(), out);
+	}
+	
+	void writeConstructSignature(ConstructSignatureTree node, WriterHelper out) {
+		out.append("new");
+		out.optionalSpace();
+		
+		this.writeTypeParametersMaybe(node.getTypeParameters(), out);
+		
+		this.writeFunctionParameters(node.getParameters(), false, out);
+		
+		this.writeTypeMaybe(node.getReturnType(), out);
+	}
+	
+	void writePropertySignature(PropertySignatureTree node, WriterHelper out) {
+		// TODO: finish
+		throw new UnsupportedOperationException();
+	}
+	
+	void writeMethodSignature(MethodSignatureTree node, WriterHelper out) {
+		// TODO: finish
+		throw new UnsupportedOperationException();
+	}
+	
+	void writeTypeElement(TypeElementTree element, WriterHelper out) {
+		switch (element.getKind()) {
 			case INDEX_SIGNATURE:
+				this.writeIndexSignature((IndexSignatureTree) element, out);
+				break;
 			case CALL_SIGNATURE:
+				this.writeCallSignature((CallSignatureTree) element, out);
+				break;
 			case CONSTRUCT_SIGNATURE:
+				this.writeConstructSignature((ConstructSignatureTree) element, out);
+				break;
 			case PROPERTY_SIGNATURE:
+				this.writePropertySignature((PropertySignatureTree) element, out);
+				break;
 			case METHOD_SIGNATURE:
-		}
-		if (property.getKey() == null) {
-			//Is function interface
-			FunctionTypeTree type = (FunctionTypeTree) property.getType();
-			this.writeFunctionParameters(type.getParameters(), false, out);
-			out.append(':').optionalSpace();
-			type.getReturnType().accept(this, out);
-		} else if (property.getType().getKind() == Kind.INDEX_TYPE) {
-			//Is index type (format: `[name: KeyType]: ValueType`)
-			out.append('[');
-			this.writePropertyKey(property.getKey(), out);
-
-			IndexSignatureTree type = (IndexSignatureTree) property.getType();
-			out.append(':').optionalSpace();
-			type.getIndexType().accept(this, out);
-			
-			out.append("]:").optionalSpace();
-			type.getReturnType().accept(this, out);
-		} else {
-			this.writePropertyKey(property.getKey(), out);
-			if (property.isOptional())
-				out.append('?');
-			
-			writeTypeMaybe(property.getType(), out);
+				this.writeMethodSignature((MethodSignatureTree) element, out);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported: " + element.getKind());
 		}
 	}
 	
