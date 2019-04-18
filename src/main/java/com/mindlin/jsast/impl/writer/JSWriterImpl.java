@@ -1451,7 +1451,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		List<TemplateElementTree> quasis = node.getQuasis();
 		List<ExpressionTree> expressions = node.getExpressions();
 		
-		out.append(quasis.get(0).getCooked());
+		out.append(quasis.get(0).getRaw());
 		for (int i = 1; i < quasis.size(); i++) {
 			ExpressionTree expr = expressions.get(i-1);
 			TemplateElementTree quasi = quasis.get(i);
@@ -1460,7 +1460,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 			expr.accept(this, out);
 			out.append("}");
 			
-			out.append(quasi.getCooked());
+			out.append(quasi.getRaw());
 		}
 		out.append('`');
 		return null;
