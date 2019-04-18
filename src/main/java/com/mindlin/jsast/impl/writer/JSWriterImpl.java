@@ -969,7 +969,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		out.append("else");
 		
 		if (elseStmt.getKind() == Kind.IF)
-			out.append(options.space);
+			out.space();
 		else if (elseStmt.getKind() == Kind.BLOCK)
 			out.optionalSpace();
 		
@@ -1098,7 +1098,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 
 	@Override
 	public Void visitNew(NewTree node, WriterHelper out) {
-		out.append("new").append(options.space);
+		out.append("new").space();
 		node.getCallee().accept(this, out);
 		out.append('(');
 		writeList(node.getArguments(), out);
@@ -1176,7 +1176,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	public Void visitReturn(ReturnTree node, WriterHelper out) {
 		out.append("return");
 		if (node.getExpression() != null) {
-			out.append(options.space);
+			out.space();
 			node.getExpression().accept(this, out);
 		}
 		out.finishStatement(true);
@@ -1249,13 +1249,13 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		boolean isFirst = true;
 		for (SwitchCaseTree caseStmt : node.getCases()) {
 			if (!isFirst)
-				out.append(options.space);
+				out.space();
 			isFirst = false;
 			ExpressionTree expr = caseStmt.getExpression();
 			if (expr == null) {
 				out.append("default:");
 			} else {
-				out.append("case").append(options.space);
+				out.append("case").space();
 				expr.accept(this, out);
 				out.append(':');
 			}
@@ -1277,7 +1277,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 	@Override
 	public Void visitThrow(ThrowTree node, WriterHelper out) {
 		out.append("throw");
-		out.append(options.space);
+		out.space();
 		node.getExpression().accept(this, out);
 		out.finishStatement(true);
 		return null;
@@ -1370,7 +1370,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 		}
 		out.append(operator);
 		if (spaceAfter)
-			out.append(options.space);
+			out.space();
 		node.getExpression().accept(this, out);
 		return null;
 	}
@@ -1406,7 +1406,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 				break;
 		}
 		
-		out.append(options.space);
+		out.space();
 		
 		boolean isFirstDeclaration = true;
 		for (VariableDeclaratorTree declarator : node.getDeclarations()) {
@@ -1473,7 +1473,7 @@ public class JSWriterImpl extends AbstractJSWriter<Tree> implements JSWriter, Tr
 
 	@Override
 	public Void visitTypeAlias(TypeAliasTree node, WriterHelper out) {
-		out.append("type").append(options.space);
+		out.append("type").space();
 		node.getName().accept(this, out);
 		if (!node.getTypeParameters().isEmpty()) {
 			out.append('<');
