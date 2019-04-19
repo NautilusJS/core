@@ -686,6 +686,14 @@ public class JSLexer implements Supplier<Token> {
 		return t;
 	}
 	
+	public Token expectKeyword(JSKeyword keyword) {
+		return this.expect(TokenKind.KEYWORD, keyword);
+	}
+	
+	public Token expectOperator(JSOperator operator) {
+		return this.expect(TokenKind.OPERATOR, operator);
+	}
+	
 	public JSOperator nextOperator() {
 		JSOperator result = peekOperator();
 		if (result != null)
