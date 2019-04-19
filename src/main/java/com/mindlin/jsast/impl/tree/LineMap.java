@@ -80,26 +80,8 @@ public interface LineMap {
 		public long getLineNumber(final long position) {
 			// Binary search to get the line number
 			// Find highest newline less than value
-			int lo = 0;
-			int hi = newlinePositions.length;
-			while (lo < hi) {
-				int idx = (hi - lo) / 2 + lo;
-				long val = newlinePositions[idx];
-				if (val > position)
-					hi = idx;
-				else if (val < position)
-					lo = idx;
-				else
-					return idx;
-			}
-			return lo;// lo==hi
-		}
-		
-		@Override
-		public SourcePosition lookup(final long position) {
-			long row = getLineNumber(position);
-			long col = position - newlinePositions[(int) row];
-			return new SourcePosition(source, position, row, col);
+			int idx = Arrays.binarySearch(this.newlinePositions, position);
+			return idx < 0 ? (-1 - idx) : idx;
 		}
 
 		@Override
