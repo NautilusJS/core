@@ -27,6 +27,12 @@ import com.mindlin.jsast.impl.util.Characters;
 
 public class JSLexer implements Supplier<Token> {
 	
+	protected static String decodeEASCII(byte value) {
+		Charset easciiCharset = Charset.forName("EASCII");
+		CharBuffer buffer = easciiCharset.decode(ByteBuffer.wrap(new byte[]{ value }));
+		return buffer.toString();
+	}
+	
 	protected final CharacterStream chars;
 	protected Token lookahead = null;
 	protected LinkedList<Token> lookaheads = new LinkedList<>();
@@ -143,7 +149,7 @@ public class JSLexer implements Supplier<Token> {
 						if (val < 32 && chars.peek() >= '0' && chars.peek() <= '7')
 							val = (val << 3) | (chars.next() - '0');
 					}
-					return Charset.forName("EASCII").decode(ByteBuffer.wrap(new byte[]{(byte)val})).toString();
+					return JSLexer.decodeEASCII((byte) val);
 				}
 			case '\n':
 				this.lines.putNewline(chars.position());
@@ -160,19 +166,20 @@ public class JSLexer implements Supplier<Token> {
 				//Unicode escape
 				return this.readUnicodeEscapeSequence();
 			}
-			case 'x':
+			case 'x': {
 				//EASCII hexdecimal character escape
 				if (!chars.hasNext(2))
 					throw new JSEOFException("Invalid Extended ASCII escape sequence (EOF)", this.resolvePosition(this.getPositionOffset() - 2));
+				int val;
 				try {
 					String s = chars.copyNext(2);
-					Charset easciiCharset = Charset.forName("EASCII");
-					CharBuffer buffer = easciiCharset.decode(ByteBuffer.wrap(new byte[]{(byte) Integer.parseInt(s, 16)}));
-					return buffer.toString();
+					val = Integer.parseInt(s, 16);
 				} catch (NumberFormatException e) {
 					SourcePosition start = this.resolvePosition(this.getPositionOffset() - 4);
 					throw new JSSyntaxException("Invalid Extended ASCII escape sequence (\\x" + chars.copy(chars.position() - 1, 2) + ")", new SourceRange(start, this.getPosition()), e);
 				}
+				return JSLexer.decodeEASCII((byte) val);
+			}
 			default:
 				throw new JSSyntaxException("Invalid escape sequence: \\" + c, this.resolvePosition(this.getPositionOffset() - 2));
 		}
