@@ -41,6 +41,12 @@ public interface SignatureDeclarationTree extends NamedDeclarationTree {
 	 */
 	TypeTree getReturnType();
 	
+	/**
+	 * <pre>
+	 * CallSignature:
+	 *  	TypeParameterList[opt] ( ParameterList ) : Type
+	 * </pre>
+	 */
 	public static interface CallSignatureTree extends SignatureDeclarationTree, TypeElementTree {
 		@Override
 		default Kind getKind() {
@@ -53,6 +59,13 @@ public interface SignatureDeclarationTree extends NamedDeclarationTree {
 		}
 	}
 	
+	/**
+	 * <pre>
+	 * ConstructSignature:
+	 *  	new ( ParameterList )
+	 *  	new ( ParameterList ) : Type
+	 * </pre>
+	 */
 	public static interface ConstructSignatureTree extends SignatureDeclarationTree, TypeElementTree {
 		@Override
 		default Kind getKind() {

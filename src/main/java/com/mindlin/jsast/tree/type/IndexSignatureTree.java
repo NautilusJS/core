@@ -18,12 +18,12 @@ public interface IndexSignatureTree extends ClassElementTree, TypeElementTree {
 	Modifiers getModifiers();
 	
 	/**
-	 * Get type being used to index.
+	 * @return Type being used to index.
 	 */
 	TypeParameterDeclarationTree getIndexType();
 	
 	/**
-	 * Get type returned from index
+	 * @return Type returned from index
 	 */
 	TypeTree getReturnType();
 	

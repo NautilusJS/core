@@ -3,7 +3,10 @@ package com.mindlin.jsast.tree;
 import com.mindlin.jsast.tree.type.TypeTree;
 
 /**
- * 
+ * <pre>
+ * PropertyDeclaration:
+ *  	PrefixModifiers PropertyName TypeAnnotation[opt] Initializer[opt]
+ * </pre>
  * @author mailmindlin
  */
 public interface PropertyDeclarationTree extends PropertyTree, DecoratableTree, NamedDeclarationTree, ClassElementTree {
