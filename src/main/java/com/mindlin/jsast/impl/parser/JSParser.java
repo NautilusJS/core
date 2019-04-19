@@ -1864,7 +1864,7 @@ public class JSParser {
 		List<ParameterTree> params = this.parseParameters(null, src, context);
 		src.expectOperator(JSOperator.RIGHT_PARENTHESIS);
 		
-		expectOperator(JSOperator.LAMBDA, src, context);
+		src.expectOperator(JSOperator.LAMBDA);
 		
 		TypeTree returnType = this.parseType(src, context);
 		
@@ -1911,7 +1911,7 @@ public class JSParser {
 		
 		List<TypeTree> slots = this.parseDelimitedList(this::parseTupleElement, this::parseCommaSeparator, TokenPredicate.match(TokenKind.OPERATOR, JSOperator.RIGHT_BRACKET), src, context);
 		
-		SourcePosition end = expectOperator(JSOperator.RIGHT_BRACKET, src, context).getEnd();
+		SourcePosition end = src.expectOperator(JSOperator.RIGHT_BRACKET).getEnd();
 		return new TupleTypeTreeImpl(start, end, slots);
 	}
 	
@@ -2625,7 +2625,7 @@ public class JSParser {
 			expectSemicolon(src, context);
 		}
 		ExpressionTree update = src.peek().matchesOperator(JSOperator.RIGHT_PARENTHESIS) ? null : parseNextExpression(src, context);
-		expectOperator(JSOperator.RIGHT_PARENTHESIS, src, context);
+		src.expectOperator(JSOperator.RIGHT_PARENTHESIS);
 		StatementTree statement = parseStatement(src, context);
 		return new ForLoopTreeImpl(forKeywordToken.getStart(), src.getPosition(), initializer, condition, update,
 				statement);
@@ -3252,7 +3252,7 @@ public class JSParser {
 	 */
 	@SuppressWarnings("unchecked")
 	protected ExpressionTree parseGroupExpression(JSLexer src, Context context) {
-		Token leftParenToken = expectOperator(JSOperator.LEFT_PARENTHESIS, src, context);
+		Token leftParenToken = src.expectOperator(JSOperator.LEFT_PARENTHESIS);
 		
 		//Check for easy upgrades to lambda expression
 		if (src.nextTokenIs(TokenKind.OPERATOR, JSOperator.RIGHT_PARENTHESIS)) {
