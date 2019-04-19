@@ -14,6 +14,11 @@ public class SourceRange implements Serializable {
 		return new SourceRange(null, end);
 	}
 	
+	public static SourceRange invalid() {
+		//TODO: cache?
+		return new SourceRange(null, null);
+	}
+	
 	protected SourcePosition start;
 	protected SourcePosition end;
 	
