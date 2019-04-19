@@ -29,7 +29,7 @@ public interface LineMap {
 	 * @return Character offset
 	 * @throws IndexOutOfBoundsException If {@code line} is not mapped.
 	 */
-	long getLineOffset(long line);
+	long getLineOffset(long line) throws IndexOutOfBoundsException;
 	
 	/**
 	 * Lookup position
@@ -86,10 +86,12 @@ public interface LineMap {
 
 		@Override
 		public long getLineOffset(long line) {
-			if (line < 0 || this.newlinePositions.length <= line)
+			if (line < 0 || this.newlinePositions.length < line)
 				throw new IndexOutOfBoundsException(String.format("%d is out of range [0, %d]", line, this.newlinePositions.length));
 			
-			return this.newlinePositions[(int) line];
+			if (line == 0)
+				return 0;
+			return this.newlinePositions[(int) line - 1];
 		}
 	}
 	
@@ -108,8 +110,8 @@ public interface LineMap {
 		}
 		
 		public void putNewline(long position) {
-			if (newlinePositions.length == length) {
-				int newCap = length * 3 / 2 + 1;
+			if (this.newlinePositions.length == this.length) {
+				int newCap = this.length * 3 / 2 + 1;
 				
 				//Overflow checking stuff
 				if (newCap < this.length)
@@ -117,7 +119,7 @@ public interface LineMap {
 				if (newCap <= this.length)//Still can't please everyone
 					throw new OutOfMemoryError("Somehow, you managed to overflow array capacity limits. Congrats.");
 				
-				newlinePositions = Arrays.copyOf(newlinePositions, newCap);
+				this.newlinePositions = Arrays.copyOf(this.newlinePositions, newCap);
 			}
 			
 			this.newlinePositions[this.length++] = position;
@@ -132,18 +134,12 @@ public interface LineMap {
 		
 		@Override
 		public long getLineOffset(long line) {
-			if (line < 0 || this.length <= line)
-				throw new ArrayIndexOutOfBoundsException(String.format("%d is out of range [0, %d]", line, this.length));
+			if (line < 0 || this.length < line)
+				throw new IndexOutOfBoundsException(String.format("%d is out of range [0, %d]", line, this.length));
 			
-			return this.newlinePositions[(int) line];
-		}
-		
-		@Override
-		public SourcePosition lookup(long offset) {
-			long row = this.getLineNumber(offset);
-			long col = offset - newlinePositions[(int) row];
-			
-			return new SourcePosition(this.source, offset, row, col);
+			if (line == 0)
+				return 0;
+			return this.newlinePositions[(int) line - 1];
 		}
 		
 		public void shrink() {
