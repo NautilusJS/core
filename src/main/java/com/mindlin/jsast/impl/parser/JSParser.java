@@ -734,6 +734,7 @@ public class JSParser {
 				if (context.isStrict()) {
 					//TODO throw error on implicit octal
 				}
+				//$FALL-THROUGH$
 			case STRING_LITERAL:
 			case BOOLEAN_LITERAL:
 			case NULL_LITERAL:
@@ -1256,6 +1257,7 @@ public class JSParser {
 					//Strict or ASI
 					if (context.isStrict() || src.peek().hasPrecedingNewline())
 						return false;
+					//$FALL-THROUGH$
 				case STATIC:
 					continue;
 				default:
@@ -2032,7 +2034,7 @@ public class JSParser {
 					case TYPEOF:
 						if (!src.peek(1).matches(TokenKind.KEYWORD, JSKeyword.IMPORT))
 							return this.parseTypeQuery(src, context);
-						//Fallthrough intentional
+						//$FALL-THROUGH$
 					case IMPORT:
 						throw new JSUnsupportedException("Import types", src.getPosition());
 					default:
@@ -2071,7 +2073,7 @@ public class JSParser {
 					case "never":
 						if (!src.peek(1).matchesOperator(JSOperator.PERIOD))
 							return this.parsePrimitiveType(src, context);
-						// Fallthrough intentional
+						//$FALL-THROUGH$
 					default:
 						return this.parseTypeReference(src, context);
 				}
@@ -2791,7 +2793,7 @@ public class JSParser {
 				case IN:
 					if (!context.inAllowed())
 						return -1;
-					//Fallthrough intentional
+					//$FALL-THROUGH$
 				case INSTANCEOF:
 					return 11;
 				case AS:
@@ -3491,7 +3493,7 @@ public class JSParser {
 				case YIELD:
 					if (context.allowYield())
 						return false;
-					//Fallthrough intentional
+					//$FALL-THROUGH$
 				case AS:
 					// Contextual keywords
 					return true;
