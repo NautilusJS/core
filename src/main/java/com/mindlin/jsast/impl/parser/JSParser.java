@@ -1338,9 +1338,10 @@ public class JSParser {
 	/**
 	 * <pre>
 	 * CallSignature:
-	 * 		TypeParameterList[opt] ( ParameterList ) => Type
+	 *  	TypeParameterList[opt] ( ParameterList ) : Type
 	 * ConstructSignature:
-	 * 		new ( ParameterList ) => Type
+	 *  	new ( ParameterList )
+	 *   	new ( ParameterList ) => Type
 	 * </pre>
 	 */
 	protected SignatureDeclarationTree parseCallSignature(JSLexer src, Context context) {
