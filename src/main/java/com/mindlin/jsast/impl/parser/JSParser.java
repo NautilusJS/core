@@ -318,8 +318,9 @@ public class JSParser {
 					case IMPORT:
 						return this.parseImportStatement(src, context);
 					case RETURN:
+						return this.parseReturnStatement(src, context);
 					case THROW:
-						return this.parseUnaryStatement(src, context);
+						return this.parseThrowStatement(src, context);
 					case SWITCH:
 						return this.parseSwitchStatement(src, context);
 					case TRY:
@@ -1034,28 +1035,23 @@ public class JSParser {
 	}
 	
 	/**
-	 * Parse a {@code return} or {@code throw} statement.
-	 * <p>
-	 * Note that {@code yield} expressions aren't unary statements, as they can
-	 * evaluate to a value.
-	 * </p>
+	 * Parse a {@code return} statement.
+	 * <br/>
 	 * Syntax:
 	 * <pre>
 	 * ReturnStatement[Yield, Await]:
 	 * 		return ;
 	 * 		return <no line terminator> Expression[+In, ?Yield, ?Await] ;
-	 * ThrowStatement[Yield, Await]:
-	 * 		throw <no line terminator> Expression[+In, ?Yield, ?Await] ;
 	 * </pre>
+	 * @param src
+	 * @param context
+	 * @return
 	 */
-	//TODO: split to parseThrow & parseReturn?
-	protected StatementTree parseUnaryStatement(JSLexer src, Context context) {
-		Token keywordToken = src.expectKind(TokenKind.KEYWORD);
-		if (!(keywordToken.getValue() == JSKeyword.RETURN || keywordToken.getValue() == JSKeyword.THROW))
-			throw new JSUnexpectedTokenException(keywordToken);
+	protected StatementTree parseReturnStatement(JSLexer src, Context context) {
+		Token keywordToken = src.expectKeyword(JSKeyword.RETURN);
 		
 		ExpressionTree expr;
-		if (keywordToken.getValue() == JSKeyword.RETURN && src.peek().matches(TokenKind.SPECIAL, JSSpecialGroup.SEMICOLON))
+		if (src.peek().matches(TokenKind.SPECIAL, JSSpecialGroup.SEMICOLON))
 			expr = null;
 		else
 			expr = this.parseNextExpression(src, context);
@@ -1063,10 +1059,28 @@ public class JSParser {
 		expectEOL(src, context);
 		//TODO: fix end to happen after EOL (also handle for expr == null)
 		
-		if (keywordToken.getValue() == JSKeyword.RETURN)
-			return new ReturnTreeImpl(keywordToken.getStart(), expr.getEnd(), expr);
-		else
-			return new ThrowTreeImpl(keywordToken.getStart(), expr.getEnd(), expr);
+		return new ReturnTreeImpl(keywordToken.getStart(), expr.getEnd(), expr);
+	}
+	
+	/**
+	 * Parse a {@code throw} statement.
+	 * <br/>
+	 * Syntax:
+	 * <pre>
+	 * ThrowStatement[Yield, Await]:
+	 * 		throw <no line terminator> Expression[+In, ?Yield, ?Await] ;
+	 * </pre>
+	 */
+	//TODO: split to parseThrow & parseReturn?
+	protected StatementTree parseThrowStatement(JSLexer src, Context context) {
+		Token keywordToken = src.expectKeyword(JSKeyword.THROW);
+		
+		ExpressionTree expr = this.parseNextExpression(src, context);
+		
+		expectEOL(src, context);
+		//TODO: fix end to happen after EOL (also handle for expr == null)
+		
+		return new ThrowTreeImpl(keywordToken.getStart(), expr.getEnd(), expr);
 	}
 	
 	/**
