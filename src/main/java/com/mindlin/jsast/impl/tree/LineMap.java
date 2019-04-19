@@ -130,21 +130,21 @@ public interface LineMap {
 				int newCap = length * 3 / 2 + 1;
 				
 				//Overflow checking stuff
-				if (newCap < length)
+				if (newCap < this.length)
 					newCap = Integer.MAX_VALUE - 8;//Something something array constant overhead
-				if (newCap <= length)//Still can't please everyone
+				if (newCap <= this.length)//Still can't please everyone
 					throw new OutOfMemoryError("Somehow, you managed to overflow array capacity limits. Congrats.");
 				
 				newlinePositions = Arrays.copyOf(newlinePositions, newCap);
 			}
 			
-			newlinePositions[length++] = position;
+			this.newlinePositions[this.length++] = position;
 		}
 		
 		@Override
 		public long getLineNumber(long position) {
 			// Binary search to get the line number
-			int idx = Arrays.binarySearch(newlinePositions, 0, length, position);
+			int idx = Arrays.binarySearch(this.newlinePositions, 0, this.length, position);
 			return idx < 0 ? (-1 - idx) : idx;
 		}
 		

@@ -56,7 +56,7 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	public LineMap getLines() {
-		return lines;
+		return this.lines;
 	}
 	
 	public SourcePosition getPosition() {
@@ -1049,7 +1049,7 @@ public class JSLexer implements Supplier<Token> {
 		
 		@Override
 		public int hashCode() {
-			return Objects.hash(body, flags);
+			return Objects.hash(this.body, this.flags);
 		}
 		
 		@Override

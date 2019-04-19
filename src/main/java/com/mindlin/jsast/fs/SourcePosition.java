@@ -23,11 +23,11 @@ public class SourcePosition implements Serializable {
 	}
 	
 	public long getLine() {
-		return line;
+		return this.line;
 	}
 	
 	public long getCol() {
-		return col;
+		return this.col;
 	}
 	
 	public SourceFile getSource() {
