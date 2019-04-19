@@ -143,6 +143,7 @@ public class JSLexer implements Supplier<Token> {
 			case '7':
 				//EASCII octal escape
 				{
+					//TODO: test if lookahead exists?
 					int val = c - '0';
 					if (chars.peek() >= '0' && chars.peek() <= '7') {
 						val = (val << 3) | (chars.next() - '0');
@@ -263,6 +264,7 @@ public class JSLexer implements Supplier<Token> {
 					if (chars.hasNext() && chars.peek() == '\n')
 						chars.skip(1);
 					//breakthrough intentional
+					//$FALL-THROUGH$
 				case '\n':
 					cooked.append('\n');
 					break;
@@ -299,8 +301,9 @@ public class JSLexer implements Supplier<Token> {
 					continue;
 				}
 				throw new JSSyntaxException("Illegal newline in the middle of a string literal", this.getPosition());
-			} else if (c == startChar)
+			} else if (c == startChar) {
 				break;
+			}
 			sb.append(c);
 		}
 		return sb.toString();
@@ -479,6 +482,7 @@ public class JSLexer implements Supplier<Token> {
 							break outer;
 						}
 						//Fallthrough intentional
+						//$FALL-THROUGH$
 					case OCTAL:
 						isValid = c <= '7';
 						break;
@@ -654,8 +658,9 @@ public class JSLexer implements Supplier<Token> {
 				if (d == '.' && e == '.')
 					return JSOperator.SPREAD;
 				return JSOperator.PERIOD;
+			default:
+				return null;
 		}
-		return null;
 	}
 	
 	public Token expectKind(TokenKind kind) {
