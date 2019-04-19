@@ -4,13 +4,13 @@ import java.util.Objects;
 
 import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.impl.lexer.Token;
+import com.mindlin.jsast.tree.DeclarationName;
 import com.mindlin.jsast.tree.ExpressionTree;
-import com.mindlin.jsast.tree.PatternTree;
 import com.mindlin.jsast.tree.VariableDeclaratorTree;
 import com.mindlin.jsast.tree.type.TypeTree;
 
 public class VariableDeclaratorTreeImpl extends AbstractTree implements VariableDeclaratorTree {
-	protected final PatternTree identifier;
+	protected final DeclarationName identifier;
 	protected final ExpressionTree initializer;
 	protected final TypeTree type;
 	
@@ -18,8 +18,7 @@ public class VariableDeclaratorTreeImpl extends AbstractTree implements Variable
 		this(t.getStart(), t.getEnd(), t.getValue(), null, null);
 	}
 	
-	public VariableDeclaratorTreeImpl(SourcePosition start, SourcePosition end, PatternTree identifier, TypeTree type,
-			ExpressionTree initializer) {
+	public VariableDeclaratorTreeImpl(SourcePosition start, SourcePosition end, DeclarationName identifier, TypeTree type, ExpressionTree initializer) {
 		super(start, end);
 		this.identifier = identifier;
 		this.type = type;
@@ -37,8 +36,8 @@ public class VariableDeclaratorTreeImpl extends AbstractTree implements Variable
 	}
 	
 	@Override
-	public PatternTree getName() {
-		return identifier;
+	public DeclarationName getName() {
+		return this.identifier;
 	}
 	
 	@Override
