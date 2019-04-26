@@ -402,7 +402,6 @@ public class JSParser {
 				}
 			case IDENTIFIER:
 				return this.parseLabeledOrExpressionStement(src, context);
-			//Fallthrough intentional
 			case BOOLEAN_LITERAL:
 			case NUMERIC_LITERAL:
 			case STRING_LITERAL:
@@ -1846,14 +1845,11 @@ public class JSParser {
 	protected boolean isStartOfFunctionType(JSLexer src, Context context) {
 		if (!src.nextTokenIs(TokenKind.OPERATOR, JSOperator.LEFT_PARENTHESIS))
 			return false;
-		if (src.nextTokenIs(TokenKind.OPERATOR, JSOperator.RIGHT_PARENTHESIS) || src.nextTokenIs(TokenKind.OPERATOR, JSOperator.SPREAD))
+		if (src.nextTokenIsAny(TokenKind.OPERATOR, JSOperator.RIGHT_PARENTHESIS, JSOperator.SPREAD))
 			return true;
 		if (!this.skipParameterStart(src, context))
 			return false;
-		if (src.nextTokenIs(TokenKind.OPERATOR, JSOperator.COLON)
-				|| src.nextTokenIs(TokenKind.OPERATOR, JSOperator.COMMA)
-				|| src.nextTokenIs(TokenKind.OPERATOR, JSOperator.QUESTION_MARK)
-				|| src.nextTokenIs(TokenKind.OPERATOR, JSOperator.ASSIGNMENT))
+		if (src.nextTokenIsAny(TokenKind.OPERATOR, JSOperator.COLON, JSOperator.COMMA, JSOperator.QUESTION_MARK, JSOperator.ASSIGNMENT))
 			return true;
 		if (src.nextTokenIs(TokenKind.OPERATOR, JSOperator.RIGHT_PARENTHESIS) && src.nextTokenIs(TokenKind.OPERATOR, JSOperator.LAMBDA))
 			return true;
@@ -2374,9 +2370,9 @@ public class JSParser {
 	protected IfTree parseIfStatement(JSLexer src, Context context) {
 		Token ifKeywordToken = src.expectKeyword(JSKeyword.IF);
 		
-		src.expect(JSOperator.LEFT_PARENTHESIS);
+		src.expectOperator(JSOperator.LEFT_PARENTHESIS);
 		ExpressionTree expression = this.parseNextExpression(src, context);
-		src.expect(JSOperator.RIGHT_PARENTHESIS);
+		src.expectOperator(JSOperator.RIGHT_PARENTHESIS);
 		
 		StatementTree thenStatement = this.parseStatement(src, context);
 		StatementTree elseStatement = null;
@@ -2436,7 +2432,7 @@ public class JSParser {
 			
 			cases.add(new SwitchCaseTreeImpl(next.getStart(), src.getPosition(), caseExpr, statements));
 		}
-		src.expect(JSOperator.RIGHT_BRACE);
+		src.expectOperator(JSOperator.RIGHT_BRACE);
 		cases.trimToSize();
 		
 		return new SwitchTreeImpl(switchKeywordToken.getStart(), src.getPosition(), expression, cases);

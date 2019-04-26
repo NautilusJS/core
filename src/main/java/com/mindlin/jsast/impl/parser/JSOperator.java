@@ -3,88 +3,90 @@ package com.mindlin.jsast.impl.parser;
 public enum JSOperator {
 	// Reference:
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators
-	AT_SYMBOL(1, "@"),
-	EQUAL(2, "=="),
-	NOT_EQUAL(2, "!="),
-	STRICT_EQUAL(2, "==="),
-	STRICT_NOT_EQUAL(2, "!=="),
-	GREATER_THAN(2, ">"),
-	GREATER_THAN_EQUAL(2, ">="),
-	LESS_THAN_EQUAL(2, "<="),
-	LESS_THAN(2, "<"),
+	AT_SYMBOL("@"),
+	EQUAL("=="),
+	NOT_EQUAL("!="),
+	STRICT_EQUAL("==="),
+	STRICT_NOT_EQUAL("!=="),
+	GREATER_THAN(">"),
+	GREATER_THAN_EQUAL(">="),
+	LESS_THAN_EQUAL("<="),
+	LESS_THAN("<"),
 
-	INCREMENT(1, "++"),
-	DECREMENT(1, "--"),
+	INCREMENT("++"),
+	DECREMENT("--"),
 
-	PLUS(2, "+"),
-	MINUS(2, "-"),
-	ASTERISK(2, "*"),
-	DIVISION(2, "/"),
-	REMAINDER(2, "%"),
-	EXPONENTIATION(2, "**"),
-	LEFT_SHIFT(2, "<<"),
-	RIGHT_SHIFT(2, ">>"),
-	UNSIGNED_RIGHT_SHIFT(2, ">>>"),
+	PLUS("+"),
+	MINUS("-"),
+	ASTERISK("*"),
+	DIVISION("/"),
+	REMAINDER("%"),
+	EXPONENTIATION("**"),
+	LEFT_SHIFT("<<"),
+	RIGHT_SHIFT(">>"),
+	UNSIGNED_RIGHT_SHIFT(">>>"),
 
-	AMPERSAND(2, "&"),
-	BITWISE_XOR(2, "^"),
-	VBAR(2, "|"),
-	BITWISE_NOT(1, "~"),
+	AMPERSAND("&"),
+	BITWISE_XOR("^"),
+	VBAR("|"),
+	BITWISE_NOT("~"),
 
-	LOGICAL_AND(2, "&&"),
-	LOGICAL_OR(2, "||"),
-	LOGICAL_NOT(1, "!"),
+	LOGICAL_AND("&&"),
+	LOGICAL_OR("||"),
+	LOGICAL_NOT("!"),
 
-	ASSIGNMENT(true, 2, "="),
-	ADDITION_ASSIGNMENT(true, 2, "+="),
-	SUBTRACTION_ASSIGNMENT(true, 2, "-="),
-	MULTIPLICATION_ASSIGNMENT(true, 2, "*="),
-	DIVISION_ASSIGNMENT(true, 2, "/="),
-	REMAINDER_ASSIGNMENT(true, 2, "%="),
-	EXPONENTIATION_ASSIGNMENT(true, 2, "**="),
-	LEFT_SHIFT_ASSIGNMENT(true, 2, "<<="),
-	RIGHT_SHIFT_ASSIGNMENT(true, 2, ">>="),
-	UNSIGNED_RIGHT_SHIFT_ASSIGNMENT(true, 2, ">>>="),
-	BITWISE_AND_ASSIGNMENT(true, 2, "&="),
-	BITWISE_XOR_ASSIGNMENT(true, 2, "^="),
-	BITWISE_OR_ASSIGNMENT(true, 2, "|="),
+	ASSIGNMENT(true, "="),
+	ADDITION_ASSIGNMENT(true, "+="),
+	SUBTRACTION_ASSIGNMENT(true, "-="),
+	MULTIPLICATION_ASSIGNMENT(true, "*="),
+	DIVISION_ASSIGNMENT(true, "/="),
+	REMAINDER_ASSIGNMENT(true, "%="),
+	EXPONENTIATION_ASSIGNMENT(true, "**="),
+	LEFT_SHIFT_ASSIGNMENT(true, "<<="),
+	RIGHT_SHIFT_ASSIGNMENT(true, ">>="),
+	UNSIGNED_RIGHT_SHIFT_ASSIGNMENT(true, ">>>="),
+	BITWISE_AND_ASSIGNMENT(true, "&="),
+	BITWISE_XOR_ASSIGNMENT(true, "^="),
+	BITWISE_OR_ASSIGNMENT(true, "|="),
 
-	QUESTION_MARK(3, "?"),
-	COLON(3, ":"),
-	LEFT_PARENTHESIS(0, "("),
-	RIGHT_PARENTHESIS(0, ")"),
-	LEFT_BRACKET(0, "["),
-	RIGHT_BRACKET(0, "]"),
-	LEFT_BRACE(0, "{"),
-	RIGHT_BRACE(0, "}"),
-	COMMA(2, ","),
-	LAMBDA(2, "=>"),
+	QUESTION_MARK("?"),
+	COLON(":"),
+	LEFT_PARENTHESIS("("),
+	RIGHT_PARENTHESIS(")"),
+	LEFT_BRACKET("["),
+	RIGHT_BRACKET("]"),
+	LEFT_BRACE("{"),
+	RIGHT_BRACE("}"),
+	COMMA(","),
+	LAMBDA("=>"),
 
-	PERIOD(2, "."),
-	SPREAD(1, "..."),;
+	PERIOD("."),
+	SPREAD("..."),;
 
 	final String operator;
 	final int precedence;
-	final int arity;
 	final boolean assignment;
 
-	JSOperator(boolean assignment, int precedence, int arity, String operator) {
+	JSOperator(boolean assignment, int precedence, String operator) {
 		this.assignment = assignment;
 		this.operator = operator;
-		this.arity = arity;
 		this.precedence = precedence;
 	}
 
-	JSOperator(boolean assignment, int arity, String operator) {
-		this(assignment, -1, arity, operator);
+	JSOperator(boolean assignment, String operator) {
+		this(assignment, -1, operator);
 	}
 
-	JSOperator(int precedence, int arity, String operator) {
-		this(false, precedence, arity, operator);
+	JSOperator(int precedence, String operator) {
+		this(false, precedence, operator);
 	}
 
-	JSOperator(int arity, String operator) {
-		this(-1, arity, operator);
+	JSOperator(String operator) {
+		this(-1, operator);
+	}
+	
+	JSOperator() {
+		this(true, -1, "");
 	}
 	
 	public String getText() {
@@ -101,9 +103,5 @@ public enum JSOperator {
 
 	public int precedence() {
 		return this.precedence;
-	}
-
-	public int arity() {
-		return arity;
 	}
 }

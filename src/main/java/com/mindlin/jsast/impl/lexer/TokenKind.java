@@ -1,5 +1,6 @@
 package com.mindlin.jsast.impl.lexer;
 
+@Deprecated
 public enum TokenKind {
 	/**
 	 * Semicolon, EOL, EOF, etc.
