@@ -1085,11 +1085,11 @@ public class JSLexer implements Supplier<Token> {
 		
 		@Override
 		public String toString() {
-			return new StringBuilder()
-					.append(this.getClass().getSimpleName())
-					.append("{body=\"").append(this.body)
-					.append("\",flags=\"").append(this.flags)
-					.append("\"}").toString();
+			return String.format(
+					"%s{body=\"%s\",flags=\"%s\"}",
+					this.getClass().getSimpleName(),
+					this.body,
+					this.flags);
 		}
 	}
 	
