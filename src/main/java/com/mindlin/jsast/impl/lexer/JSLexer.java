@@ -263,7 +263,6 @@ public class JSLexer implements Supplier<Token> {
 					// '\r\n' is treated as a single character
 					if (chars.hasNext() && chars.peek() == '\n')
 						chars.skip(1);
-					//breakthrough intentional
 					//$FALL-THROUGH$
 				case '\n':
 					cooked.append('\n');
@@ -316,6 +315,7 @@ public class JSLexer implements Supplier<Token> {
 	//Numeric literals
 	
 	protected long nextHexLiteral() throws JSSyntaxException {
+		//TODO: fix for BigInt
 		boolean isEmpty = true;
 		long result = 0;
 		while (chars.hasNext()) {
@@ -334,6 +334,7 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	protected long nextBinaryLiteral() throws JSSyntaxException {
+		//TODO: fix for BigInt
 		boolean isEmpty = true;
 		long result = 0;
 		while (chars.hasNext()) {
@@ -352,6 +353,7 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	protected long nextOctalLiteral() throws JSSyntaxException {
+		//TODO: fix for BigInt
 		boolean isEmpty = true;
 		long result = 0;
 		while (chars.hasNext()) {
@@ -374,6 +376,7 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	public Number nextNumericLiteral() throws JSSyntaxException {
+		//TODO: fix for BigInt
 		NumericLiteralType type = NumericLiteralType.DECIMAL;
 		
 		boolean isPositive = true;
@@ -481,7 +484,6 @@ public class JSLexer implements Supplier<Token> {
 								chars.next();
 							break outer;
 						}
-						//Fallthrough intentional
 						//$FALL-THROUGH$
 					case OCTAL:
 						isValid = c <= '7';
@@ -877,7 +879,7 @@ public class JSLexer implements Supplier<Token> {
 		}
 		
 		final long start = Math.max(chars.position(), -1);
-		chars.mark();
+		chars.mark(); // Mark start (so we can copy the text later)
 		char c = chars.peek();
 		Object value = null;
 		TokenKind kind = null;
