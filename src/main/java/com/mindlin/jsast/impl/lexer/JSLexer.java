@@ -15,9 +15,12 @@ import com.mindlin.jsast.exception.JSUnexpectedTokenException;
 import com.mindlin.jsast.fs.SourceFile;
 import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.fs.SourceRange;
-import com.mindlin.jsast.impl.parser.JSKeyword;
-import com.mindlin.jsast.impl.parser.JSOperator;
-import com.mindlin.jsast.impl.parser.JSSpecialGroup;
+import com.mindlin.jsast.impl.lexer.ParsedNumber.ParsedDouble;
+import com.mindlin.jsast.impl.lexer.ParsedNumber.ParsedInteger;
+import com.mindlin.jsast.impl.lexer.Token.IdentifierToken;
+import com.mindlin.jsast.impl.lexer.Token.NumericLiteralToken;
+import com.mindlin.jsast.impl.lexer.Token.RegExpToken;
+import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
 import com.mindlin.jsast.impl.tree.LineMap;
 import com.mindlin.jsast.impl.tree.LineMap.LineMapBuilder;
 import com.mindlin.jsast.impl.util.BooleanStack;
@@ -59,6 +62,26 @@ public class JSLexer implements Supplier<Token> {
 	public JSLexer(SourceFile source, CharacterStream chars) {
 		this.lines = new LineMapBuilder(source);
 		this.chars = chars;
+	}
+	
+	protected void markNewline(long position) {
+		this.lines.putNewline(position);
+	}
+	
+	protected void error(SourcePosition location, String text, Object...args) {
+		
+	}
+	
+	protected void error(SourceRange range, String text, Object...args) {
+		
+	}
+	
+	protected void errorEOF(SourcePosition position, String text, Object...args) {
+		
+	}
+	
+	protected void errorEOF(SourceRange range, String text, Object...args) {
+		
 	}
 	
 	public LineMap getLines() {
@@ -114,6 +137,111 @@ public class JSLexer implements Supplier<Token> {
 		return null;
 	}
 	
+	protected String readOctalEASCII(char c) {
+		//TODO: test if lookahead exists?
+		int val = c - '0';
+		if (chars.peek() >= '0' && chars.peek() <= '7') {
+			val = (val << 3) | (chars.next() - '0');
+			if (val < 32 && chars.peek() >= '0' && chars.peek() <= '7')
+				val = (val << 3) | (chars.next() - '0');
+		}
+		return JSLexer.decodeEASCII((byte) val);
+	}
+	
+	protected String readHexEASCII() {
+		// EASCII hexdecimal character escape
+		// In \xXX form 
+		if (!chars.hasNext(2))
+			throw new JSEOFException(JSLexerMessages.EASCII_EOF, this.resolvePosition(this.getPositionOffset() - 2));
+		String text = chars.copyNext(2).toString();
+		int val;
+		try {
+			val = Integer.parseInt(text, 16);
+		} catch (NumberFormatException e) {
+			SourceRange range = new SourceRange(this.resolvePosition(this.getPositionOffset() - 4), this.getPosition());
+			throw new JSSyntaxException("Invalid Extended ASCII escape sequence (\\x" + text + ")", range, e);
+		}
+		
+		return JSLexer.decodeEASCII((byte) val);
+	}
+	
+	/**
+	 * Read an escape sequence in the form of either {@code uXXXX} or <code>u{X...XXX}</code>.
+	 * 
+	 * It is expected that the 'u' at the start of the escape sequence has already been consumed.
+	 * 
+	 * @return character read
+	 * @see <a href="https://tc39.github.io/ecma262/#prod-UnicodeEscapeSequence">ECMAScript 262 &sect; 11.8.4</a>
+	 * @see <a href="https://mathiasbynens.be/notes/javascript-escapes">JavaScript character escape sequences · Mathias Bynens</a>
+	 */
+	protected String readUnicodeEscapeSequence() {
+		long start = this.getPositionOffset();
+		int value = 0;
+		if (chars.peek() == '{') {
+			// In u{X...XX} form
+			chars.skip(1);
+			return this.readExtendedUnicodeEscape();
+		} else {
+			//Escape in uXXXX form
+			if (!chars.hasNext(4))
+				throw new JSEOFException(JSLexerMessages.UNICODE_ESCAPE_EOF, this.getPosition());
+			for (int i = 0; i < 4; i++) {
+				char c = chars.next();
+				int digit = Characters.asHexDigit(c);
+				if (digit < 0)
+					throw new JSSyntaxException(JSLexerMessages.format(JSLexerMessages.INVALID_CHARACTER_IN_UNICODE_ESCAPE, c), this.getPosition());
+				value = (value << 4) | digit;
+			}
+		}
+		
+		try {
+			return new String(new int[] { value }, 0, 1);
+		} catch (IllegalArgumentException e) {
+			SourceRange range = new SourceRange(this.resolvePosition(start), this.getPosition());
+			throw new JSSyntaxException(JSLexerMessages.format(JSLexerMessages.INVALID_UNICODE_CODE_POINT, value), range, e);
+		}
+	}
+	
+	/**
+	 * Read escape sequence in for <code>u{X...XXX}</code>.
+	 * @return Decoded text
+	 */
+	protected String readExtendedUnicodeEscape() {
+		long start = this.getPositionOffset();
+		//Max unicode code point is 0x10FFFF, which fits within a 32-bit integer
+		ParsedInteger value = this.readHexDigits(1, true, false);
+		boolean valid = true;
+		if (value.length < 1) {
+			this.error(this.getPosition(), JSLexerMessages.HEX_DIGIT_EXPECTED);
+			valid = false;
+		} else if (value.longValue() > 0x10FFFF) {
+			this.error(this.getPosition(), JSLexerMessages.INVALID_UNICODE_CODE_POINT, value.longValue());
+			valid = false;
+		}
+		
+		if (!chars.hasNext()) {
+			this.errorEOF(this.getPosition(), JSLexerMessages.UNICODE_ESCAPE_EOF);
+			valid = false;
+		} else if (chars.peek() == '}') {
+			chars.skip(1);
+		} else {
+			this.error(this.getPosition(), JSLexerMessages.UNTERMINATED_UNICODE_ESCAPE);
+			valid = false;
+		}
+		
+		if (valid) {
+			try {
+				return new String(new int[] { value.intValue() }, 0, 1);
+			} catch (IllegalArgumentException e) {
+				SourceRange range = new SourceRange(this.resolvePosition(start), this.getPosition());
+				//TODO: error?
+				throw new JSSyntaxException(JSLexerMessages.format(JSLexerMessages.INVALID_UNICODE_CODE_POINT, value.longValue()), range, e);
+			}
+		}
+		
+		return "";
+	}
+	
 	protected String readEscapeSequence(char c) {
 		switch (c) {
 			case '\'':
@@ -142,85 +270,26 @@ public class JSLexer implements Supplier<Token> {
 			case '6':
 			case '7':
 				//EASCII octal escape
-				{
-					//TODO: test if lookahead exists?
-					int val = c - '0';
-					if (chars.peek() >= '0' && chars.peek() <= '7') {
-						val = (val << 3) | (chars.next() - '0');
-						if (val < 32 && chars.peek() >= '0' && chars.peek() <= '7')
-							val = (val << 3) | (chars.next() - '0');
-					}
-					return JSLexer.decodeEASCII((byte) val);
-				}
+				return this.readOctalEASCII(c);
 			case '\n':
-				this.lines.putNewline(chars.position());
+				this.markNewline(chars.position());
 				if (chars.hasNext() && chars.peek() == '\r')
 					chars.skip(1);
 				return "";
 			case '\r':
 				if (chars.hasNext() && chars.peek() == '\n') {
-					this.lines.putNewline(chars.position());
+					this.markNewline(chars.position());
 					chars.skip(1);
 				}
 				return "";
-			case 'u': {
+			case 'u':
 				//Unicode escape
 				return this.readUnicodeEscapeSequence();
-			}
-			case 'x': {
-				//EASCII hexdecimal character escape
-				if (!chars.hasNext(2))
-					throw new JSEOFException("Invalid Extended ASCII escape sequence (EOF)", this.resolvePosition(this.getPositionOffset() - 2));
-				int val;
-				try {
-					String s = chars.copyNext(2);
-					val = Integer.parseInt(s, 16);
-				} catch (NumberFormatException e) {
-					SourcePosition start = this.resolvePosition(this.getPositionOffset() - 4);
-					throw new JSSyntaxException("Invalid Extended ASCII escape sequence (\\x" + chars.copy(chars.position() - 1, 2) + ")", new SourceRange(start, this.getPosition()), e);
-				}
-				return JSLexer.decodeEASCII((byte) val);
-			}
+			case 'x':
+				return this.readHexEASCII();
 			default:
 				throw new JSSyntaxException("Invalid escape sequence: \\" + c, this.resolvePosition(this.getPositionOffset() - 2));
 		}
-	}
-	
-	/**
-	 * Read an escape sequence in the form of either {@code uXXXX} or <code>u{X...XXX}</code>.
-	 * 
-	 * It is expected that the 'u' at the start of the escape sequence has already been consumed.
-	 * 
-	 * @return character read
-	 * @see <a href="https://tc39.github.io/ecma262/#prod-UnicodeEscapeSequence">ECMAScript 262 &sect; 11.8.4</a>
-	 * @see <a href="https://mathiasbynens.be/notes/javascript-escapes">JavaScript character escape sequences · Mathias Bynens</a>
-	 */
-	protected String readUnicodeEscapeSequence() {
-		int value = 0;
-		if (chars.peek() == '{') {
-			chars.skip(1);
-			//Max unicode code point is 0x10FFFF, which fits within a 32-bit integer
-			char c = chars.next();
-			do {
-				int digit = Characters.asHexDigit(c);
-				if (c < 0)
-					throw new JSSyntaxException("Invalid character '" + c + "' in unicode code point escape sequence", this.getPosition());
-				//Overflow (value >= 0x10FFFF)
-				if ((value << 4) < value)
-					throw new JSSyntaxException("Invalid Unicode code point " + value, this.getPosition());
-				value = (value << 4) | digit;
-			} while ((c = chars.next()) != '}');
-		} else {
-			//Escape in uXXXX form
-			for (int i = 0; i < 4; i++) {
-				char c = chars.next();
-				int digit = Characters.asHexDigit(c);
-				if (digit < 0)
-					throw new JSSyntaxException("Invalid character '" + c + "' in unicode code point escape sequence", this.getPosition());
-				value = (value << 4) | digit;
-			}
-		}
-		return new String(new int[]{value}, 0, 1);
 	}
 	
 	protected TemplateTokenInfo nextTemplateLiteral() {
@@ -313,8 +382,53 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	//Numeric literals
+	protected ParsedInteger readHexDigits(int minCount, boolean greedy, boolean separators) throws JSSyntaxException {
+		boolean allowSeparator = false;
+		boolean usedSeparators = false;
+		int read = 0;
+		long result = 0;
+		while (chars.hasNext() && (read < minCount || greedy)) {
+			char lookahead = chars.peek();
+			if (separators && lookahead == '_') {
+				if (!separators)
+					throw new JSSyntaxException(JSLexerMessages.NUMERIC_SEPARATORS_DISALLOWED, this.getPosition());
+				if (!allowSeparator)
+					throw new JSSyntaxException(JSLexerMessages.CONSECUTIVE_NUMERIC_SEPARATORS, this.getPosition());
+
+				usedSeparators = true;
+				allowSeparator = false;
+				chars.skip(1);
+				continue;
+			} else if (Characters.isHexDigit(lookahead)) {
+				result = (result << 4) | Characters.asHexDigit(chars.next());
+				read++;
+			} else {
+				break;
+			}
+			allowSeparator = separators;
+		}
+		
+		return new ParsedInteger(NumericLiteralType.HEXDECIMAL, result, read, usedSeparators);
+	}
 	
-	protected long nextHexLiteral() throws JSSyntaxException {
+	protected ParsedInteger readOctalDigits() {
+		int length = 0;
+		long result = 0;
+		while (chars.hasNext()) {
+			char lookahead = chars.peek();
+			if (lookahead < '0' || '7' < lookahead) {
+				if (Characters.canStartIdentifier(lookahead) || Characters.isDecimalDigit(lookahead))
+					throw new JSSyntaxException("Unexpected character: " + lookahead, this.getPosition());
+				break;
+			}
+			result = (result << 3) | (chars.next() - '0');
+			length++;
+		}
+		
+		return new ParsedInteger(NumericLiteralType.OCTAL, result, length, false);
+	}
+	
+	protected ParsedInteger nextHexLiteral() throws JSSyntaxException {
 		//TODO: fix for BigInt
 		boolean isEmpty = true;
 		long result = 0;
@@ -326,14 +440,16 @@ public class JSLexer implements Supplier<Token> {
 				break;
 			}
 			isEmpty = false;
+			//TODO: check for overflows
 			result = (result << 4) | Characters.asHexDigit(chars.next());
 		}
 		if (isEmpty)
 			throw new JSEOFException("Unexpected EOF in hex literal", this.getPosition());
-		return result;
+		
+		return new ParsedInteger(NumericLiteralType.HEXDECIMAL, result, -1, false);//TODO: finish
 	}
 	
-	protected long nextBinaryLiteral() throws JSSyntaxException {
+	protected ParsedInteger nextBinaryLiteral() throws JSSyntaxException {
 		//TODO: fix for BigInt
 		boolean isEmpty = true;
 		long result = 0;
@@ -345,37 +461,53 @@ public class JSLexer implements Supplier<Token> {
 				break;
 			}
 			isEmpty = false;
+			//TODO: check for overflows
 			result = (result << 1) | (chars.next() - '0');
 		}
 		if (isEmpty)
-			throw new JSEOFException("Unexpected EOF in hex literal", this.getPosition());
-		return result;
+			throw new JSEOFException("Unexpected EOF in binary literal", this.getPosition());
+		return new ParsedInteger(NumericLiteralType.BINARY, result, -1, false);//TODO: finish
 	}
 	
-	protected long nextOctalLiteral() throws JSSyntaxException {
+	protected ParsedInteger nextOctalLiteral() throws JSSyntaxException {
 		//TODO: fix for BigInt
-		boolean isEmpty = true;
+		int length = 0;
 		long result = 0;
 		while (chars.hasNext()) {
 			char lookahead = chars.peek();
 			if (lookahead < '0' || '7' < lookahead) {
-				if (Characters.canStartIdentifier(lookahead) || Characters.isDecimalDigit(lookahead) || isEmpty)
+				if (Characters.canStartIdentifier(lookahead) || Characters.isDecimalDigit(lookahead))
 					throw new JSSyntaxException("Unexpected character: " + lookahead, this.getPosition());
 				break;
 			}
-			isEmpty = false;
 			result = (result << 3) | (chars.next() - '0');
+			length++;
 		}
-		if (isEmpty)
+		if (length == 0)
 			throw new JSEOFException("Unexpected EOF in hex literal", this.getPosition());
-		return result;
+		return new ParsedInteger(NumericLiteralType.OCTAL, result, -1, false);//TODO: finish
 	}
 	
-	protected Number nextDecimalLiteral() throws JSSyntaxException {
+	protected ParsedInteger readDecimalDigits() {
+		int length = 0;
+		long result = 0;
+		//TODO: check for overflow
+		while (chars.hasNext() && Characters.isDecimalDigit(chars.peek())) {
+			result = result * 10 + (chars.next() - '0');
+			length++;
+		}
+		return new ParsedInteger(NumericLiteralType.DECIMAL, result, length, false);
+	}
+	
+	protected ParsedInteger nextDecimalLiteral() throws JSSyntaxException {
+		this.readDecimalDigits();
+//		while (chars.hasNext() && Characters.isDecimalDigit(chars.peek()))
+//			iPart = Math.addExact(Math.multiplyExact(iPart, 10), chars.next() - '0');
+		
 		return null;
 	}
 	
-	public Number nextNumericLiteral() throws JSSyntaxException {
+	public ParsedNumber nextNumericLiteral() throws JSSyntaxException {
 		//TODO: fix for BigInt
 		NumericLiteralType type = NumericLiteralType.DECIMAL;
 		
@@ -401,7 +533,7 @@ public class JSLexer implements Supplier<Token> {
 			if (!chars.hasNext(2)) {
 				//Is '0'
 				chars.skip(1);
-				return 0;
+				return new ParsedInteger(NumericLiteralType.DECIMAL, 0, 1, false);
 			}
 			
 			switch (chars.peek(2)) {
@@ -460,9 +592,6 @@ public class JSLexer implements Supplier<Token> {
 			boolean isValid = false;
 			if (c >= '0') {
 				switch (type) {
-					case BINARY:
-						isValid = c <= '1';
-						break;
 					case OCTAL_IMPLICIT:
 						if (c > '7' && c <= '9') {
 							//Upgrade to decimal if possible
@@ -487,9 +616,6 @@ public class JSLexer implements Supplier<Token> {
 						//$FALL-THROUGH$
 					case OCTAL:
 						isValid = c <= '7';
-						break;
-					case HEXDECIMAL:
-						isValid = (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c <= '9');
 						break;
 					case DECIMAL:
 						if (isValid = (c <= '9'))
@@ -518,189 +644,31 @@ public class JSLexer implements Supplier<Token> {
 		//Build the string for Java to parse (It might be slightly faster to calculate the value of the digit while parsing,
 		//but it causes problems with OCTAL_IMPLICIT upgrades.
 		String nmb = (isPositive ? "" : "-") + chars.copyFromMark();
+		int length = nmb.length();
 		
 		//Return number. Tries to cast down to the smallest size that it can losslessly
 		if (hasDecimal || hasExponent) {
 			double result = Double.parseDouble(nmb);
 			//TODO reorder return options
-			long lResult = (long) result;
-			if (result > Long.MIN_VALUE && result < Long.MAX_VALUE && lResult == result) {
-				if (lResult > Integer.MIN_VALUE && lResult < Integer.MAX_VALUE)
-					return (int) lResult;
-				return lResult;
-			}
-			float fResult = (float) result;
-			if (result == fResult)
-				return fResult;
-			return result;
+			return new ParsedDouble(type, result, length, false);
 		}
 		long result = Long.parseLong(nmb, type.getExponent());
-		if (result > Integer.MIN_VALUE && result < Integer.MAX_VALUE)
-			//Downgrade to an int if possible
-			return (Integer) (int) result;
-		return (Long) result;
+		return new ParsedInteger(type, result, length, false);
 	}
 	
-	public JSOperator peekOperator() {
-		char c = chars.peek(),
-				d = chars.hasNext(2) ? chars.peek(2) : '\0',
-				e = chars.hasNext(3) ? chars.peek(3) : '\0';
-		if (d == '=') {
-			//Switch through assignment types
-			switch (c) {
-				case '+':
-					return JSOperator.ADDITION_ASSIGNMENT;
-				case '-':
-					return JSOperator.SUBTRACTION_ASSIGNMENT;
-				case '*':
-					return JSOperator.MULTIPLICATION_ASSIGNMENT;
-				case '/':
-					return JSOperator.DIVISION_ASSIGNMENT;
-				case '%':
-					return JSOperator.REMAINDER_ASSIGNMENT;
-				case '&':
-					return JSOperator.BITWISE_AND_ASSIGNMENT;
-				case '|':
-					return JSOperator.BITWISE_OR_ASSIGNMENT;
-				case '^':
-					return JSOperator.BITWISE_XOR_ASSIGNMENT;
-				case '<':
-					return JSOperator.LESS_THAN_EQUAL;
-				case '>':
-					return JSOperator.GREATER_THAN_EQUAL;
-				case '!'://!=
-					if (e == '=')//!==
-						return JSOperator.STRICT_NOT_EQUAL;
-					return JSOperator.NOT_EQUAL;
-				case '='://==
-					if (e == '=')//===
-						return JSOperator.STRICT_EQUAL;
-					return JSOperator.EQUAL;
-				default:
-					break;
-			}
-		}
-		switch (c) {
-			case '+':
-				if (d == '+')
-					return JSOperator.INCREMENT;
-				return JSOperator.PLUS;
-			case '-':
-				if (d == '-')
-					return JSOperator.DECREMENT;
-				return JSOperator.MINUS;
-			case '*':
-				if (d == '*') {
-					if (e == '=')
-						return JSOperator.EXPONENTIATION_ASSIGNMENT;
-					return JSOperator.EXPONENTIATION;
-				}
-				return JSOperator.ASTERISK;
-			case '/':
-				return JSOperator.DIVISION;
-			case '%':
-				return JSOperator.REMAINDER;
-			case '<':
-				if (d == '<') {
-					if (e == '=')
-						return JSOperator.LEFT_SHIFT_ASSIGNMENT;
-					return JSOperator.LEFT_SHIFT;
-				}
-				return JSOperator.LESS_THAN;
-			case '>':// '>'
-				if (d == '>') {// '>>'
-					// '>=' already handled
-					if (e == '>') {// '>>='
-						if (chars.hasNext(4) && chars.peek(4) == '=')// '>>>='
-							return JSOperator.UNSIGNED_RIGHT_SHIFT_ASSIGNMENT;
-						return JSOperator.UNSIGNED_RIGHT_SHIFT;
-					} else if (e == '=') {
-						return JSOperator.RIGHT_SHIFT_ASSIGNMENT;
-					}
-					return JSOperator.RIGHT_SHIFT;
-				}
-				return JSOperator.GREATER_THAN;
-			case '=':
-				if (d == '>')
-					return JSOperator.LAMBDA;
-				return JSOperator.ASSIGNMENT;
-			case '&':
-				if (d == '&')
-					return JSOperator.LOGICAL_AND;
-				return JSOperator.AMPERSAND;
-			case '^':
-				return JSOperator.BITWISE_XOR;
-			case '|':
-				if (d == '|')
-					return JSOperator.LOGICAL_OR;
-				return JSOperator.VBAR;
-			case '!':
-				return JSOperator.LOGICAL_NOT;
-			case '~':
-				return JSOperator.BITWISE_NOT;
-			case '(':
-				return JSOperator.LEFT_PARENTHESIS;
-			case ')':
-				return JSOperator.RIGHT_PARENTHESIS;
-			case '[':
-				return JSOperator.LEFT_BRACKET;
-			case ']':
-				return JSOperator.RIGHT_BRACKET;
-			case '{':
-				return JSOperator.LEFT_BRACE;
-			case '}':
-				return JSOperator.RIGHT_BRACE;
-			case ',':
-				return JSOperator.COMMA;
-			case '?':
-				return JSOperator.QUESTION_MARK;
-			case ':':
-				return JSOperator.COLON;
-			case '.':
-				if (d == '.' && e == '.')
-					return JSOperator.SPREAD;
-				return JSOperator.PERIOD;
-			default:
-				return null;
-		}
-	}
-	
-	public Token expectKind(TokenKind kind) {
+	public Token expect(JSSyntaxKind kind) {
 		Token t = this.nextToken();
 		if (t.getKind() != kind)
 			throw new JSUnexpectedTokenException(t, kind);
 		return t;
 	}
 	
-	public Token expect(Object value) {
+	public Token expectAny(JSSyntaxKind first, JSSyntaxKind...kinds) {
 		Token t = this.nextToken();
-		if (!Objects.equals(t.getValue(), value))
-			throw new JSUnexpectedTokenException(t, value);
+		if (!t.matchesAny(first, kinds))
+			//TODO: fix type
+			throw new JSUnexpectedTokenException(t, kinds);
 		return t;
-	}
-	
-	public Token expect(TokenKind kind, Object value) {
-		Token t = this.nextToken();
-		if (!Objects.equals(t.getValue(), value))
-			throw new JSUnexpectedTokenException(t, value);
-		if (t.getKind() != kind)
-			throw new JSUnexpectedTokenException(t, kind);
-		return t;
-	}
-	
-	public Token expectKeyword(JSKeyword keyword) {
-		return this.expect(TokenKind.KEYWORD, keyword);
-	}
-	
-	public Token expectOperator(JSOperator operator) {
-		return this.expect(TokenKind.OPERATOR, operator);
-	}
-	
-	public JSOperator nextOperator() {
-		JSOperator result = peekOperator();
-		if (result != null)
-			chars.skip(result.length());
-		return result;
 	}
 	
 	public String nextIdentifier() {
@@ -815,20 +783,21 @@ public class JSLexer implements Supplier<Token> {
 		return sb.toString();
 	}
 	
-	public Token finishRegExpLiteral(Token start) {
+	public RegExpToken finishRegExpLiteral(Token start) {
 		Objects.requireNonNull(start);
-		if (start.getValue() != JSOperator.DIVISION && start.getValue() != JSOperator.DIVISION_ASSIGNMENT)
+		if (!start.matches(JSSyntaxKind.DIVISION) && !start.matches(JSSyntaxKind.DIVISION_ASSIGNMENT))
 			throw new JSSyntaxException("Regular expression must start with a slash", start.getRange());
 		
 		this.invalidateLookaheads(start.getEnd().getOffset());
 		
-		long intermediateStart = this.getPositionOffset();
-		String body = scanRegExpBody(start.text);
+		chars.mark();
+		
+		String body = scanRegExpBody(start.text.toString());
 		String flags = scanRegExpFlags();
-		RegExpTokenInfo info = new RegExpTokenInfo(body, flags);
 		
 		SourceRange range = new SourceRange(start.getStart(), this.getPosition());
-		return new Token(start.flags, range, TokenKind.REGEX_LITERAL, start.text + chars.copy(intermediateStart, chars.position() - intermediateStart), info);
+		String text = start.text + chars.copyFromMark();
+		return new RegExpToken(start.flags, range, text, body, flags);
 	}
 	
 	public String nextComment(final boolean singleLine) {
@@ -858,11 +827,378 @@ public class JSLexer implements Supplier<Token> {
 		return sb.toString();
 	}
 	
+	protected Token finishToken(long start, int flags, JSSyntaxKind kind) {
+		SourceRange range = new SourceRange(this.resolvePosition(start + 1), this.getPosition());
+		String text = chars.copyFromMark();
+		return new Token(flags, range, kind, text);
+	}
+	
+	protected Token finishStringLiteralToken(long start, int flags) {
+		String value = this.nextStringLiteral();
+		SourceRange range = new SourceRange(this.resolvePosition(start + 1), this.getPosition());
+		String text = chars.copyFromMark();
+		return new StringLiteralToken(flags, range, text, value);
+	}
+	
+	protected Token finishTemplateToken(long start, int flags) {
+		TemplateTokenInfo value = this.nextTemplateLiteral();
+		//TODO: finish
+		throw new UnsupportedOperationException();
+	}
+	
+	protected Token finishIdentifierToken(long start, int flags, String name) {
+		SourceRange range = new SourceRange(this.resolvePosition(start + 1), this.getPosition());
+		String text = chars.copyFromMark();
+		return new IdentifierToken(flags, range, text, name.intern());
+	}
+	
+	protected Token finishNumericLiteralToken(long start, int flags) {
+		ParsedNumber value = this.nextNumericLiteral();
+		
+		SourceRange range = new SourceRange(this.resolvePosition(start + 1), this.getPosition());
+		String text = chars.copyFromMark();
+		
+		return new NumericLiteralToken(flags, range, text, value);
+	}
+	
+	protected boolean isSingleLineCommentStart() {
+		return chars.hasNext(2) && chars.peek() == '/' && chars.peek(2) == '/';
+	}
+	
+	protected boolean isMultiLineCommentStart() {
+		return chars.hasNext(2) && chars.peek() == '/' && chars.peek(2) == '*';
+	}
+	
+	/**
+	 * Get hint for reading next token. For the most part, the
+	 * {@link JSSyntaxKind} returned from this will indicate the next token
+	 * read, except for the following cases:
+	 * <dl>
+	 * 	<dt>{@link JSSyntaxKind#STRING_LITERAL}</dt>
+	 * 		<dd>A string literal should be completed</dd>
+	 * 	<dt>{@link JSSyntaxKind#NUMERIC_LITERAL}</dt>
+	 * 		<dd>A numeric/bigint literal should be completed</dd>
+	 * 	<dt>{@link JSSyntaxKind#TEMPLATE_LITERAL}</dt>
+	 * 		<dd>A template literal should be started</dd>
+	 * 	<dt>{@link JSSyntaxKind#IDENTIFIER}</dt>
+	 * 		<dd>An identifier should be attempted (may fail if it starts with an escape). This identifier may be a keyword.</dd>
+	 * 	<dt>{@link JSSyntaxKind#COMMENT}</dt>
+	 * 		<dd>A single/multi-line comment should be consumed.</dd>
+	 * </dl>
+	 * @return Hint for reading next token.
+	 */
+	protected JSSyntaxKind getTokenHint() {
+		char c = chars.peek();
+		char d = chars.peekSafe(2);
+		switch (c) {
+			case '"':
+			case '\'':
+				return JSSyntaxKind.STRING_LITERAL;
+			case '`':
+				return JSSyntaxKind.TEMPLATE_LITERAL;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				return JSSyntaxKind.NUMERIC_LITERAL;
+			// Simple punctuation
+			case ':':
+				return JSSyntaxKind.COLON;
+			case ';':
+				return JSSyntaxKind.SEMICOLON;
+			case '?':
+				return JSSyntaxKind.QUESTION_MARK;
+			case '[':
+				return JSSyntaxKind.LEFT_BRACKET;
+			case ']':
+				return JSSyntaxKind.RIGHT_BRACKET;
+			case '(':
+				return JSSyntaxKind.LEFT_PARENTHESIS;
+			case ')':
+				return JSSyntaxKind.RIGHT_PARENTHESIS;
+			case '{':
+				return JSSyntaxKind.LEFT_BRACE;
+			case '}':
+				//TODO: template head?
+				return JSSyntaxKind.RIGHT_BRACE;
+			case ',':
+				return JSSyntaxKind.COMMA;
+			case '~':
+				return JSSyntaxKind.BITWISE_NOT;
+			case '@':
+				return JSSyntaxKind.AT_SYMBOL;
+			// 2 option punctuation (assignment variants)
+			case '+':
+				return (d == '=') ? JSSyntaxKind.ADDITION_ASSIGNMENT : JSSyntaxKind.PLUS;
+			case '-':
+				return (d == '=') ? JSSyntaxKind.BITWISE_OR_ASSIGNMENT : JSSyntaxKind.VBAR;
+			case '%':
+				return (d == '=') ? JSSyntaxKind.REMAINDER_ASSIGNMENT : JSSyntaxKind.REMAINDER;
+			case '^':
+				return (d == '=') ? JSSyntaxKind.BITWISE_XOR_ASSIGNMENT : JSSyntaxKind.BITWISE_XOR;
+			// 3+ option punctuation
+			case '.':
+				if (Characters.isDecimalDigit(d)) // Fractional numeric literal
+					return JSSyntaxKind.NUMERIC_LITERAL;
+				else if (d == '.' && chars.peekSafe(3) == '.') // '...'
+					return JSSyntaxKind.SPREAD;
+				else // '.'
+					return JSSyntaxKind.PERIOD;
+			case '/':
+				if (d == '/') // Single-line comment start '//'
+					return JSSyntaxKind.COMMENT;
+				else if (d == '*') // Multi-line comment start '/*'
+					return JSSyntaxKind.COMMENT;
+				else if (d == '=') // '/='
+					return JSSyntaxKind.DIVISION_ASSIGNMENT;
+				else // '/'
+					return JSSyntaxKind.DIVISION;
+			case '!':
+				if (d == '=') { // '!='
+					if (chars.peekSafe(3) == '=') // '!=='
+						return JSSyntaxKind.STRICT_NOT_EQUAL;
+					return JSSyntaxKind.NOT_EQUAL;
+				} else { // '!'
+					return JSSyntaxKind.LOGICAL_NOT;
+				}
+			case '=':
+				if (d == '>') // '=>'
+					return JSSyntaxKind.LAMBDA;
+				else if (d != '=') // '='
+					return JSSyntaxKind.ASSIGNMENT;
+				else if (chars.peekSafe(3) != '=') // '=='
+					return JSSyntaxKind.EQUAL;
+				else // '==='
+					return JSSyntaxKind.STRICT_EQUAL;
+			case '<':
+				//TODO: HTML-style comment start '<!--'
+				//TODO: Git merge tokens '<<<<<<<'
+				if (d == '=') // '<='
+					return JSSyntaxKind.LESS_THAN_EQUAL;
+				else if (d != '<') // '<'
+					return JSSyntaxKind.LESS_THAN;
+				else if (chars.peekSafe(3) != '=') // '<<'
+					return JSSyntaxKind.LEFT_SHIFT;
+				else // '<<='
+					return JSSyntaxKind.LEFT_SHIFT_ASSIGNMENT;
+			case '>': {
+				//TODO: Git merge tokens '>>>>>>>'
+				if (d == '=') // '>='
+					return JSSyntaxKind.GREATER_THAN_EQUAL;
+				else if (d != '>') // '>'
+					return JSSyntaxKind.GREATER_THAN;
+				
+				char e = chars.peekSafe(3);
+				if (e == '=') // '>>='
+					return JSSyntaxKind.RIGHT_SHIFT_ASSIGNMENT;
+				else if (e != '>') // '>>'
+					return JSSyntaxKind.RIGHT_SHIFT;
+				
+				// '>>>' / '>>>='
+				if (chars.peekSafe(4) == '=') // '>>>='
+					return JSSyntaxKind.UNSIGNED_RIGHT_SHIFT_ASSIGNMENT;
+				else // '>>>'
+					return JSSyntaxKind.UNSIGNED_RIGHT_SHIFT;
+			}
+			case '&':
+				if (d == '&') // '&&'
+					return JSSyntaxKind.LOGICAL_AND;
+				else if (d == '=') // '&='
+					return JSSyntaxKind.BITWISE_AND_ASSIGNMENT;
+				else // '&'
+					return JSSyntaxKind.AMPERSAND;
+			case '|':
+				if (d == '|') // '||'
+					return JSSyntaxKind.LOGICAL_OR;
+				else if (d == '=') // '|='
+					return JSSyntaxKind.BITWISE_OR_ASSIGNMENT;
+				else // '|'
+					return JSSyntaxKind.VBAR;
+			case '*':
+				if (d == '=') // '*='
+					return JSSyntaxKind.MULTIPLICATION_ASSIGNMENT;
+				else if (d != '*') // '*'
+					return JSSyntaxKind.ASTERISK;
+				return (chars.peekSafe(3) == '=') ? JSSyntaxKind.EXPONENTIATION_ASSIGNMENT : JSSyntaxKind.EXPONENTIATION;
+			case '\\':
+				// Assume escape that starts identifier
+				return JSSyntaxKind.IDENTIFIER;
+			default:
+				if (Characters.canStartIdentifier(c))
+					return JSSyntaxKind.IDENTIFIER;
+				//TODO: other cases?
+				return null;
+		}
+	}
+	
+	protected JSSyntaxKind lookupKeyword(String name) {
+		switch (name) {
+			case "abstract":
+				return JSSyntaxKind.ABSTRACT;
+			case "as":
+				return JSSyntaxKind.AS;
+			case "async":
+				return JSSyntaxKind.ASYNC;
+			case "await":
+				return JSSyntaxKind.AWAIT;
+			case "bigint":
+				break;//TODO
+			case "boolean":
+				break;//TODO
+			case "break":
+				return JSSyntaxKind.BREAK;
+			case "case":
+				return JSSyntaxKind.CASE;
+			case "catch":
+				return JSSyntaxKind.CATCH;
+			case "class":
+				return JSSyntaxKind.CLASS;
+			case "continue":
+				return JSSyntaxKind.CONTINUE;
+			case "const":
+				return JSSyntaxKind.CONST;
+			case "constructor":
+				return JSSyntaxKind.CONSTRUCTOR;
+			case "debugger":
+				return JSSyntaxKind.DEBUGGER;
+			case "declare":
+				return JSSyntaxKind.DECLARE;
+			case "default":
+				return JSSyntaxKind.DEFAULT;
+			case "delete":
+				return JSSyntaxKind.DELETE;
+			case "do":
+				return JSSyntaxKind.DO;
+			case "else":
+				return JSSyntaxKind.ELSE;
+			case "enum":
+				return JSSyntaxKind.ENUM;
+			case "export":
+				return JSSyntaxKind.EXPORT;
+			case "extends":
+				return JSSyntaxKind.EXTENDS;
+			case "false":
+				return JSSyntaxKind.FALSE;
+			case "finally":
+				return JSSyntaxKind.FINALLY;
+			case "for":
+				return JSSyntaxKind.FOR;
+			case "from":
+				return JSSyntaxKind.FROM;
+			case "function":
+				return JSSyntaxKind.FUNCTION;
+			case "get":
+				return JSSyntaxKind.GET;
+			case "global":
+				break;//TODO
+			case "if":
+				return JSSyntaxKind.IF;
+			case "implements":
+				return JSSyntaxKind.IMPLEMENTS;
+			case "import":
+				return JSSyntaxKind.IMPORT;
+			case "in":
+				return JSSyntaxKind.IN;
+			case "infer":
+				break;//TODO
+			case "instanceof":
+				return JSSyntaxKind.INSTANCEOF;
+			case "interface":
+				return JSSyntaxKind.INTERFACE;
+			case "is":
+				break;//TODO
+			case "keyof":
+				break;//TODO
+			case "let":
+				return JSSyntaxKind.LET;
+			case "module":
+				break;//TODO
+			case "namespace":
+				break;//TODO
+			case "never":
+				break;//TODO
+			case "new":
+				return JSSyntaxKind.NEW;
+			case "null":
+				return JSSyntaxKind.NULL;
+			case "number":
+				break;//TODO
+			case "object":
+				break;//TODO
+			case "of":
+				return JSSyntaxKind.OF;
+			case "package":
+				return JSSyntaxKind.PACKAGE;
+			case "private":
+				return JSSyntaxKind.PRIVATE;
+			case "protected":
+				return JSSyntaxKind.PROTECTED;
+			case "public":
+				return JSSyntaxKind.PUBLIC;
+			case "readonly":
+				return JSSyntaxKind.READONLY;
+			case "require":
+				break;//TODO
+			case "return":
+				return JSSyntaxKind.RETURN;
+			case "set":
+				return JSSyntaxKind.SET;
+			case "static":
+				return JSSyntaxKind.STATIC;
+			case "string":
+				break;//TODO
+			case "super":
+				return JSSyntaxKind.SUPER;
+			case "switch":
+				return JSSyntaxKind.SWITCH;
+			case "symbol":
+				break;//TODO
+			case "this":
+				return JSSyntaxKind.THIS;
+			case "throw":
+				return JSSyntaxKind.THROW;
+			case "true":
+				return JSSyntaxKind.TRUE;
+			case "try":
+				return JSSyntaxKind.TRY;
+			case "type":
+				return JSSyntaxKind.TYPE;
+			case "typeof":
+				return JSSyntaxKind.TYPEOF;
+			case "undefined":
+				break;//TODO
+			case "unique":
+				break;//TODO
+			case "unknown":
+				break;//TODO
+			case "var":
+				return JSSyntaxKind.VAR;
+			case "void":
+				return JSSyntaxKind.VOID;
+			case "while":
+				return JSSyntaxKind.WHILE;
+			case "with":
+				return JSSyntaxKind.WITH;
+			case "yield":
+				return JSSyntaxKind.YIELD;
+			default:
+				break;
+		}
+		return null;
+	}
+	
 	protected Token readToken() {
 		//Skip whitespace until token
+		final long scanStart = Math.max(this.getPositionOffset(), -1);
 		int flags = 0;
 		while (chars.hasNext() && Characters.isJsWhitespace(chars.peek())) {
-			if (chars.next() == '\n') {
+			if (Characters.isLineBreak(chars.next())) {
 				flags |= Token.FLAG_PRECEDEING_NEWLINE;
 				//TODO: does this cause problems if we're backtracking?
 				this.lines.putNewline(chars.position());
@@ -872,77 +1208,69 @@ public class JSLexer implements Supplier<Token> {
 		//Special EOF token
 		if (isEOF()) {
 			SourceRange range = new SourceRange(this.getPosition(), this.getPosition());
-			Token result = new Token(flags, range, TokenKind.SPECIAL, null, JSSpecialGroup.EOF);
+			Token result = new Token(flags, range, JSSyntaxKind.END_OF_FILE, null);
 			if (this.lookahead == null)
 				this.lookahead = result;
 			return result;
 		}
 		
-		final long start = Math.max(chars.position(), -1);
-		chars.mark(); // Mark start (so we can copy the text later)
-		char c = chars.peek();
-		Object value = null;
-		TokenKind kind = null;
-		//TODO clean up (possibly with switch statement)
-		//Drop through a various selection of possible results
-		//Check if it's a string literal
-		if (c == '"' || c == '\'') {
-			value = nextStringLiteral();
-			kind = TokenKind.STRING_LITERAL;
-		} else if (c == '`' || (c == '}' && this.templateStack.getSize() != 0 && this.templateStack.peek())) {
-			value = nextTemplateLiteral();
-			kind = TokenKind.TEMPLATE_LITERAL;
-		//Check if it's a numeric literal (the first letter of all numbers must be /[\.0-9]/)
-		} else if (Characters.isDecimalDigit(c) || (c == '.' && chars.hasNext(2) && Characters.isDecimalDigit(chars.peek(2)))) {
-			value = nextNumericLiteral();
-			kind = TokenKind.NUMERIC_LITERAL;
-
-		} else if (c == ';') {
-			kind = TokenKind.SPECIAL;
-			value = JSSpecialGroup.SEMICOLON;
-			chars.next();
-		} else if ((c == '/' && chars.hasNext(2) && (chars.peek(2) == '/' || chars.peek(2) == '*')) ||
-				(c == '<' && chars.hasNext(4) && chars.peek(2) == '!' && chars.peek(3) == '-' && chars.peek(4) == '-')) {
-			kind = TokenKind.COMMENT;
-			value = this.nextComment(chars.peek(2) != '*');
-			return nextToken();
-		} else if ((value = nextOperator()) != null) {
-			kind = TokenKind.OPERATOR;
-			//TODO: how resistant is templateStack to mark-reset stuff?
-			if (value == JSOperator.LEFT_BRACE)
-				templateStack.push(false);
-			else if (value == JSOperator.RIGHT_BRACE && templateStack.getSize() > 0)
-				templateStack.pop();
-		} else {
-			//It's probably an identifier
-			String identifierName = this.nextIdentifier();
-			if (identifierName == null) {
-				//Couldn't even parse an identifier
-				throw new JSSyntaxException("Illegal syntax", this.resolvePosition(start));
-			} else if (identifierName.equals("true") || identifierName.equals("false")) {
-				//Boolean literal
-				kind = TokenKind.BOOLEAN_LITERAL;
-				value = identifierName.equals("true");
-			} else if (identifierName.equals("null")) {
-				//Null literal
-				kind = TokenKind.NULL_LITERAL;
-				value = null;
-			} else {
-				//An identifier was parsed, and it wasn't a boolean literal
-				//Check if it's a keyword
-				JSKeyword keyword = JSKeyword.lookup(identifierName);
-				if (keyword != null) {
-					value = keyword;
-					kind = TokenKind.KEYWORD;
-				} else {
-					value = identifierName;
-					kind = TokenKind.IDENTIFIER;
+		while (true) {
+			if (this.isEOF()) {
+				SourceRange range = new SourceRange(this.getPosition(), this.getPosition());
+				Token result = new Token(flags, range, JSSyntaxKind.END_OF_FILE, null);
+				if (this.lookahead == null)
+					this.lookahead = result;
+				return result;
+			}
+			
+			if (Characters.isJsWhitespace(chars.peek())) {
+				if (Characters.isLineBreak(chars.next())) {
+					flags |= Token.FLAG_PRECEDEING_NEWLINE;
+					//TODO: does this cause problems if we're backtracking?
+					//TODO: Only one newline for '\r\n'
+					this.lines.putNewline(chars.position());
 				}
+				continue;
+			}
+
+			chars.mark();
+			long start = Math.max(this.getPositionOffset(), -1);
+			JSSyntaxKind kind = this.getTokenHint();
+			if (kind == null) {
+				//TODO: handle?
+				Objects.requireNonNull(kind);
+			}
+			
+			switch (kind) {
+				case NUMERIC_LITERAL:
+					return this.finishNumericLiteralToken(start, flags);
+				case STRING_LITERAL:
+					return this.finishStringLiteralToken(start, flags);
+				case TEMPLATE_LITERAL:
+					return this.finishTemplateToken(start, flags);
+				case IDENTIFIER:
+					String name = this.nextIdentifier();
+					if (name == null) {
+						//Couldn't even parse an identifier
+						throw new JSSyntaxException("Illegal syntax", this.resolvePosition(start));
+					}
+					kind = this.lookupKeyword(name);
+					if (kind != null)
+						return this.finishToken(start, flags, kind);
+					return this.finishIdentifierToken(start, flags, name);
+				case COMMENT:
+					//TODO: track comments
+					this.nextComment(chars.peek(2) != '*');
+					this.unmark();
+					continue;
+				default:
+					if (kind.length() < 0)
+						//TODO: better exception type
+						throw new IllegalStateException();
+					chars.skip(kind.length());
+					return this.finishToken(start, flags, kind);
 			}
 		}
-		
-		SourceRange range = new SourceRange(this.resolvePosition(start + 1), this.getPosition());
-		return new Token(flags, range, kind, chars.copyFromMark(), value);
 	}
 	
 	public Token nextToken() {
@@ -950,7 +1278,7 @@ public class JSLexer implements Supplier<Token> {
 		if (this.lookahead != null) {
 			Token result = this.lookahead;
 			//EOF token is sticky
-			if (!result.matches(TokenKind.SPECIAL, JSSpecialGroup.EOF))
+			if (!result.matches(JSSyntaxKind.END_OF_FILE))
 				skip(result);
 			return result;
 		}
@@ -960,24 +1288,21 @@ public class JSLexer implements Supplier<Token> {
 	/**
 	 * Take & return next token if it matches the provided kind and value.
 	 * @param kind
-	 * @param value
 	 * @return next token if it matches, else null
 	 */
-	public Token nextTokenIf(TokenKind kind, Object value) {
+	public Token nextTokenIf(JSSyntaxKind kind) {
 		Token lookahead = peek();
-		if (lookahead.matches(kind, value)) {
+		if (lookahead.getKind() == kind) {
 			skip(lookahead);
 			return lookahead;
 		}
 		return null;
 	}
 	
-	public Token nextTokenIf(TokenKind kind) {
+	public Token nextTokenIfAny(JSSyntaxKind first, JSSyntaxKind...rest) {
 		Token lookahead = peek();
-		if (lookahead.getKind() == kind) {
-			skip(lookahead);
-			return lookahead;
-		}
+		if (lookahead.matchesAny(first, rest))
+			return this.skip(lookahead);
 		return null;
 	}
 	
@@ -990,15 +1315,19 @@ public class JSLexer implements Supplier<Token> {
 		return null;
 	}
 	
+
 	/**
 	 * Take the next token iff it matches the provided kind & value. If it matches, consume it
 	 * @param kind
-	 * @param value
 	 * @return if the next token matches
-	 * @see #nextTokenIf(TokenKind, Object)
+	 * @see #nextTokenIf(JSSyntaxKind)
 	 */
-	public boolean nextTokenIs(TokenKind kind, Object value) {
-		return nextTokenIf(kind, value) != null;
+	public boolean nextTokenIs(JSSyntaxKind kind) {
+		return this.nextTokenIf(kind) != null;
+	}
+	
+	public boolean nextTokenIsAny(JSSyntaxKind first, JSSyntaxKind...rest) {
+		return this.nextTokenIfAny(first, rest) != null;
 	}
 	
 	public Token peek() {
@@ -1018,7 +1347,7 @@ public class JSLexer implements Supplier<Token> {
 		if (this.lookaheads.size() < ahead) {
 			// Get last-consumed offset
 			Token last = this.lookaheads.isEmpty() ? this.lookahead : this.lookaheads.getLast();
-			if (last.matches(TokenKind.SPECIAL, JSSpecialGroup.EOF))// EOF is sticky
+			if (last.matches(JSSyntaxKind.END_OF_FILE))// EOF is sticky
 				return last;
 			
 			chars.mark();
@@ -1033,7 +1362,7 @@ public class JSLexer implements Supplier<Token> {
 	public Token skip(Token token) {
 		if (token != this.lookahead)
 			throw new IllegalArgumentException("Skipped token " + token + " is not lookahead");
-		if (token.matches(TokenKind.SPECIAL, JSSpecialGroup.EOF))
+		if (token.matches(JSSyntaxKind.END_OF_FILE))
 			throw new IllegalStateException("Cannot skip EOF token " + token);
 		
 		this.lookahead = this.lookaheads.isEmpty() ? null : this.lookaheads.removeFirst();
@@ -1058,41 +1387,6 @@ public class JSLexer implements Supplier<Token> {
 	@Override
 	public Token get() {
 		return nextToken();
-	}
-	
-	public static class RegExpTokenInfo {
-		public final String body;
-		public final String flags;
-		
-		RegExpTokenInfo(String body, String flags) {
-			this.body = body;
-			this.flags = flags;
-		}
-		
-		@Override
-		public int hashCode() {
-			return Objects.hash(this.body, this.flags);
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if (this == other)
-				return true;
-			if (other == null || !(other instanceof RegExpTokenInfo))
-				return false;
-			
-			RegExpTokenInfo o = (RegExpTokenInfo) other;
-			return Objects.equals(this.body, o.body) && Objects.equals(this.flags, o.flags);
-		}
-		
-		@Override
-		public String toString() {
-			return String.format(
-					"%s{body=\"%s\",flags=\"%s\"}",
-					this.getClass().getSimpleName(),
-					this.body,
-					this.flags);
-		}
 	}
 	
 	public static class TemplateTokenInfo {
