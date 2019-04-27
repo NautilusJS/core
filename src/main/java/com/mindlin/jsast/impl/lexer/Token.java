@@ -82,7 +82,7 @@ public class Token {
 		return false;
 	}
 
-	public Token reinterpretAsIdentifier() {
+	public IdentifierToken reinterpretAsIdentifier() {
 		String name = this.getKind().getText();
 		if (name == null)
 			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
@@ -132,7 +132,7 @@ public class Token {
 		}
 		
 		@Override
-		public Token reinterpretAsIdentifier() {
+		public IdentifierToken reinterpretAsIdentifier() {
 			return this;
 		}
 		
@@ -150,6 +150,11 @@ public class Token {
 		public String getValue() {
 			return this.value;
 		}
+		
+		@Override
+		public IdentifierToken reinterpretAsIdentifier() {
+			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
+		}
 	}
 	
 	public static class NumericLiteralToken extends Token {
@@ -163,6 +168,11 @@ public class Token {
 		@Override
 		public Number getValue() {
 			return this.value;
+		}
+		
+		@Override
+		public IdentifierToken reinterpretAsIdentifier() {
+			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
 		}
 	}
 	
@@ -185,7 +195,7 @@ public class Token {
 		}
 		
 		@Override
-		public Token reinterpretAsIdentifier() {
+		public IdentifierToken reinterpretAsIdentifier() {
 			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
 		}
 	}
@@ -203,7 +213,7 @@ public class Token {
 		}
 		
 		@Override
-		public Token reinterpretAsIdentifier() {
+		public IdentifierToken reinterpretAsIdentifier() {
 			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
 		}
 
