@@ -87,7 +87,6 @@ public interface CharacterStream {
 
 	String copyNext(long len);
 
-	String copy(long start, long len);
 	
 	String copyFromMark();
 }
