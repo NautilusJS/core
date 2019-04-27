@@ -1,72 +1,97 @@
 package com.mindlin.jsast.impl.util;
 
+import java.util.Arrays;
+
 public final class Characters {
-	public static final char NULL = '\0',
-		SOH = '\u0001',
-		STX = '\u0002',
-		ETX = '\u0003',
-		EOT = '\u0004',
-		ENQ = '\u0005',
-		ACK = '\u0006',
-		BEL = '\u0007',
-		BS  = '\u0008',
-		TAB = '\u0009',
-		LF  = '\n',
-		VT  = '\u000b',
-		FF  = '\u000c',
-		CR  = '\r',
-		SO  = '\u000e',
-		SI  = '\u000f'
-		
-		//SPACE = '\u0020',
-		;
-	public static final char[] JS_WHITESPACE = new char[] {
+	public static final char NULL                  = '\0';
+	public static final char SOH                   = '\u0001';
+	public static final char STX                   = '\u0002';
+	public static final char ETX                   = '\u0003';
+	public static final char EOT                   = '\u0004';
+	public static final char ENQ                   = '\u0005';
+	public static final char ACK                   = '\u0006';
+	public static final char BEL                   = '\u0007';
+	public static final char BS                    = '\u0008';
+	public static final char TAB                   = '\u0009';
+	public static final char LF                    = '\n';
+	public static final char VT                    = '\u000b';
+	public static final char FF                    = '\u000c'; // Form feed (ctrl+l)
+	public static final char CR                    = '\r';
+	public static final char SO                    = '\u000e';
+	public static final char SI                    = '\u000f';
+	public static final char SPACE                 = '\u0020';
+	public static final char NBSP                  = '\u00a0'; // Latin-1 space
+	public static final char OGHAM                 = '\u1680';
+	public static final char EN_QUAD               = '\u2000';
+	public static final char EM_QUAD               = '\u2001';
+	public static final char EN_SPACE              = '\u2002';
+	public static final char EM_SPACE              = '\u2003';
+	public static final char THREE_PER_EM_SPACE    = '\u2004';
+	public static final char FOUR_PER_EM_SPACE     = '\u2005';
+	public static final char SIX_PER_EM_SPACE      = '\u2006';
+	public static final char FIGURE_SPACE          = '\u2007';
+	public static final char PUNCTUATION_SPACE     = '\u2008';
+	public static final char THIN_SPACE            = '\u2009';
+	public static final char HAIR_SPACE            = '\u200a';
+	public static final char ZERO_WIDTH_SPACE      = '\u200b';
+	public static final char LINE_SEPARATOR        = '\u2028';
+	public static final char PARAGRAPH_SEPARATOR   = '\u2029';
+	public static final char NARROW_NO_BREAK_SPACE = '\u202f';
+	public static final char MEDIUM_MATH_SPACE     = '\u205f';
+	public static final char IDEOGRAPHIC_SPACE     = '\u3000';
+	public static final char BYTE_ORDER_MARK       = '\ufeff';
+	
+	/**
+	 * Array of JS whitespace chars.
+	 * 
+	 * Must be sorted
+	 */
+	private static final char[] JS_WHITESPACE = new char[] {
 			TAB,
 			LF,
-			VT, // tabulation line
-			FF, // ff (ctrl-l)
+			VT,
+			FF,
 			CR,
-			' ',
-			'\u00a0', // Latin-1 space
-			'\u1680', // Ogham space mark
-			'\u180e', // separator, Mongolian vowel
-			'\u2000', // en quad
-			'\u2001', // em quad
-			'\u2002', // en space
-			'\u2003', // em space
-			'\u2004', // three-per-em space
-			'\u2005', // four-per-em space
-			'\u2006', // six-per-em space
-			'\u2007', // figure space
-			'\u2008', // punctuation space
-			'\u2009', // thin space
-			'\u200a', // hair space
-			'\u2028',
-			'\u2029',
-			'\u202f', // narrow no-break space
-			'\u205f', // medium mathematical space
-			'\u3000', // ideographic space
-			'\ufeff' // byte order mark
+			SPACE,
+			NBSP,
+			OGHAM,
+			EN_QUAD,
+			EM_QUAD,
+			EN_SPACE,
+			EM_SPACE,
+			THREE_PER_EM_SPACE,
+			FOUR_PER_EM_SPACE,
+			SIX_PER_EM_SPACE,
+			FIGURE_SPACE,
+			PUNCTUATION_SPACE,
+			THIN_SPACE,
+			HAIR_SPACE,
+			ZERO_WIDTH_SPACE,
+			LINE_SEPARATOR,
+			PARAGRAPH_SEPARATOR,
+			NARROW_NO_BREAK_SPACE,
+			MEDIUM_MATH_SPACE,
+			IDEOGRAPHIC_SPACE,
+			BYTE_ORDER_MARK,
 	};
 	
 	public static final int ZWNJ = 0x200C;
 	public static final int ZWJ = 0x200D;
 	
-	public static boolean isJsWhitespace(final char c) {
-		//binary search
-		int lo = 0;
-	    int hi = JS_WHITESPACE.length - 1;
-	    while (lo <= hi) {
-	        // Key is in a[lo..hi] or not present.
-	        int mid = lo + (hi - lo) / 2;
-			if (c < JS_WHITESPACE[mid])
-				hi = mid - 1;
-			else if (c > JS_WHITESPACE[mid])
-				lo = mid + 1;
-			else
+	public static boolean isLineBreak(final char c) {
+		switch (c) {
+			case Characters.LF:
+			case Characters.CR:
+			case Characters.LINE_SEPARATOR:
+			case Characters.PARAGRAPH_SEPARATOR:
 				return true;
-	    }
-	    return false;
+			default:
+				return false;
+		}
+	}
+	
+	public static boolean isJsWhitespace(final char c) {
+		return Arrays.binarySearch(JS_WHITESPACE, c) >= 0;
 	}
 	
 	public static boolean isDecimalDigit(char c) {
