@@ -1,40 +1,44 @@
 package com.mindlin.jsast.impl.util;
 
+import java.nio.InvalidMarkException;
+import java.util.EmptyStackException;
+
 public abstract class AbstractCharacterStream implements CharacterStream {
 	protected final LongStack marks = new LongStack();
 	
 	@Override
 	public String copyNext(long len) {
-		StringBuilder sb = new StringBuilder((int) len);
+		StringBuilder sb = new StringBuilder(Math.toIntExact(len));
 		while (len-- > 0)
 			sb.append(next());
 		return sb.toString();
 	}
 	
 	@Override
-	public String copy(long start, long len) {
-		String result = this.mark().position(start - 1).copyNext(len);
-		this.resetToMark();
-		return result;
-	}
-	
-	@Override
 	public AbstractCharacterStream mark() {
 		long pos = position();
-		marks.push(pos);
+		this.marks.push(pos);
+		return this;
+	}
+	
+	protected long popMark() throws InvalidMarkException {
+		try {
+			return this.marks.pop();
+		} catch (EmptyStackException e) {
+			throw new InvalidMarkException();
+		}
+	}
+	
+	@Override
+	public AbstractCharacterStream resetToMark() throws InvalidMarkException {
+		long pos = this.popMark();
+		this.position(pos);
 		return this;
 	}
 	
 	@Override
-	public AbstractCharacterStream resetToMark() {
-		long pos = marks.pop();
-		position(pos);
-		return this;
-	}
-	
-	@Override
-	public AbstractCharacterStream unmark() {
-		marks.pop();
+	public AbstractCharacterStream unmark() throws InvalidMarkException {
+		this.popMark();
 		return this;
 	}
 }
