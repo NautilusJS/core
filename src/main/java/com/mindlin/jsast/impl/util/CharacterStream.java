@@ -1,5 +1,7 @@
 package com.mindlin.jsast.impl.util;
 
+import java.nio.InvalidMarkException;
+
 public interface CharacterStream {
 	/**
 	 * Get current character (the character at the current {@link #position()}
@@ -9,18 +11,18 @@ public interface CharacterStream {
 	 */
 	char current();
 
-	char next();
+	char next() throws IndexOutOfBoundsException;
 
-	default char next(long offset) {
+	default char next(long offset) throws IndexOutOfBoundsException {
 		skip(offset);
 		return current();
 	}
 
-	default char peek() {
+	default char peek() throws IndexOutOfBoundsException {
 		return peek(1);
 	}
 
-	char peek(long offset);
+	char peek(long offset) throws IndexOutOfBoundsException;
 
 	CharacterStream skip(long offset);
 
@@ -75,9 +77,9 @@ public interface CharacterStream {
 	
 	CharacterStream mark();
 
-	CharacterStream resetToMark();
+	CharacterStream resetToMark() throws InvalidMarkException;
 	
-	CharacterStream unmark();
+	CharacterStream unmark() throws InvalidMarkException;
 
 	default CharacterStream skipTo(final char c) {
 		while (next() != c)
@@ -85,8 +87,7 @@ public interface CharacterStream {
 		return this;
 	}
 
-	String copyNext(long len);
-
+	String copyNext(long len) throws IndexOutOfBoundsException;
 	
-	String copyFromMark();
+	String copyFromMark() throws InvalidMarkException;
 }
