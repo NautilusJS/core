@@ -934,15 +934,25 @@ public class JSLexer implements Supplier<Token> {
 			case '@':
 				return JSSyntaxKind.AT_SYMBOL;
 			// 2 option punctuation (assignment variants)
-			case '+':
-				return (d == '=') ? JSSyntaxKind.ADDITION_ASSIGNMENT : JSSyntaxKind.PLUS;
-			case '-':
-				return (d == '=') ? JSSyntaxKind.BITWISE_OR_ASSIGNMENT : JSSyntaxKind.VBAR;
 			case '%':
 				return (d == '=') ? JSSyntaxKind.REMAINDER_ASSIGNMENT : JSSyntaxKind.REMAINDER;
 			case '^':
 				return (d == '=') ? JSSyntaxKind.BITWISE_XOR_ASSIGNMENT : JSSyntaxKind.BITWISE_XOR;
 			// 3+ option punctuation
+			case '+':
+				if (d == '=') // '+='
+					return JSSyntaxKind.ADDITION_ASSIGNMENT;
+				else if (d == '+') // '++'
+					return JSSyntaxKind.INCREMENT;
+				else
+					return JSSyntaxKind.PLUS;
+			case '-':
+				if (d == '=') // '-='
+					return JSSyntaxKind.SUBTRACTION_ASSIGNMENT;
+				else if (d == '-') // '--'
+					return JSSyntaxKind.DECREMENT;
+				else
+					return JSSyntaxKind.MINUS;
 			case '.':
 				if (Characters.isDecimalDigit(d)) // Fractional numeric literal
 					return JSSyntaxKind.NUMERIC_LITERAL;
