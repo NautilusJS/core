@@ -21,6 +21,7 @@ import com.mindlin.jsast.impl.lexer.Token.IdentifierToken;
 import com.mindlin.jsast.impl.lexer.Token.NumericLiteralToken;
 import com.mindlin.jsast.impl.lexer.Token.RegExpToken;
 import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
+import com.mindlin.jsast.impl.lexer.Token.TemplateLiteralToken;
 import com.mindlin.jsast.impl.tree.LineMap;
 import com.mindlin.jsast.impl.tree.LineMap.LineMapBuilder;
 import com.mindlin.jsast.impl.util.BooleanStack;
@@ -41,7 +42,6 @@ public class JSLexer implements Supplier<Token> {
 	protected LinkedList<Token> lookaheads = new LinkedList<>();
 	//TODO: supply source file
 	protected final LineMapBuilder lines;
-	protected final BooleanStack templateStack = new BooleanStack();
 	
 	public JSLexer(String src) {
 		this(new CharacterArrayStream(src));
@@ -293,11 +293,6 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	protected TemplateTokenInfo nextTemplateLiteral() {
-		boolean head = chars.hasNext() && chars.peek() == '`';
-		chars.skip(1);//Skip start '`'/'}';
-		if (!head)
-			this.templateStack.pop();//Pop template marker from stack
-		
 		boolean tail = false;
 		boolean escaped = false;
 		StringBuilder cooked = new StringBuilder();
@@ -319,7 +314,6 @@ public class JSLexer implements Supplier<Token> {
 				case '$': {
 					if (chars.hasNext() && chars.peek() == '{') {
 						chars.next();
-						this.templateStack.push(true);
 						break loop;
 					}
 					cooked.append('$');
@@ -342,7 +336,7 @@ public class JSLexer implements Supplier<Token> {
 			}
 		}
 		
-		return new TemplateTokenInfo(head, tail, cooked.toString());
+		return new TemplateTokenInfo(false, tail, cooked.toString());
 	}
 	
 	public String nextStringLiteral(final char startChar) {
@@ -800,6 +794,22 @@ public class JSLexer implements Supplier<Token> {
 		return new RegExpToken(start.flags, range, text, body, flags);
 	}
 	
+	public TemplateLiteralToken finishTemplate(Token start) {
+		Objects.requireNonNull(start);
+		if (!start.matches(JSSyntaxKind.RIGHT_BRACE))
+			throw new JSSyntaxException("Template continuation must start with a right brace", start.getRange());
+		
+		this.invalidateLookaheads(start.getEnd().getOffset());
+		
+		chars.mark();
+		
+		TemplateTokenInfo data = this.nextTemplateLiteral();
+		
+		SourceRange range = new SourceRange(start.getStart(), this.getPosition());
+		CharSequence text = start.getText() + chars.copyFromMark();
+		return new TemplateLiteralToken(start.flags, range, text, false, data.tail, data.cooked);
+	}
+	
 	public String nextComment(final boolean singleLine) {
 		StringBuilder sb = new StringBuilder();
 		while (true) {
@@ -841,9 +851,11 @@ public class JSLexer implements Supplier<Token> {
 	}
 	
 	protected Token finishTemplateToken(long start, int flags) {
+		chars.skip(1);// Skip over the leading '`'
 		TemplateTokenInfo value = this.nextTemplateLiteral();
-		//TODO: finish
-		throw new UnsupportedOperationException();
+		SourceRange range = new SourceRange(this.resolvePosition(start + 1), this.getPosition());
+		String text = chars.copyFromMark();
+		return new TemplateLiteralToken(flags, range, text, true, value.tail, value.cooked);
 	}
 	
 	protected Token finishIdentifierToken(long start, int flags, String name) {
