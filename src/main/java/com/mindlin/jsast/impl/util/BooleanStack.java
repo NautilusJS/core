@@ -38,6 +38,10 @@ public class BooleanStack implements RandomAccess, Cloneable, Serializable {
 		this.shrinkSize = initialCapacity >> 16;
 	}
 	
+	public boolean isEmpty() {
+		return this.size == 0;
+	}
+	
 	public int getSize() {
 		return size;
 	}
