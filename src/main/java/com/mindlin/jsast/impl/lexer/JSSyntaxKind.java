@@ -8,6 +8,8 @@ package com.mindlin.jsast.impl.lexer;
 public enum JSSyntaxKind {
 	// Special
 	SEMICOLON,
+	@Deprecated
+	END_OF_LINE,
 	END_OF_FILE,
 	IDENTIFIER,
 	COMMENT,
@@ -25,53 +27,53 @@ public enum JSSyntaxKind {
 	TYPE,
 	
 	// ===== Reserved words =====
-	BREAK,
-	CASE,
-	CATCH,
-	CLASS,
-	CONST,
-	CONTINUE,
-	DEBUGGER,
-	DEFAULT,
-	DELETE,
-	DO,
-	ELSE,
-	ENUM,
-	EXPORT,
-	EXTENDS,
-	FALSE,
-	FINALLY,
-	FOR,
-	FUNCTION,
-	IF,
-	IMPORT,
-	IN,
-	INSTANCEOF,
-	NEW,
-	NULL,
-	RETURN,
-	SUPER,
-	SWITCH,
-	THIS,
-	THROW,
-	TRUE,
-	TRY,
-	TYPEOF,
-	VAR,
-	VOID,
-	WHILE,
-	WITH,
+	BREAK("break"),
+	CASE("case"),
+	CATCH("catch"),
+	CLASS("class"),
+	CONST("const"),
+	CONTINUE("continue"),
+	DEBUGGER("debugger"),
+	DEFAULT("default"),
+	DELETE("delete"),
+	DO("do"),
+	ELSE("else"),
+	ENUM("enum"),
+	EXPORT("export"),
+	EXTENDS("extends"),
+	FALSE("false"),
+	FINALLY("finally"),
+	FOR("for"),
+	FUNCTION("function"),
+	IF("if"),
+	IMPORT("import"),
+	IN("in"),
+	INSTANCEOF("instanceof"),
+	NEW("new"),
+	NULL("null"),
+	RETURN("return"),
+	SUPER("super"),
+	SWITCH("switch"),
+	THIS("this"),
+	THROW("throw"),
+	TRUE("true"),
+	TRY("try"),
+	TYPEOF("typeof"),
+	VAR("var"),
+	VOID("void"),
+	WHILE("while"),
+	WITH("with"),
 	
 	// ===== Strict mode reserved =====
-	IMPLEMENTS,
-	INTERFACE,
-	LET,
-	PACKAGE,
-	PRIVATE,
-	PROTECTED,
-	PUBLIC,
-	STATIC,
-	YIELD,
+	IMPLEMENTS("implements"),
+	INTERFACE("interface"),
+	LET("let"),
+	PACKAGE("package"),
+	PRIVATE("private"),
+	PROTECTED("protected"),
+	PUBLIC("public"),
+	STATIC("static"),
+	YIELD("yield"),
 	
 	// ===== Operators =====
 	// ===== Syntax ====
@@ -142,19 +144,26 @@ public enum JSSyntaxKind {
 	// ===== Literals =====
 	STRING_LITERAL,
 	NUMERIC_LITERAL,
-	REGEXP_LITERAL,
+	REGEX_LITERAL,
 	BIGINT_LITERAL,
-	// ===== Templates =====
-	TEMPLATE_HEAD,
-	TEMPLATE_MIDDLE,
-	TEMPLATE_TAIL,
+	TEMPLATE_LITERAL,
 	;
 	
+	private final String text;
+	
 	private JSSyntaxKind() {
-		// TODO Auto-generated constructor stub
+		this(null);
 	}
 	
 	private JSSyntaxKind(String text) {
-		
+		this.text = text;
+	}
+	
+	public String getText() {
+		return this.text;
+	}
+	
+	public int length() {
+		return text == null ? -1 : text.length();
 	}
 }
