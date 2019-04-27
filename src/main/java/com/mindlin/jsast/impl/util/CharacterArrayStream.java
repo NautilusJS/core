@@ -78,12 +78,12 @@ public class CharacterArrayStream extends AbstractCharacterStream {
 	
 	@Override
 	public char peek(long offset) {
-		long index = position + offset;
+		long index = Math.addExact(this.position, offset);
 		
-		if (index > data.length)//Also checks if > Integer.MAX_INT
+		if (index > this.data.length)//Also checks if > Integer.MAX_INT
 			throw new IndexOutOfBoundsException("Cannot look ahead by " + offset);
 		
-		return data[(int) index];
+		return this.data[(int) index];
 	}
 
 	@Override
@@ -94,5 +94,4 @@ public class CharacterArrayStream extends AbstractCharacterStream {
 		System.arraycopy(this.data, (int)mark + 1, buf, 0, len);
 		return new String(buf, 0, len);
 	}
-	
 }
