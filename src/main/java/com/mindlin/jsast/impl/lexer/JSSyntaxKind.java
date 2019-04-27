@@ -14,18 +14,6 @@ public enum JSSyntaxKind {
 	IDENTIFIER,
 	COMMENT,
 	
-	// ===== Keywords =====
-	ABSTRACT,
-	AS,
-	ASYNC,
-	AWAIT,
-	CONSTRUCTOR,
-	DECLARE,
-	FROM,
-	OF,
-	READONLY,
-	TYPE,
-	
 	// ===== Reserved words =====
 	BREAK("break"),
 	CASE("case"),
@@ -74,6 +62,20 @@ public enum JSSyntaxKind {
 	PUBLIC("public"),
 	STATIC("static"),
 	YIELD("yield"),
+	
+	// ===== Contextual keywords =====
+	ABSTRACT("abstract"),
+	AS("as"),
+	ASYNC("async"),
+	AWAIT("await"),
+	CONSTRUCTOR("constructor"),
+	DECLARE("declare"),
+	FROM("from"),
+	GET("get"),
+	OF("of"),
+	READONLY("readonly"),
+	SET("set"),
+	TYPE("type"),
 	
 	// ===== Operators =====
 	// ===== Syntax ====
