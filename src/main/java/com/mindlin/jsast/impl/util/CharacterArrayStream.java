@@ -69,8 +69,8 @@ public class CharacterArrayStream extends AbstractCharacterStream {
 		if (passNewlines)
 			return this.skipWhitespace();
 		
-		while (position + 1 < data.length && Characters.isJsWhitespace(data[position + 1]))
-			if (data[++position] == '\n')
+		while (this.position + 1 < this.data.length && Characters.isJsWhitespace(this.data[this.position + 1]))
+			if (this.data[++this.position] == '\n')
 				break;
 		
 		return this;
