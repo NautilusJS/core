@@ -3,14 +3,13 @@ package com.mindlin.jsast.impl.tree;
 import java.util.Objects;
 
 import com.mindlin.jsast.fs.SourcePosition;
+import com.mindlin.jsast.impl.lexer.JSSyntaxKind;
 import com.mindlin.jsast.impl.lexer.Token;
-import com.mindlin.jsast.impl.lexer.TokenKind;
-import com.mindlin.jsast.impl.parser.JSKeyword;
 import com.mindlin.jsast.tree.type.SpecialTypeTree;
 
 public class SpecialTypeTreeImpl extends AbstractTypeTree implements SpecialTypeTree {
 	public static SpecialType mapType(Token t) {
-		if (t.matches(TokenKind.KEYWORD, JSKeyword.VOID))
+		if (t.matches(JSSyntaxKind.VOID))
 			return SpecialType.VOID;
 		String name = t.<String> getValue();
 		switch (name) {
@@ -32,8 +31,9 @@ public class SpecialTypeTreeImpl extends AbstractTypeTree implements SpecialType
 				return SpecialType.BOOLEAN;
 			case "never":
 				return SpecialType.NEVER;
+			default:
+				return null;
 		}
-		return null;
 	}
 	
 	protected final SpecialType type;

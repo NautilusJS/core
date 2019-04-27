@@ -3,13 +3,13 @@ package com.mindlin.jsast.impl.tree;
 import java.util.Objects;
 
 import com.mindlin.jsast.fs.SourcePosition;
-import com.mindlin.jsast.impl.lexer.Token;
+import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
 import com.mindlin.jsast.tree.StringLiteralTree;
 
 public class StringLiteralTreeImpl extends AbstractTree implements StringLiteralTree {
 	protected final String value;
 	
-	public StringLiteralTreeImpl(Token t) {
+	public StringLiteralTreeImpl(StringLiteralToken t) {
 		this(t.getStart(), t.getEnd(), t.getValue());
 	}
 	

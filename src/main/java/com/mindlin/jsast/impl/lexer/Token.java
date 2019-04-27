@@ -2,27 +2,24 @@ package com.mindlin.jsast.impl.lexer;
 
 import java.util.Objects;
 
+import com.mindlin.jsast.exception.JSUnexpectedTokenException;
 import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.fs.SourceRange;
-import com.mindlin.jsast.impl.parser.JSOperator;
-import com.mindlin.jsast.impl.parser.JSSpecialGroup;
 
 public class Token {
 	public static final int FLAG_PRECEDEING_NEWLINE = 1 << 0;
 	public static final int FLAG_PRECEDING_JSDOC = 1 << 1;
 	//TODO: use EnumSet-type wrapper in the future?
 	protected final int flags;
-	protected final TokenKind kind;
+	protected final JSSyntaxKind kind;
 	protected final SourceRange range;
-	protected final String text;
-	protected final Object value;
-
-	public Token(int flags, SourceRange range, TokenKind kind, String text, Object value) {
+	protected final CharSequence text;
+	
+	public Token(int flags, SourceRange range, JSSyntaxKind kind, CharSequence text) {
 		this.flags = flags;
-		this.range = range;
-		this.kind = kind;
+		this.range = Objects.requireNonNull(range);
+		this.kind = Objects.requireNonNull(kind);
 		this.text = text;
-		this.value = value;
 	}
 	
 	public boolean hasPrecedingNewline() {
@@ -45,92 +42,56 @@ public class Token {
 		return this.range.getEnd();
 	}
 
-	public String getText() {
-		return text;
+	public CharSequence getText() {
+		return this.text;
 	}
 
-	public TokenKind getKind() {
-		return kind;
+	public JSSyntaxKind getKind() {
+		return this.kind;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T getValue() {
-		return (T) value;
-	}
-
-	public boolean isSpecial() {
-		return getKind() == TokenKind.SPECIAL;
-	}
-
-	public boolean isOperator() {
-		return getKind() == TokenKind.OPERATOR;
-	}
-
-	public boolean isKeyword() {
-		return getKind() == TokenKind.KEYWORD;
+	public Object getValue() {
+		return null;
 	}
 
 	public boolean isIdentifier() {
-		return getKind() == TokenKind.IDENTIFIER;
-	}
-
-	public boolean isLiteral() {
-		final TokenKind kind = getKind();
-		return kind == TokenKind.STRING_LITERAL || kind == TokenKind.BOOLEAN_LITERAL || kind == TokenKind.NULL_LITERAL
-				|| kind == TokenKind.REGEX_LITERAL || kind == TokenKind.NUMERIC_LITERAL
-				|| kind == TokenKind.TEMPLATE_LITERAL;
-	}
-
-	/**
-	 * Is end of statement. EOL or EOF
-	 * 
-	 * @return
-	 */
-	public boolean isEOS() {
-		return getKind() == TokenKind.SPECIAL && (getValue() == JSSpecialGroup.EOF || getValue() == JSSpecialGroup.EOL
-				|| getValue() == JSSpecialGroup.SEMICOLON);
-	}
-
-	public boolean matches(TokenKind kind, Object value) {
-		if (getKind() != kind)
-			return false;
-		return Objects.equals(getValue(), value);
+		return this.getKind() == JSSyntaxKind.IDENTIFIER;
 	}
 	
-	public boolean matchesOperator(JSOperator value) {
-		return getKind() == TokenKind.OPERATOR && getValue() == value;
+	public boolean matches(JSSyntaxKind kind) {
+		return getKind() == kind;
+	}
+	
+	public boolean matchesAny(JSSyntaxKind first, JSSyntaxKind second) {
+		JSSyntaxKind kind = this.getKind();
+		return kind == first || kind == second;
+	}
+	
+	public boolean matchesAny(JSSyntaxKind first, JSSyntaxKind...rest) {
+		JSSyntaxKind kind = this.getKind();
+		if (kind == first)
+			return true;
+		for (int i = 0; i < rest.length; i++)
+			if (kind == rest[i])
+				return true;
+		return false;
+	}
+	
+	public boolean matchesIdentifier(String text) {
+		//TODO: finish
+		return false;
 	}
 
 	public Token reinterpretAsIdentifier() {
-		Object value;
-		switch (getKind()) {
-			case IDENTIFIER:
-				return this;
-			case KEYWORD:
-			case NUMERIC_LITERAL:
-			case BOOLEAN_LITERAL:
-				value = this.getValue().toString();
-				break;
-			case NULL_LITERAL:
-				value = "null";
-				break;
-			case OPERATOR:
-				value = this.<JSOperator>getValue().getText();
-				break;
-			case SPECIAL:
-				if (this.getValue() == JSSpecialGroup.SEMICOLON)
-					value = ';';
-				// Fallthrough intentional
-				// There is no way to possibly reinterpret these
-			case REGEX_LITERAL:
-			case STRING_LITERAL:
-			case TEMPLATE_LITERAL:
-			case COMMENT:
-			default:
-				throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
-		}
-		
-		return new Token(this.flags, this.range, TokenKind.IDENTIFIER, getText(), value);
+		String name = this.getKind().getText();
+		if (name == null)
+			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
+		return new IdentifierToken(this.flags, this.range, this.getText(), name);
+	}
+
+	public void expect(JSSyntaxKind kind) {
+		if (this.getKind() != kind)
+			throw new JSUnexpectedTokenException(this, kind);
 	}
 
 	@Override
@@ -139,7 +100,7 @@ public class Token {
 		StringBuilder sb = new StringBuilder(70)//High end of expected outputs
 				.append(this.getClass().getSimpleName())
 				.append("{kind=").append(getKind())
-				.append(",value=").append(value)
+				.append(",value=").append(getValue())
 				.append(",range=").append(getRange());
 		//@formatter:on
 
@@ -150,5 +111,112 @@ public class Token {
 
 		sb.append('}');
 		return sb.toString();
+	}
+	
+	public static class IdentifierToken extends Token {
+		protected final String name;
+		
+		public IdentifierToken(int flags, SourceRange range, CharSequence text, String name) {
+			super(flags, range, JSSyntaxKind.IDENTIFIER, text);
+			this.name = name;
+		}
+		
+		@Override
+		public boolean matchesIdentifier(String text) {
+			return Objects.equals(this.getValue(), text);
+		}
+		
+		@Override
+		public String getValue() {
+			return this.name;
+		}
+		
+		@Override
+		public Token reinterpretAsIdentifier() {
+			return this;
+		}
+		
+	}
+	
+	public static class StringLiteralToken extends Token {
+		protected final String value;
+		
+		public StringLiteralToken(int flags, SourceRange range, CharSequence text, String value) {
+			super(flags, range, JSSyntaxKind.STRING_LITERAL, text);
+			this.value = value;
+		}
+		
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+	}
+	
+	public static class NumericLiteralToken extends Token {
+		protected final Number value;
+		
+		public NumericLiteralToken(int flags, SourceRange range, CharSequence text, Number value) {
+			super(flags, range, JSSyntaxKind.NUMERIC_LITERAL, text);
+			this.value = value;
+		}
+		
+		@Override
+		public Number getValue() {
+			return this.value;
+		}
+	}
+	
+	public static class RegExpToken extends Token {
+		protected final String pattern;
+		protected final String rxFlags;
+		
+		public RegExpToken(int flags, SourceRange range, CharSequence text, String pattern, String rxFlags) {
+			super(flags, range, JSSyntaxKind.REGEX_LITERAL, text);
+			this.pattern = pattern;
+			this.rxFlags = rxFlags;
+		}
+
+		public String getPattern() {
+			return this.pattern;
+		}
+
+		public String getRxFlags() {
+			return this.rxFlags;
+		}
+		
+		@Override
+		public Token reinterpretAsIdentifier() {
+			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
+		}
+	}
+	
+	public static class TemplateLiteralToken extends Token {
+		protected final boolean head;
+		protected final boolean tail;
+		protected final String cooked;
+		
+		public TemplateLiteralToken(int flags, SourceRange range, CharSequence text, boolean head, boolean tail, String cooked) {
+			super(flags, range, JSSyntaxKind.TEMPLATE_LITERAL, text);
+			this.head = head;
+			this.tail = tail;
+			this.cooked = cooked;
+		}
+		
+		@Override
+		public Token reinterpretAsIdentifier() {
+			throw new UnsupportedOperationException(this + " cannot be reinterpreted as an identifier");
+		}
+
+		public boolean isHead() {
+			return this.head;
+		}
+
+		public boolean isTail() {
+			return this.tail;
+		}
+
+		public String getCooked() {
+			return this.cooked;
+		}
 	}
 }
