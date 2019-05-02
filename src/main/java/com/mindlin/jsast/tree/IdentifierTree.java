@@ -44,4 +44,9 @@ public interface IdentifierTree extends ExpressionTree, PropertyName, PatternTre
 	default <R, D> R accept(PatternTreeVisitor<R, D> visitor, D data) {
 		return visitor.visitIdentifier(this, data);
 	}
+	
+	@Override
+	default <R, D> R accept(PropertyNameVisitor<R, D> visitor, D data) {
+		return visitor.visitIdentifier(this, data);
+	}
 }
