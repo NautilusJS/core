@@ -33,12 +33,12 @@ public class AssignmentTest {
 
 	@Test
 	public void testInvalidAssignmentToBooleanLiteral() {
-		assertExceptionalExpression("true = x", "Illegal assignment to string literal");
+		assertExceptionalExpression("true = x", "Illegal assignment to boolean literal");
 	}
 
 	@Test
 	public void testInvalidAssignmentToNumericLiteral() {
-		assertExceptionalExpression("5 = x", "Illegal assignment to string literal");
+		assertExceptionalExpression("5 = x", "Illegal assignment to number literal");
 	}
 
 	@Test
