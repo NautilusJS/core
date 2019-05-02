@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.SpreadElementTree;
-import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.UnaryTree;
 import com.mindlin.jsast.tree.Tree.Kind;
 
@@ -94,12 +93,6 @@ public class UnaryOperatorTest {
 	public void testVoid() {
 		UnaryTree expr = parseExpression("void a", Kind.VOID);
 		assertIdentifier("a", expr.getExpression());
-	}
-	
-	@Test
-	public void testLonelyVoid() {
-		UnaryTree expr = parseExpression("void", Kind.VOID);
-		assertNull(expr.getExpression());
 	}
 	
 	@Test
