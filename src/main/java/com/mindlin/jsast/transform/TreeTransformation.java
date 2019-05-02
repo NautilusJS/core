@@ -8,10 +8,15 @@ import com.mindlin.jsast.tree.BlockTree;
 import com.mindlin.jsast.tree.BooleanLiteralTree;
 import com.mindlin.jsast.tree.BreakTree;
 import com.mindlin.jsast.tree.CastExpressionTree;
+import com.mindlin.jsast.tree.ClassElementTree;
 import com.mindlin.jsast.tree.ClassTreeBase.ClassDeclarationTree;
 import com.mindlin.jsast.tree.ClassTreeBase.ClassExpressionTree;
+import com.mindlin.jsast.tree.SignatureDeclarationTree.CallSignatureTree;
+import com.mindlin.jsast.tree.SignatureDeclarationTree.ConstructSignatureTree;
 import com.mindlin.jsast.tree.CompilationUnitTree;
+import com.mindlin.jsast.tree.ComputedPropertyKeyTree;
 import com.mindlin.jsast.tree.ConditionalExpressionTree;
+import com.mindlin.jsast.tree.ConstructorDeclarationTree;
 import com.mindlin.jsast.tree.ContinueTree;
 import com.mindlin.jsast.tree.DebuggerTree;
 import com.mindlin.jsast.tree.DirectiveTree;
@@ -31,6 +36,8 @@ import com.mindlin.jsast.tree.IfTree;
 import com.mindlin.jsast.tree.ImportDeclarationTree;
 import com.mindlin.jsast.tree.LabeledStatementTree;
 import com.mindlin.jsast.tree.MemberExpressionTree;
+import com.mindlin.jsast.tree.MethodDeclarationTree;
+import com.mindlin.jsast.tree.MethodSignatureTree;
 import com.mindlin.jsast.tree.NewTree;
 import com.mindlin.jsast.tree.NullLiteralTree;
 import com.mindlin.jsast.tree.NumericLiteralTree;
@@ -38,6 +45,9 @@ import com.mindlin.jsast.tree.ObjectLiteralTree;
 import com.mindlin.jsast.tree.ObjectPatternTree;
 import com.mindlin.jsast.tree.ParenthesizedTree;
 import com.mindlin.jsast.tree.PatternTree;
+import com.mindlin.jsast.tree.PropertyDeclarationTree;
+import com.mindlin.jsast.tree.PropertyName;
+import com.mindlin.jsast.tree.PropertySignatureTree;
 import com.mindlin.jsast.tree.RegExpLiteralTree;
 import com.mindlin.jsast.tree.ReturnTree;
 import com.mindlin.jsast.tree.SequenceExpressionTree;
@@ -66,6 +76,8 @@ import com.mindlin.jsast.tree.type.ConstructorTypeTree;
 import com.mindlin.jsast.tree.type.EnumDeclarationTree;
 import com.mindlin.jsast.tree.type.FunctionTypeTree;
 import com.mindlin.jsast.tree.type.IdentifierTypeTree;
+import com.mindlin.jsast.tree.type.IndexSignatureTree;
+import com.mindlin.jsast.tree.type.InferTypeTree;
 import com.mindlin.jsast.tree.type.InterfaceDeclarationTree;
 import com.mindlin.jsast.tree.type.LiteralTypeTree;
 import com.mindlin.jsast.tree.type.MappedTypeTree;
@@ -74,6 +86,7 @@ import com.mindlin.jsast.tree.type.ObjectTypeTree;
 import com.mindlin.jsast.tree.type.SpecialTypeTree;
 import com.mindlin.jsast.tree.type.TupleTypeTree;
 import com.mindlin.jsast.tree.type.TypeAliasTree;
+import com.mindlin.jsast.tree.type.TypeElementTree;
 import com.mindlin.jsast.tree.type.TypeTree;
 import com.mindlin.jsast.tree.type.UnaryTypeTree;
 
@@ -125,6 +138,11 @@ public interface TreeTransformation<D> extends TreeVisitor<Tree, D> {
 	}
 	
 	@Override
+	default TypeElementTree visitCallSignature(CallSignatureTree node, D context) {
+		return node;
+	}
+	
+	@Override
 	default ExpressionTree visitCast(CastExpressionTree node, D d) {
 		return node;
 	}
@@ -150,12 +168,27 @@ public interface TreeTransformation<D> extends TreeVisitor<Tree, D> {
 	}
 	
 	@Override
+	default PropertyName visitComputedPropertyKey(ComputedPropertyKeyTree node, D context) {
+		return node;
+	}
+	
+	@Override
 	default ExpressionTree visitConditionalExpression(ConditionalExpressionTree node, D d) {
 		return node;
 	}
 	
 	@Override
 	default TypeTree visitConditionalType(ConditionalTypeTree node, D d) {
+		return node;
+	}
+	
+	@Override
+	default ClassElementTree visitConstructorDeclaration(ConstructorDeclarationTree node, D context) {
+		return node;
+	}
+	
+	@Override
+	default TypeElementTree visitConstructSignature(ConstructSignatureTree node, D context) {
 		return node;
 	}
 	
@@ -253,6 +286,17 @@ public interface TreeTransformation<D> extends TreeVisitor<Tree, D> {
 	default StatementTree visitImport(ImportDeclarationTree node, D d) {
 		return node;
 	}
+
+	@Override
+	default IndexSignatureTree visitIndexSignature(IndexSignatureTree node, D context) {
+		//TODO: fix return?
+		return node;
+	}
+
+	@Override
+	default TypeTree visitInferType(InferTypeTree node, D d) {
+		return node;
+	}
 	
 	@Override
 	default StatementTree visitInterfaceDeclaration(InterfaceDeclarationTree node, D d) {
@@ -293,6 +337,17 @@ public interface TreeTransformation<D> extends TreeVisitor<Tree, D> {
 	default TypeTree visitMemberType(MemberTypeTree node, D d) {
 		return node;
 	}
+
+	@Override
+	default Tree visitMethodSignature(MethodSignatureTree node, D context) {
+		return node;
+	}
+
+	@Override
+	default ClassElementTree visitMethodDeclaration(MethodDeclarationTree node, D context) {
+		//TODO: fix return?
+		return node;
+	}
 	
 	@Override
 	default ExpressionTree visitNew(NewTree node, D d) {
@@ -321,6 +376,16 @@ public interface TreeTransformation<D> extends TreeVisitor<Tree, D> {
 	
 	@Override
 	default ExpressionTree visitParentheses(ParenthesizedTree node, D d) {
+		return node;
+	}
+
+	@Override
+	default Tree visitPropertyDeclaration(PropertyDeclarationTree node, D context) {
+		return node;
+	}
+
+	@Override
+	default Tree visitPropertySignature(PropertySignatureTree node, D context) {
 		return node;
 	}
 	

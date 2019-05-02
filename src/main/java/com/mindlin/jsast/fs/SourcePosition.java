@@ -6,6 +6,10 @@ import java.util.Objects;
 public class SourcePosition implements Serializable {
 	private static final long serialVersionUID = 4861187271740573475L;
 	
+	public static SourcePosition invalid() {
+		return null;
+	}
+	
 	protected final SourceFile source;
 	protected final long offset;
 	protected final long line;
