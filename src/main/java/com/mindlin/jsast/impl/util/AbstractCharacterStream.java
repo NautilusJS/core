@@ -24,8 +24,10 @@ public abstract class AbstractCharacterStream implements CharacterStream {
 	protected long popMark() throws InvalidMarkException {
 		try {
 			return this.marks.pop();
-		} catch (EmptyStackException e) {
-			throw new InvalidMarkException();
+		} catch (EmptyStackException e0) {
+			InvalidMarkException e = new InvalidMarkException();
+			e.addSuppressed(e0);
+			throw e;
 		}
 	}
 	
