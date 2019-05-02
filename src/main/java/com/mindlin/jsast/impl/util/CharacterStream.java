@@ -24,7 +24,7 @@ public interface CharacterStream {
 
 	char peek(long offset) throws IndexOutOfBoundsException;
 
-	CharacterStream skip(long offset);
+	CharacterStream skip(long offset) throws IndexOutOfBoundsException;
 
 	/**
 	 * Get current position in the stream.
@@ -32,7 +32,7 @@ public interface CharacterStream {
 	 */
 	long position();
 
-	CharacterStream position(long pos);
+	CharacterStream position(long pos) throws IndexOutOfBoundsException;
 
 	/**
 	 * Whether a call to {@link #next()} is valid (i.e., this CharacterStream
