@@ -14,10 +14,6 @@ public class VariableDeclaratorTreeImpl extends AbstractTree implements Variable
 	protected final ExpressionTree initializer;
 	protected final TypeTree type;
 	
-	public VariableDeclaratorTreeImpl(Token t) {
-		this(t.getStart(), t.getEnd(), t.getValue(), null, null);
-	}
-	
 	public VariableDeclaratorTreeImpl(SourcePosition start, SourcePosition end, DeclarationName identifier, TypeTree type, ExpressionTree initializer) {
 		super(start, end);
 		this.identifier = identifier;
