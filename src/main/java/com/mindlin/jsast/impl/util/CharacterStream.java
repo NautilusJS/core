@@ -56,7 +56,7 @@ public interface CharacterStream {
 	 */
 	boolean hasNext(long num);
 	
-	//TODO: remove?
+	@Deprecated
 	default boolean isEOL() {
 		if (!hasNext() || position() < 0)
 			return false;
@@ -65,6 +65,7 @@ public interface CharacterStream {
 		return c == '\r' || c == '\n';
 	}
 
+	@Deprecated
 	default boolean isWhitespace() {
 		return position() >= 0 && hasNext() && Characters.isJsWhitespace(current());
 	}
