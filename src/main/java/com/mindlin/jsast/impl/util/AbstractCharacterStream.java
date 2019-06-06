@@ -15,6 +15,25 @@ public abstract class AbstractCharacterStream implements CharacterStream {
 	}
 	
 	@Override
+	public CharacterStream skipWhitespace() {
+		while (hasNext() && Characters.isJsWhitespace(this.peek()))
+			this.skip(1);
+		return this;
+	}
+	
+	@Override
+	public CharacterStream skipWhitespace(boolean passNewlines) {
+		if (passNewlines)
+			return this.skipWhitespace();
+		
+		while (this.hasNext() && Characters.isJsWhitespace(this.peek()))
+			if (this.next() == '\n')
+				break;
+		
+		return this;
+	}
+	
+	@Override
 	public AbstractCharacterStream mark() {
 		long pos = position();
 		this.marks.push(pos);

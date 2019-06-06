@@ -8,10 +8,20 @@ public interface CharacterStream {
 	 * in the stream).
 	 * 
 	 * @return current character
+	 * 
+	 * @throws IllegalStateException If the CharacterStream hasn't started
 	 */
-	char current();
+	default char current() throws IllegalStateException {
+		try {
+			return peek(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
-	char next() throws IndexOutOfBoundsException;
+	default char next() throws IndexOutOfBoundsException {
+		return next(1);
+	}
 
 	default char next(long offset) throws IndexOutOfBoundsException {
 		skip(offset);
@@ -23,6 +33,18 @@ public interface CharacterStream {
 	}
 
 	char peek(long offset) throws IndexOutOfBoundsException;
+	
+	default char peekSafe() {
+		return peekSafe(1);
+	}
+	
+	default char peekSafe(long offset) {
+		return peek(offset, '\0');
+	}
+	
+	default char peek(long offset, char defaultValue) {
+		return hasNext(offset) ? peek(offset) : defaultValue;
+	}
 
 	CharacterStream skip(long offset) throws IndexOutOfBoundsException;
 
@@ -70,10 +92,12 @@ public interface CharacterStream {
 		return position() >= 0 && hasNext() && Characters.isJsWhitespace(current());
 	}
 
+	@Deprecated
 	default CharacterStream skipWhitespace() {
 		return skipWhitespace(true);
 	}
 	
+	@Deprecated
 	CharacterStream skipWhitespace(boolean passNewlines);
 	
 	CharacterStream mark();
@@ -81,7 +105,8 @@ public interface CharacterStream {
 	CharacterStream resetToMark() throws InvalidMarkException;
 	
 	CharacterStream unmark() throws InvalidMarkException;
-
+	
+	@Deprecated
 	default CharacterStream skipTo(final char c) {
 		while (next() != c)
 			;
