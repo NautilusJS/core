@@ -69,17 +69,17 @@ public class CompositeType implements Type {
 	 * @param value Apparent property value
 	 * @return resolved property was stored
 	 */
-	public boolean putResolvedProperty(Type key, TypeMember value) {
+	public boolean putResolvedProperty(Type name, TypeMember value) {
 		if (this.propertyCache == null)
 			this.propertyCache = new HashMap<>();
-		this.propertyCache.put(key, value);
+		this.propertyCache.put(name, value);
 		return true;
 	}
 	
 	public TypeMember getResolvedProperty(Type key) {
 		if (this.propertyCache == null)
 			return null;
-		return propertyCache.get(key);
+		return this.propertyCache.get(key);
 	}
 	
 	@Override
@@ -93,7 +93,7 @@ public class CompositeType implements Type {
 		sb.append(super.toString());
 		sb.append('{');
 		boolean first = true;
-		for (Type constituent : constituents) {
+		for (Type constituent : this.constituents) {
 			if (!first)
 				sb.append(this.kind == Kind.UNION ? " | " : " & ");
 			first = false;
