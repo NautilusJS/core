@@ -55,11 +55,15 @@ public class CharacterStreamTest {
 	@Test
 	public void testCopy() {
 		CharacterArrayStream chars = new CharacterArrayStream("123ABC456");
-		assertEquals("123", chars.copyNext(3));
+		chars.mark();
+		assertEquals("123", chars.copyNext(3).toString());
 		assertEquals("ABC456", chars.copyNext(6));
 		assertFalse(chars.hasNext());
-		assertEquals("123ABC", chars.copy(0, 6));
-		assertFalse(chars.hasNext());
+		chars.resetToMark();
+		chars.mark();
+		chars.skip(6);
+		assertEquals("123ABC", chars.copyFromMark());
+		assertEquals(5, chars.position());
 	}
 	
 	@Test
