@@ -26,6 +26,12 @@
 			<version>1.0-rc1</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.annotation</artifactId>
+			<version>2.2.200</version>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<build>
