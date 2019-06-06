@@ -696,6 +696,7 @@ public class JSLexer implements Supplier<Token> {
 			} else
 				break;
 		}
+		//TODO: intern string?
 		return sb.toString();
 	}
 	
@@ -1288,7 +1289,7 @@ public class JSLexer implements Supplier<Token> {
 				default:
 					if (kind.length() < 0)
 						//TODO: better exception type
-						throw new IllegalStateException();
+						throw new IllegalStateException(""+kind);
 					chars.skip(kind.length());
 					return this.finishToken(start, flags, kind);
 			}
