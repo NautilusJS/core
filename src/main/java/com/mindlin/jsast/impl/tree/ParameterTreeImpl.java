@@ -41,8 +41,6 @@ public class ParameterTreeImpl extends AbstractTree implements ParameterTree {
 	 * @param start
 	 * @param end
 	 * @param identifier
-	 * @param rest
-	 * @param optional
 	 * @param type
 	 * @param initializer
 	 */
