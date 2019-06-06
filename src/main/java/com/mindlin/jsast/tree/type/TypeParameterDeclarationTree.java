@@ -8,7 +8,6 @@ import com.mindlin.jsast.tree.UnvisitableTree;
  * Generic type parameter (not argument).
  * 
  * @author mailmindlin
- * @see GenericRefTypeTree
  */
 public interface TypeParameterDeclarationTree extends Tree, UnvisitableTree {
 	
