@@ -1,32 +1,64 @@
 package com.mindlin.jsast.harness;
 
-import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
 
-import com.mindlin.jsast.impl.parser.JSDialect;
-import com.mindlin.jsast.impl.parser.JSDialect.JSStandardDialect;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.mindlin.jsast.harness.CompilerOption.OptionInferenceStrategy;
+import com.mindlin.jsast.i18n.DiagnosticConsumer;
 
 public class CompilerOptions {
-	public static final CompilerOption<String> PRINT_HELP = new CompilerOption<>("print_help");
-	public static final CompilerOption<JSDialect> SOURCE_LANGUAGE = new CompilerOption<>("source_language", JSStandardDialect.EVERYTHING);
-	public static final CompilerOption<String> TARGET_LANGUAGE = new CompilerOption<>("target_language");
-	public static final CompilerOption<Charset> ENCODING = new CompilerOption<>("source_encoding", Charset.defaultCharset());
+	@NonNull
+	protected DiagnosticConsumer errorHandler;
 	
-	@SuppressWarnings("rawtypes")
-	protected Map<CompilerOption, Object> options = new HashMap<>();
+	protected final Map<CompilerOption<?>, Object> options = new LinkedHashMap<>();
 	
-	public <T> void set(CompilerOption<T> option, T value) {
-		options.put(option, value);
+	public <T> void addOption(CompilerOption<T> option) {
+		this.options.putIfAbsent(option, null);
 	}
 	
-	public <T> Optional<T> get(CompilerOption<? extends T> option) {
-		@SuppressWarnings("unchecked")
-		T result = (T) options.get(option);
-		if (result == null && !options.containsKey(option))
-			return Optional.ofNullable(option.defaultValue());
-		return Optional.of(result);
+	@SuppressWarnings("unchecked")
+	public <T> void set(CompilerOption<@Nullable T> option, T value) {
+		options.merge(option, value, (p, n) -> option.reduce(this.errorHandler, (T) p, (T) n));
+	}
+	
+	public @NonNull Set<CompilerOption<?>> getOptions() {
+		return this.options.keySet();
+	}
+	
+	protected @Nullable CompilerOption<?> getOption(String name) {
+		//TODO better runtime
+		return this.getOptions()
+				.stream()
+				.filter(option -> Objects.equals(option.name(), name))
+				.findFirst()
+				.orElse(null);
+	}
+	
+	protected <T> T compute(@NonNull CompilerOption<T> option) {
+		OptionInferenceStrategy<T> inference = option.getInference();
+		if (inference == null)
+			return null;
+		Set<String> deps = new HashSet<>(inference.getDependencies());
+		//TODO: compute deps first
+		//TODO: compute optional deps
+		
+		return inference.apply(this.errorHandler, this);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T get(CompilerOption<? extends T> option) {
+		Objects.requireNonNull(option);
+		return (T) options.computeIfAbsent(option, this::compute);
+	}
+	
+	public boolean isPresent(CompilerOption<?> option) {
+		return this.options.get(option) != null;
 	}
 	
 	public <T> T get(CompilerOption<? extends T> option, T defaultValue) {
@@ -37,23 +69,12 @@ public class CompilerOptions {
 		return result;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T> T getIfPresent(@NonNull CompilerOption<? extends @Nullable T> option, T defaultValue) {
+		return (T) options.getOrDefault(option, defaultValue);
+	}
+	
 	public <T> void clear(CompilerOption<T> option) {
 		options.remove(option);
-	}
-	
-	public JSDialect parseDialect(String name) {
-		switch (name.toUpperCase()) {
-			case "ES6":
-				return JSStandardDialect.ES6;
-			case "ES7":
-			case "ES2017":
-				return JSStandardDialect.ES2017;
-			default:
-				return JSStandardDialect.EVERYTHING;
-		}
-	}
-	
-	public void parseCLIArguments(String...args) {
-		//TODO: finish
 	}
 }
