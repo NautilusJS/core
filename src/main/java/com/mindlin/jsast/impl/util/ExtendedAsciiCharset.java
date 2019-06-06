@@ -11,6 +11,8 @@ import java.nio.charset.spi.CharsetProvider;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import com.google.auto.service.AutoService;
+
 public class ExtendedAsciiCharset extends Charset {
 	
 	public static final ExtendedAsciiCharset INSTANCE = new ExtendedAsciiCharset();
@@ -89,9 +91,9 @@ public class ExtendedAsciiCharset extends Charset {
 			}
 			return CoderResult.UNDERFLOW;
 		}
-		
 	}
 	
+	@AutoService(CharsetProvider.class)
 	public static class ExtendedAsciiCharsetProvider extends CharsetProvider {
 		@Override
 		public Charset charsetForName(String name) {
@@ -103,6 +105,5 @@ public class ExtendedAsciiCharset extends Charset {
 		public Iterator<Charset> charsets() {
 			return Arrays.asList((Charset) ExtendedAsciiCharset.INSTANCE).iterator();
 		}
-		
 	}
 }
