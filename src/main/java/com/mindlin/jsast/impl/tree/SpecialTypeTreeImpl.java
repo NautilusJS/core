@@ -11,7 +11,8 @@ public class SpecialTypeTreeImpl extends AbstractTypeTree implements SpecialType
 	public static SpecialType mapType(Token t) {
 		if (t.matches(JSSyntaxKind.VOID))
 			return SpecialType.VOID;
-		String name = t.<String> getValue();
+		//TODO: please fix me
+		String name = (String) t.getValue();
 		switch (name) {
 			case "any":
 				return SpecialType.ANY;
