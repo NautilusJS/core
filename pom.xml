@@ -52,12 +52,12 @@
 		<testSourceDirectory>test</testSourceDirectory>
 		<testOutputDirectory>bin/test-classes</testOutputDirectory>
 		<testResources>
-			<resource>
+			<testResource>
 				<directory>src/test/resources</directory>
 				<includes>
 					<include>**/*.js</include>
 				</includes>
-			</resource>
+			</testResource>
 		</testResources>
 
 		<!-- TODO: Support building examples -->
