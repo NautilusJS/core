@@ -1,26 +1,39 @@
 package com.mindlin.jsast.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import static com.mindlin.jsast.impl.TestUtils.assertNumberEquals;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 import com.mindlin.jsast.exception.JSSyntaxException;
 import com.mindlin.jsast.impl.lexer.JSLexer;
+import com.mindlin.jsast.impl.lexer.JSSyntaxKind;
 import com.mindlin.jsast.impl.lexer.Token;
-import com.mindlin.jsast.impl.lexer.TokenKind;
-import com.mindlin.jsast.impl.parser.JSKeyword;
-import com.mindlin.jsast.impl.parser.JSOperator;
-import com.mindlin.jsast.impl.parser.JSSpecialGroup;
+import com.mindlin.jsast.impl.lexer.Token.NumericLiteralToken;
+import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
 import com.mindlin.jsast.impl.util.Characters;
 
 public class JSLexerTest {
 	
-	protected void assertToken(TokenKind kind, Object value, Token token) {
+	protected static void assertToken(JSSyntaxKind kind, Token token) {
 		assertEquals(kind, token.getKind());
-		assertEquals(value, token.getValue());
+	}
+	
+	protected static void assertNumericLiteral(Number expected, Token token) {
+		assertNotNull(token);
+		assertEquals(JSSyntaxKind.NUMERIC_LITERAL, token.getKind());
+		Number value = ((NumericLiteralToken) token).getValue();
+		assertNumberEquals(expected, value);
+	}
+	
+	protected static void assertStringLiteral(String text, Token token) {
+		assertNotNull(token);
+		assertEquals(JSSyntaxKind.STRING_LITERAL, token.getKind());
+		assertEquals(text, ((StringLiteralToken) token).getValue());
 	}
 	
 	@Test
@@ -55,7 +68,7 @@ public class JSLexerTest {
 	public void testStringLiteralEASCIIOctalEscape() {
 		JSLexer lexer = new JSLexer("'\\1\\12\\123\\129'");
 		String next = lexer.nextStringLiteral();
-		assertEquals("Unexpected string literal length", 5, next.length());
+		assertEquals(5, next.length(), "Unexpected string literal length");
 		assertEquals(Characters.SOH, next.charAt(0));
 		assertEquals(Characters.LF, next.charAt(1));
 		assertEquals('S', next.charAt(2));
@@ -120,6 +133,7 @@ public class JSLexerTest {
 	
 	@Test
 	public void testNumericLiteralBinary() {
+		// Check case invariance
 		{
 			JSLexer lexer = new JSLexer("0b1010");
 			assertEquals(0b1010, lexer.nextNumericLiteral().intValue());
@@ -132,22 +146,20 @@ public class JSLexerTest {
 		{
 			//Check higher numbers
 			JSLexer lexer = new JSLexer("0b102");
-			try {
-				lexer.nextNumericLiteral();
-				fail("Failed to throw exception on invalid syntax");
-			} catch (JSSyntaxException e) {
-				//Expected
-			}
+			Assertions.assertThrows(
+					JSSyntaxException.class,
+					() -> lexer.nextNumericLiteral(),
+					"Failed to throw exception on invalid syntax");
 		}
 		{
 			//Check termination
 			JSLexer lexer = new JSLexer("0b0001 0b0010;0b0011\n0b0100\r0b0101\r0b0110");
-			assertEquals(0b0001, lexer.nextNumericLiteral().intValue());
-			assertEquals(0b0010, lexer.nextNumericLiteral().intValue());
-			assertEquals(0b0011, lexer.nextNumericLiteral().intValue());
-			assertEquals(0b0100, lexer.nextNumericLiteral().intValue());
-			assertEquals(0b0101, lexer.nextNumericLiteral().intValue());
-			assertEquals(0b0110, lexer.nextNumericLiteral().intValue());
+			assertNumberEquals(0b0001, lexer.nextNumericLiteral());
+			assertNumberEquals(0b0010, lexer.nextNumericLiteral());
+			assertNumberEquals(0b0011, lexer.nextNumericLiteral());
+			assertNumberEquals(0b0100, lexer.nextNumericLiteral());
+			assertNumberEquals(0b0101, lexer.nextNumericLiteral());
+			assertNumberEquals(0b0110, lexer.nextNumericLiteral());
 		}
 	}
 	
@@ -160,12 +172,10 @@ public class JSLexerTest {
 		{
 			//Check invalid other characters numbers
 			JSLexer lexer = new JSLexer("10A");
-			try {
-				lexer.nextNumericLiteral();
-				fail("Failed to throw exception on invalid character in decimal literal");
-			} catch (JSSyntaxException e) {
-				//Expected
-			}
+			Assertions.assertThrows(
+					JSSyntaxException.class,
+					() -> lexer.nextNumericLiteral(),
+					"Failed to throw exception on invalid character in decimal literal");
 		}
 		{
 			//Check octal upgrade
@@ -200,12 +210,12 @@ public class JSLexerTest {
 		{
 			//Check termination
 			JSLexer lexer = new JSLexer("1 10;11\n100\r101\r110");
-			assertEquals(1, lexer.nextNumericLiteral().intValue());
-			assertEquals(10, lexer.nextNumericLiteral().intValue());
-			assertEquals(11, lexer.nextNumericLiteral().intValue());
-			assertEquals(100, lexer.nextNumericLiteral().intValue());
-			assertEquals(101, lexer.nextNumericLiteral().intValue());
-			assertEquals(110, lexer.nextNumericLiteral().intValue());
+			assertNumberEquals(  1, lexer.nextNumericLiteral());
+			assertNumberEquals( 10, lexer.nextNumericLiteral());
+			assertNumberEquals( 11, lexer.nextNumericLiteral());
+			assertNumberEquals(100, lexer.nextNumericLiteral());
+			assertNumberEquals(101, lexer.nextNumericLiteral());
+			assertNumberEquals(110, lexer.nextNumericLiteral());
 		}
 	}
 	
@@ -220,23 +230,23 @@ public class JSLexerTest {
 	@Test
 	public void testOctalUpgrade() {
 		//Test implicit octal
-		assertEquals("Incorrectly nextd implicit octal", 076543210, new JSLexer("076543210").nextNumericLiteral().intValue());
+		assertNumberEquals(076543210, new JSLexer("076543210").nextNumericLiteral(), "Incorrectly parsed implicit octal");
 		//Test implicit upgrade
-		assertEquals("Failed to upgrade implicit octal", 876543210, new JSLexer("0876543210").nextNumericLiteral().intValue());
+		assertNumberEquals(876543210, new JSLexer("0876543210").nextNumericLiteral(), "Failed to upgrade implicit octal");
 		//Test explicit octal
-		assertEquals("Incorrectly nextd explicit octal", 076543210, new JSLexer("0o76543210").nextNumericLiteral().intValue());
+		assertNumberEquals(076543210, new JSLexer("0o76543210").nextNumericLiteral(), "Incorrectly nextd explicit octal");
 		//Test explicit upgrade fail
-		try {
-			if (new JSLexer("0o876543210").nextNumericLiteral().intValue() == 876543210)
-				fail("Incorrectly upgraded explicit octal literal");
-			fail("Failed to throw exception upon illegal explicit octal upgrade");
-		} catch (JSSyntaxException e){}
+	}
+	
+	@Test
+	public void testIllegalExplicitOctalUpgrade() {
+		Assertions.assertThrows(JSSyntaxException.class, () -> new JSLexer("0o876543210").nextNumericLiteral(), "Explicit octal literal can't be ugraded");
 	}
 	@Test
 	public void testNumericLiteralHexdecimal() {
 		{
 			JSLexer lexer = new JSLexer("0x0123456789ABCDEF");
-			assertEquals(0x0123456789ABCDEFL, lexer.nextNumericLiteral());
+			assertNumberEquals(0x0123456789ABCDEFL, lexer.nextNumericLiteral());
 		}
 		{
 			//Check case insensitivity
@@ -246,34 +256,31 @@ public class JSLexerTest {
 		{
 			//Check invalid other characters numbers
 			JSLexer lexer = new JSLexer("0x10AG");
-			try {
-				lexer.nextNumericLiteral();
-				fail("Failed to throw exception on invalid character in hex literal");
-			} catch (JSSyntaxException e) {
-				//Expected
-			}
+			Assertions.assertThrows(
+					JSSyntaxException.class,
+					() -> lexer.nextNumericLiteral(),
+					"Failed to throw exception on invalid character in hex literal");
 		}
 		{
 			//Check header only
 			JSLexer lexer = new JSLexer("0x");
-			try {
-				lexer.nextNumericLiteral();
-				fail("Failed to throw exception on hex literal body missing");
-			} catch (JSSyntaxException e) {
-				//Expected
-			}
+			Assertions.assertThrows(
+					JSSyntaxException.class,
+					() -> lexer.nextNumericLiteral(),
+					"Failed to throw exception on hex literal body missing");
 		}
 		{
 			//Check termination
 			JSLexer lexer = new JSLexer("0x1 0x10;0x11\n0x100\r0x101\r0x110");
-			assertNumberEquals(0x1, lexer.nextNumericLiteral().intValue());
-			assertNumberEquals(0x10, lexer.nextNumericLiteral().intValue());
-			assertNumberEquals(0x11, lexer.nextNumericLiteral().intValue());
-			assertNumberEquals(0x100, lexer.nextNumericLiteral().intValue());
-			assertNumberEquals(0x101, lexer.nextNumericLiteral().intValue());
-			assertNumberEquals(0x110, lexer.nextNumericLiteral().intValue());
+			assertNumberEquals(  0x1, lexer.nextNumericLiteral());
+			assertNumberEquals( 0x10, lexer.nextNumericLiteral());
+			assertNumberEquals( 0x11, lexer.nextNumericLiteral());
+			assertNumberEquals(0x100, lexer.nextNumericLiteral());
+			assertNumberEquals(0x101, lexer.nextNumericLiteral());
+			assertNumberEquals(0x110, lexer.nextNumericLiteral());
 		}
 	}
+	
 	@Test
 	public void testEOF() {
 		JSLexer lexer = new JSLexer("'foo'");
@@ -281,8 +288,7 @@ public class JSLexerTest {
 		
 		assertTrue(lexer.isEOF());
 		Token eofToken = lexer.nextToken();
-		assertEquals(TokenKind.SPECIAL, eofToken.getKind());
-		assertEquals(JSSpecialGroup.EOF, eofToken.getValue());
+		assertEquals(JSSyntaxKind.END_OF_FILE, eofToken.getKind());
 	}
 	
 	@Test
@@ -290,24 +296,20 @@ public class JSLexerTest {
 		JSLexer lexer = new JSLexer("'bar' for asdd 0xFF");
 		
 		Token fooStringToken = lexer.nextToken();
-		assertEquals(TokenKind.STRING_LITERAL, fooStringToken.getKind());
-		assertEquals("bar", fooStringToken.getValue());
+		assertStringLiteral("bar", fooStringToken);
 		
 		Token forKeywordToken = lexer.nextToken();
-		assertEquals(TokenKind.KEYWORD, forKeywordToken.getKind());
-		assertEquals(JSKeyword.FOR, forKeywordToken.getValue());
+		assertToken(JSSyntaxKind.FOR, forKeywordToken);
 		
 		Token asddIdentifierToken = lexer.nextToken();
-		assertEquals(TokenKind.IDENTIFIER, asddIdentifierToken.getKind());
+		assertEquals(JSSyntaxKind.IDENTIFIER, asddIdentifierToken.getKind());
 		assertEquals("asdd", asddIdentifierToken.getValue());
 		
 		Token FFNumberToken = lexer.nextToken();
-		assertEquals(TokenKind.NUMERIC_LITERAL, FFNumberToken.getKind());
-		assertNumberEquals(0xFF, ((Number)FFNumberToken.getValue()).intValue());
+		assertNumericLiteral(0xFF, FFNumberToken);
 		
 		Token EofNumberToken = lexer.nextToken();
-		assertEquals(TokenKind.SPECIAL, EofNumberToken.getKind());
-		assertEquals(JSSpecialGroup.EOF, EofNumberToken.getValue());
+		assertEquals(JSSyntaxKind.END_OF_FILE, EofNumberToken.getKind());
 	}
 	
 	@Test
@@ -321,27 +323,26 @@ public class JSLexerTest {
 	 */
 	@Test
 	public void testStringLiteralEOF() {
-		try {
-			new JSLexer("'foo").nextStringLiteral();
-			fail("Failed to throw exception upon unexpected EOF");
-		} catch (JSSyntaxException e) {}
-		try {
-			new JSLexer("'foo\\'").nextStringLiteral();
-			fail("Failed to throw exception upon unexpected EOF");
-		} catch (JSSyntaxException e) {}
+		Assertions.assertThrows(
+				JSSyntaxException.class,
+				() -> new JSLexer("'foo").nextStringLiteral(),
+				"Failed to throw exception upon unexpected EOF");
+		
+		Assertions.assertThrows(
+				JSSyntaxException.class,
+				() -> new JSLexer("'foo\\'").nextStringLiteral(),
+				"Failed to throw exception upon unexpected EOF");
 	}
 	
 	@Test
 	public void testBooleanLiteral() {
 		JSLexer lexer = new JSLexer("true false");
 		Token trueToken = lexer.nextToken();
-		assertEquals(TokenKind.BOOLEAN_LITERAL, trueToken.getKind());
-		assertEquals(true, trueToken.getValue());
+		assertEquals(JSSyntaxKind.TRUE, trueToken.getKind());
 		assertEquals("true", trueToken.getText());
 		
 		Token falseToken = lexer.nextToken();
-		assertEquals(TokenKind.BOOLEAN_LITERAL, falseToken.getKind());
-		assertEquals(false, falseToken.getValue());
+		assertEquals(JSSyntaxKind.FALSE, falseToken.getKind());
 		assertEquals("false", falseToken.getText());
 	}
 	
@@ -350,86 +351,86 @@ public class JSLexerTest {
 		JSLexer lexer = new JSLexer("yield yield* yield *");
 		
 		Token next = lexer.nextToken();
-		assertEquals(TokenKind.KEYWORD, next.getKind());
-		assertEquals(JSKeyword.YIELD, next.getValue());
+		assertEquals(JSSyntaxKind.YIELD, next.getKind());
 		
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.KEYWORD, next.getKind());
-		assertEquals(JSKeyword.YIELD, next.getValue());
+		assertEquals(JSSyntaxKind.YIELD, next.getKind());
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.OPERATOR, next.getKind());
-		assertEquals(JSOperator.ASTERISK, next.getValue());
+		assertEquals(JSSyntaxKind.ASTERISK, next.getKind());
 		
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.KEYWORD, next.getKind());
-		assertEquals(JSKeyword.YIELD, next.getValue());
+		assertEquals(JSSyntaxKind.YIELD, next.getKind());
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.OPERATOR, next.getKind());
-		assertEquals(JSOperator.ASTERISK, next.getValue());
+		assertEquals(JSSyntaxKind.ASTERISK, next.getKind());
 	}
 	
 	@Test
 	public void testGenerator() {
 		JSLexer lexer = new JSLexer("function function* function *");
 		Token next = lexer.nextToken();
-		assertToken(TokenKind.KEYWORD, JSKeyword.FUNCTION, next);
+		assertToken(JSSyntaxKind.FUNCTION, next);
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.KEYWORD, next.getKind());
-		assertEquals(JSKeyword.FUNCTION, next.getValue());
+		assertEquals(JSSyntaxKind.FUNCTION, next.getKind());
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.OPERATOR, next.getKind());
-		assertEquals(JSOperator.ASTERISK, next.getValue());
+		assertEquals(JSSyntaxKind.ASTERISK, next.getKind());
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.KEYWORD, next.getKind());
-		assertEquals(JSKeyword.FUNCTION, next.getValue());
+		assertEquals(JSSyntaxKind.FUNCTION, next.getKind());
 		
 		next = lexer.nextToken();
-		assertEquals(TokenKind.OPERATOR, next.getKind());
-		assertEquals(JSOperator.ASTERISK, next.getValue());
+		assertEquals(JSSyntaxKind.ASTERISK, next.getKind());
 	}
-	
+
 	@Test
 	public void testMarkReset() {
 		JSLexer lexer = new JSLexer("1 2 3 4");
-		assertToken(TokenKind.NUMERIC_LITERAL, 1, lexer.peek());
+		assertNumericLiteral(1, lexer.peek());
 		
-		assertToken(TokenKind.NUMERIC_LITERAL, 1, lexer.nextToken());
+		assertNumericLiteral(1, lexer.nextToken());
 		
 		lexer.mark();
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.peek());
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.nextToken());
-		assertToken(TokenKind.NUMERIC_LITERAL, 3, lexer.peek());
+		assertNumericLiteral(2, lexer.peek());
+		assertNumericLiteral(2, lexer.nextToken());
+		assertNumericLiteral(3, lexer.peek());
 		lexer.reset();
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.peek());
+		assertNumericLiteral(2, lexer.peek());
 		
 	}
 	
 	@Test
 	public void testLookaheadMultiple() {
 		JSLexer lexer = new JSLexer("1 2 3 4");
-		assertToken(TokenKind.NUMERIC_LITERAL, 1, lexer.peek());
-		assertToken(TokenKind.NUMERIC_LITERAL, 1, lexer.peek(0));
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.peek(1));
-		assertToken(TokenKind.NUMERIC_LITERAL, 3, lexer.peek(2));
-		assertToken(TokenKind.NUMERIC_LITERAL, 4, lexer.peek(3));
+		assertNumericLiteral(1, lexer.peek());
+		assertNumericLiteral(1, lexer.peek(0));
+		assertNumericLiteral(2, lexer.peek(1));
+		assertNumericLiteral(3, lexer.peek(2));
+		assertNumericLiteral(4, lexer.peek(3));
 		
-		assertToken(TokenKind.NUMERIC_LITERAL, 1, lexer.nextToken());
+		assertNumericLiteral(1, lexer.nextToken());
 		
 		lexer.mark();
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.peek());
-		assertToken(TokenKind.NUMERIC_LITERAL, 3, lexer.peek(1));
-		assertToken(TokenKind.NUMERIC_LITERAL, 4, lexer.peek(2));
+		assertNumericLiteral(2, lexer.peek());
+		assertNumericLiteral(3, lexer.peek(1));
+		assertNumericLiteral(4, lexer.peek(2));
 		
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.nextToken());
-		assertToken(TokenKind.NUMERIC_LITERAL, 3, lexer.peek());
+		assertNumericLiteral(2, lexer.nextToken());
+		assertNumericLiteral(3, lexer.peek());
 		lexer.reset();
-		assertToken(TokenKind.NUMERIC_LITERAL, 2, lexer.peek());
+		assertNumericLiteral(2, lexer.peek());
+	}
+	
+	@Test
+	public void testCompleteUpdateTokens() {
+		JSLexer lexer = new JSLexer("++x--");
+		
+		assertToken(JSSyntaxKind.INCREMENT, lexer.nextToken());
+		assertToken(JSSyntaxKind.IDENTIFIER, lexer.nextToken());
+		assertToken(JSSyntaxKind.DECREMENT, lexer.nextToken());
 	}
 }
