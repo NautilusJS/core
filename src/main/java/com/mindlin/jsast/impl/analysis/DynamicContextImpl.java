@@ -88,8 +88,9 @@ public class DynamicContextImpl implements DynamicContext {
 				
 				//TODO type inference pls
 				Map<TypeVariable, Type> genericMappings = new HashMap<>();
-				for (int i = 0; i < generics.size(); i++) {
+				for (int i = 0; i < genericsProvided; i++) {
 					TypeParameter generic = alias.getTypeParameters().get(i);
+					assert generics != null;
 					Type value = generics.get(i);
 					//TODO: assert supertype stuff
 					genericMappings.put(generic, value);
