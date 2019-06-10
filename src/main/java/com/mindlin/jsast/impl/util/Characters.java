@@ -2,6 +2,11 @@ package com.mindlin.jsast.impl.util;
 
 import java.util.Arrays;
 
+/**
+ * Helper class for JS character stuff
+ * 
+ * @author mailmindlin
+ */
 public final class Characters {
 	public static final char NULL                  = '\0';
 	public static final char SOH                   = '\u0001';
@@ -94,10 +99,38 @@ public final class Characters {
 		return Arrays.binarySearch(JS_WHITESPACE, c) >= 0;
 	}
 	
+	public static boolean isJsWhitespace(final int c) {
+		if (c > Character.MAX_VALUE)
+			//TODO: is this true?
+			return false;
+		return isJsWhitespace((char) c);
+	}
+	
 	public static boolean isDecimalDigit(char c) {
 		return '0' <= c && c <= '9';
 	}
 	
+	/**
+	 * 
+	 * @param c Character
+	 * @return Value of `c` as decimal digit, or -1 if not decimal digit
+	 */
+	public static int asDecimalDigit(char c) {
+		return isDecimalDigit(c) ? (c - '0') : -1;
+	}
+	
+	/**
+	 * If the character can start a numeric literal token.
+	 * Valid characters:
+	 * <ul>
+	 * 	<li>Decimal digit ({@code 0-9})</li>
+	 * 	<li>Decimal ({@code .})</li>
+	 * 	<li>Plus sign ({@code +})</li>
+	 * 	<li>Minus sign ({@code -})</li>
+	 * </ul>
+	 * @param c Character
+	 * @return If it can start a numeric literal token.
+	 */
 	public static boolean canStartNumber(char c) {
 		return isDecimalDigit(c) || (c == '.') || (c == '+') || (c == '-');
 	}

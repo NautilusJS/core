@@ -3,9 +3,9 @@ package com.mindlin.jsast.impl.tree;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.mindlin.jsast.impl.util.LongStack;
 import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.nautilus.fs.SourcePosition;
+import com.mindlin.nautilus.impl.util.LongStack;
 
 /**
  * Provider for mapping raw offsets to {@link SourcePosition SourcePositions}. 

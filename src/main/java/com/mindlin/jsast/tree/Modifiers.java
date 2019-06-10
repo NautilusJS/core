@@ -9,7 +9,7 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import com.mindlin.jsast.impl.util.ObjectCache;
+import com.mindlin.nautilus.util.ObjectCache;
 
 /**
  * Declaration modifiers.
