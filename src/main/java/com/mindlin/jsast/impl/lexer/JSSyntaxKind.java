@@ -8,8 +8,6 @@ package com.mindlin.jsast.impl.lexer;
 public enum JSSyntaxKind {
 	// Special
 	SEMICOLON(";"),
-	@Deprecated
-	END_OF_LINE,
 	END_OF_FILE,
 	IDENTIFIER,
 	COMMENT,

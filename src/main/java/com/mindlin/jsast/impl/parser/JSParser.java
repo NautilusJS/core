@@ -216,7 +216,7 @@ public class JSParser {
 		Token t = src.nextToken();
 		if (t.matches(JSSyntaxKind.SEMICOLON))
 			return t;
-		if (context.isStrict() && (t.matches(JSSyntaxKind.END_OF_LINE) || t.matches(JSSyntaxKind.END_OF_FILE)))
+		if (!context.isStrict() && (t.hasPrecedingNewline() || t.matches(JSSyntaxKind.END_OF_FILE)))
 			return t;
 		throw new JSSyntaxException("Illegal token " + t + "; expected EOL", t.getRange());
 	}
@@ -399,7 +399,6 @@ public class JSParser {
 				return this.parseExpressionStatement(src, context);
 			case END_OF_FILE:
 				return null;
-			case END_OF_LINE:
 			case SEMICOLON:
 				return new EmptyStatementTreeImpl(src.skip(lookahead));
 			case COMMENT:
