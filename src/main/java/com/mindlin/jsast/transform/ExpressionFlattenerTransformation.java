@@ -198,7 +198,7 @@ public class ExpressionFlattenerTransformation implements TreeTransformation<AST
 	public ExpressionTree visitSequence(SequenceExpressionTree node, ASTTransformerContext ctx) {
 		boolean modified = false;
 		ArrayList<ExpressionTree> expressions = new ArrayList<>();
-		for (ExpressionTree expression : node.getExpressions().subList(0, node.getExpressions().size() - 1)) {
+		for (ExpressionTree expression : node.getElements().subList(0, node.getElements().size() - 1)) {
 			if (!SideEffectValidator.hasSideEffectsMaybe(ctx, expression))
 				modified = true;
 			else
@@ -206,8 +206,8 @@ public class ExpressionFlattenerTransformation implements TreeTransformation<AST
 		}
 		
 		//Ensure that the last value is preserved
-		if (expressions.isEmpty() || expressions.get(expressions.size() - 1) != node.getExpressions().get(node.getExpressions().size() - 1))
-			expressions.add(node.getExpressions().get(node.getExpressions().size() - 1));
+		if (expressions.isEmpty() || expressions.get(expressions.size() - 1) != node.getElements().get(node.getElements().size() - 1))
+			expressions.add(node.getElements().get(node.getElements().size() - 1));
 		
 		if (expressions.size() == 1)
 			return expressions.get(0);

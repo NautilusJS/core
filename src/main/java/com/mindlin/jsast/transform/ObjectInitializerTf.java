@@ -6,18 +6,20 @@ import java.util.List;
 import com.mindlin.jsast.impl.tree.ObjectLiteralTreeImpl;
 import com.mindlin.jsast.tree.ComputedPropertyKeyTree;
 import com.mindlin.jsast.tree.ExpressionTree;
-import com.mindlin.jsast.tree.ObjectLiteralPropertyTree;
+import com.mindlin.jsast.tree.ObjectLiteralElement;
 import com.mindlin.jsast.tree.ObjectLiteralTree;
-import com.mindlin.jsast.tree.ObjectPropertyKeyTree;
 import com.mindlin.jsast.tree.Tree.Kind;
 
 public class ObjectInitializerTf implements TreeTransformation<Void> {
 
+	protected ObjectLiteralElement mapElement() {
+		
+	}
 	@Override
 	public ExpressionTree visitObjectLiteral(ObjectLiteralTree node, Void d) {
 		boolean modified = false;
-		List<ObjectLiteralPropertyTree> props = new ArrayList<>();
-		for (ObjectLiteralPropertyTree property : node.getProperties()) {
+		List<ObjectLiteralElement> props = new ArrayList<>();
+		for (ObjectLiteralElement property : node.getProperties()) {
 			ObjectPropertyKeyTree key = property.getKey();
 			ExpressionTree value = property.getInitializer();
 			if (key == value)

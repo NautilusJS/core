@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Scanner;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+
 import com.mindlin.jsast.impl.parser.JSParser;
-import com.mindlin.jsast.impl.runtime.JSScriptEngine;
 import com.mindlin.jsast.impl.writer.JSWriterImpl;
 import com.mindlin.jsast.transform.DeadCodeRemovalTransformation;
 import com.mindlin.jsast.transform.ES6Transpiler;
@@ -16,6 +19,11 @@ import com.mindlin.jsast.tree.CompilationUnitTree;
 import com.mindlin.jsast.writer.JSWriterOptions;
 
 public class REPL {
+	protected static ScriptEngine getEngine() {
+		ScriptEngineManager manager = new ScriptEngineManager();
+		return manager.getEngineByName("JavaScript");
+	}
+	
 	public static void main(String[] args) throws IOException {
 		JSParser parser = new JSParser();
 		
@@ -30,7 +38,8 @@ public class REPL {
 		@SuppressWarnings("resource")
 		Scanner s = new Scanner(System.in);
 		
-		JSScriptEngine engine = new JSScriptEngine();
+		//TODO
+		ScriptEngine engine = getEngine();
 		
 		
 		System.out.println("Nautilus JS transpiler");
