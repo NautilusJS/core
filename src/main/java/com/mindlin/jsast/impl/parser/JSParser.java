@@ -4151,12 +4151,11 @@ public class JSParser {
 		/**
 		 * Pop the context, inheriting 
 		 */
-		public Context inheritCoverGrammar() {
+		public void inheritCoverGrammar() {
 			int mask = Context.FLAG_BINDING_ELEMENT | Context.FLAG_ASSIGNMENT_TARGET;
 			int masked = this.data.flags & mask;
 			this.pop();
 			this.data.flags &= masked | ~mask;
-			return this;
 		}
 		
 		public Context inheritingCoverGrammar() {
