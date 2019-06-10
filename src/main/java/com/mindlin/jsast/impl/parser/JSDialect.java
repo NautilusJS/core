@@ -9,18 +9,6 @@ public interface JSDialect {
 		if (!supports(feature))
 			throw new JSUnsupportedException(feature, position);
 	}
-	default boolean supportsTypes() {
-		return supports("ts.types");
-	}
-	default boolean supportsLambdas() {
-		return supports("js.function.lambda");
-	}
-	default boolean supportsModule() {
-		return supports("js.module");
-	}
-	default boolean supportsYield() {
-		return supports("js.yield");
-	}
 	public static enum JSStandardDialect implements JSDialect {
 		ES5 {
 			@Override
