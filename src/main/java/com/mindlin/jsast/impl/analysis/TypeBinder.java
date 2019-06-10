@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.mindlin.jsast.impl.util.RecursiveMap;
 import com.mindlin.jsast.type.CompositeType;
 import com.mindlin.jsast.type.IndexInfo;
 import com.mindlin.jsast.type.ObjectType;
@@ -24,6 +23,7 @@ import com.mindlin.jsast.type.TypeMember;
 import com.mindlin.jsast.type.TypeParameter;
 import com.mindlin.jsast.type.TypeVariable;
 import com.mindlin.jsast.type.UnaryType;
+import com.mindlin.nautilus.impl.util.RecursiveMap;
 
 public class TypeBinder {
 	/**

@@ -6,14 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.mindlin.jsast.analysis.VariableInfo;
 import com.mindlin.jsast.exception.TSTypeException;
-import com.mindlin.jsast.impl.util.RecursiveMap;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.type.GenericType;
 import com.mindlin.jsast.type.Type;
 import com.mindlin.jsast.type.TypeParameter;
 import com.mindlin.jsast.type.TypeVariable;
+import com.mindlin.nautilus.impl.util.RecursiveMap;
 
 public class DynamicContextImpl implements DynamicContext {
 	protected final int depth;
