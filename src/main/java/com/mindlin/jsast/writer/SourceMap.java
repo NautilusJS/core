@@ -2,7 +2,7 @@ package com.mindlin.jsast.writer;
 
 import java.util.Map;
 
-import com.mindlin.jsast.fs.SourceFile;
+import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.nautilus.fs.SourcePosition;
 
 public class SourceMap {

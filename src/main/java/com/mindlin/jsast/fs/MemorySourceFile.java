@@ -2,8 +2,9 @@ package com.mindlin.jsast.fs;
 
 import java.nio.file.Path;
 
-import com.mindlin.jsast.impl.util.CharacterArrayStream;
-import com.mindlin.jsast.impl.util.CharacterStream;
+import com.mindlin.nautilus.fs.SourceFile;
+import com.mindlin.nautilus.impl.util.CharacterArrayStream;
+import com.mindlin.nautilus.util.CharacterStream;
 
 public class MemorySourceFile implements SourceFile {
 	protected char[] data;

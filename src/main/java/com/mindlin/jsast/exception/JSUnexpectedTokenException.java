@@ -1,8 +1,8 @@
 package com.mindlin.jsast.exception;
 
-import com.mindlin.jsast.fs.SourceRange;
 import com.mindlin.jsast.impl.lexer.JSSyntaxKind;
 import com.mindlin.jsast.impl.lexer.Token;
+import com.mindlin.nautilus.fs.SourceRange;
 
 public class JSUnexpectedTokenException extends JSSyntaxException {
 	private static final long serialVersionUID = -5669873573919357134L;

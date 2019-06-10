@@ -18,8 +18,7 @@ import com.mindlin.jsast.exception.JSEOFException;
 import com.mindlin.jsast.exception.JSSyntaxException;
 import com.mindlin.jsast.exception.JSUnexpectedTokenException;
 import com.mindlin.jsast.exception.JSUnsupportedException;
-import com.mindlin.jsast.fs.SourceFile;
-import com.mindlin.jsast.fs.SourceRange;
+import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.jsast.impl.lexer.JSLexer;
 import com.mindlin.jsast.impl.lexer.JSSyntaxKind;
 import com.mindlin.jsast.impl.lexer.Token;
@@ -193,6 +192,7 @@ import com.mindlin.jsast.tree.type.TypeElementTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
 import com.mindlin.nautilus.fs.SourcePosition;
+import com.mindlin.nautilus.fs.SourceRange;
 import com.mindlin.nautilus.util.Pair;
 
 public class JSParser {
