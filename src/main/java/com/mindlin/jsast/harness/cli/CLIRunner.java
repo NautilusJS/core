@@ -17,6 +17,7 @@ import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.ToIntFunction;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -29,7 +30,6 @@ import com.mindlin.jsast.harness.CompilerOptionProvider;
 import com.mindlin.jsast.harness.CompilerOptions;
 import com.mindlin.jsast.harness.NautilusCompiler;
 import com.mindlin.jsast.harness.StandardCompilerOptions;
-import com.mindlin.jsast.harness.discovery.CompilerFileDiscoveryService;
 import com.mindlin.jsast.harness.plugin.PluginManager;
 import com.mindlin.jsast.i18n.Diagnostic;
 
@@ -138,7 +138,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		return result;
 	}
 	
-	protected ParsedCommandLine parseCLI(CompilerOptions options, List<String> args) {
+	protected @NonNull ParsedCommandLine parseCLI(CompilerOptions options, List<String> args) {
 		Map<String, CompilerOption<?>> optionLUT = new HashMap<>();
 		for (CompilerOption<?> option : options.getOptions()) {
 			if (option.getAttributes().contains(CompilerOption.Attribute.NO_CLI))
@@ -218,9 +218,15 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		}
 	}
 	
-	public CLIResult writeConfigFile(CompilerOptions options, Appendable writer) {
-		//TODO finish
-		return CLIResult.FAILURE_NO_OUTPUT;
+	public CLIResult writeConfigFile(CompilerOptions options, @NonNull Appendable out) {
+		try (ConfigFileWriter writer = new ConfigFileWriter(out)) {
+			writer.write(options);
+			return CLIResult.SUCCESS;
+		} catch (IOException e) {
+			e.printStackTrace(this.err);
+			//TODO: emit diagnostics?
+			return CLIResult.FAILURE;
+		}
 	}
 	
 	protected CLIResult compile(ParsedCommandLine args) {

@@ -15,4 +15,14 @@ public interface MethodDeclarationTree extends DecoratableTree, PropertyTree, Fu
 	default <R, D> R accept(ClassElementVisitor<R, D> visitor, D data) {
 		return visitor.visitMethodDeclaration(this, data);
 	}
+	
+	@Override
+	default <R, D> R accept(ObjectLiteralElementVisitor<R, D> visitor, D data) {
+		return visitor.visitMethodDeclaration(this, data);
+	}
+	
+	@Override
+	default <R, D> R accept(TreeVisitor<R, D> visitor, D data) {
+		return visitor.visitMethodDeclaration(this, data);
+	}
 }

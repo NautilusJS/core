@@ -12,9 +12,9 @@ import com.mindlin.jsast.impl.util.CharacterStream;
  */
 public interface SourceFile {
 	/**
-	 * Get path to file location. May return null
+	 * @return Get path to file location
 	 */
-	Path getPath();
+	@Nullable Path getPath();
 	
 	/**
 	 * Get stream of source
@@ -48,7 +48,7 @@ public interface SourceFile {
 		return idx;
 	}
 	
-	default SourcePosition getOffsetPosotion(long offset) {
+	default @NonNull SourcePosition getOffsetPosotion(long offset) throws IllegalArgumentException, IndexOutOfBoundsException {
 		long[] offsets = lineOffsets();
 		int line = Arrays.binarySearch(offsets, offset);
 		if (line < 0)

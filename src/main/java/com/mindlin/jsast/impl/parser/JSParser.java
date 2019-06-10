@@ -275,6 +275,8 @@ public class JSParser {
 		context.setDirectiveTarget(true);
 		SourcePosition start = src.getPosition();
 		
+		//TODO: parse comment pragmas
+		
 		while ((value = parseStatement(src, context)) != null) {
 			elements.add(value);
 			
@@ -1017,7 +1019,9 @@ public class JSParser {
 		expectEOL(src, context);
 		//TODO: fix end to happen after EOL (also handle for expr == null)
 		
-		return new ReturnTreeImpl(keywordToken.getStart(), expr.getEnd(), expr);
+		SourcePosition start = keywordToken.getStart();
+		SourcePosition end = src.getPosition();
+		return new ReturnTreeImpl(start, end, expr);
 	}
 	
 	/**

@@ -6,7 +6,7 @@ package com.mindlin.jsast.tree;
  * 
  * @author mailmindlin
  */
-public interface AssignmentPropertyTree extends PropertyTree, ObjectLiteralElement, UnvisitableTree {
+public interface AssignmentPropertyTree extends PropertyTree, ObjectLiteralElement {
 	ExpressionTree getInitializer();
 	
 	@Override

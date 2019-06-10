@@ -58,6 +58,11 @@ public class Token {
 		return this.getKind() == JSSyntaxKind.IDENTIFIER;
 	}
 	
+	public boolean hasFlag(int flag) {
+		//TODO: enum-based impl?
+		return (this.flags & flag) != 0;
+	}
+	
 	public boolean matches(JSSyntaxKind kind) {
 		return getKind() == kind;
 	}
