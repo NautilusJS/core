@@ -3,7 +3,6 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ClassElementTree;
 import com.mindlin.jsast.tree.ClassTreeBase;
 import com.mindlin.jsast.tree.DecoratorTree;
@@ -11,6 +10,7 @@ import com.mindlin.jsast.tree.HeritageClauseTree;
 import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public abstract class AbstractClassTree extends AbstractTree implements ClassTreeBase {
 	protected final Modifiers modifiers;

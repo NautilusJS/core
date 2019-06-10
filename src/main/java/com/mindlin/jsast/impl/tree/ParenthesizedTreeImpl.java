@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.ParenthesizedTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class ParenthesizedTreeImpl extends AbstractTree implements ParenthesizedTree {
 	protected final ExpressionTree expression;

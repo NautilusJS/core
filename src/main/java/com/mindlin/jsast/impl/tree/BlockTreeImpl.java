@@ -3,9 +3,9 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.BlockTree;
 import com.mindlin.jsast.tree.StatementTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class BlockTreeImpl extends AbstractTree implements BlockTree {
 	protected final List<? extends StatementTree> statements;

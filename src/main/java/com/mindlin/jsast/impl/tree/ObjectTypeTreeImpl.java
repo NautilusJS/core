@@ -3,9 +3,9 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.type.ObjectTypeTree;
 import com.mindlin.jsast.tree.type.TypeElementTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class ObjectTypeTreeImpl extends AbstractTypeTree implements ObjectTypeTree {
 	protected final List<TypeElementTree> properties;

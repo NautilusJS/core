@@ -13,7 +13,6 @@ import com.mindlin.jsast.exception.JSEOFException;
 import com.mindlin.jsast.exception.JSSyntaxException;
 import com.mindlin.jsast.exception.JSUnexpectedTokenException;
 import com.mindlin.jsast.fs.SourceFile;
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.fs.SourceRange;
 import com.mindlin.jsast.impl.lexer.ParsedNumber.ParsedDouble;
 import com.mindlin.jsast.impl.lexer.ParsedNumber.ParsedInteger;
@@ -24,10 +23,10 @@ import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
 import com.mindlin.jsast.impl.lexer.Token.TemplateLiteralToken;
 import com.mindlin.jsast.impl.tree.LineMap;
 import com.mindlin.jsast.impl.tree.LineMap.LineMapBuilder;
-import com.mindlin.jsast.impl.util.BooleanStack;
 import com.mindlin.jsast.impl.util.CharacterArrayStream;
 import com.mindlin.jsast.impl.util.CharacterStream;
 import com.mindlin.jsast.impl.util.Characters;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class JSLexer implements Supplier<Token> {
 	
@@ -172,7 +171,7 @@ public class JSLexer implements Supplier<Token> {
 	 * 
 	 * @return character read
 	 * @see <a href="https://tc39.github.io/ecma262/#prod-UnicodeEscapeSequence">ECMAScript 262 &sect; 11.8.4</a>
-	 * @see <a href="https://mathiasbynens.be/notes/javascript-escapes">JavaScript character escape sequences · Mathias Bynens</a>
+	 * @see <a href="https://mathiasbynens.be/notes/javascript-escapes">JavaScript character escape sequences ï¿½ Mathias Bynens</a>
 	 */
 	protected String readUnicodeEscapeSequence() {
 		long start = this.getPositionOffset();

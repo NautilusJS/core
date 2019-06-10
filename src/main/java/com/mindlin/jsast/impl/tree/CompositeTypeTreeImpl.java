@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.type.CompositeTypeTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 /**
  * Class to implement union and intersection types.

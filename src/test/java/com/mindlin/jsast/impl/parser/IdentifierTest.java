@@ -1,10 +1,10 @@
 package com.mindlin.jsast.impl.parser;
 
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpression;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.IdentifierTree;

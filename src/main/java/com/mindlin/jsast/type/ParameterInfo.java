@@ -1,7 +1,7 @@
 package com.mindlin.jsast.type;
 
-import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ExpressionTree;
+import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.PatternTree;
 
 public class ParameterInfo {

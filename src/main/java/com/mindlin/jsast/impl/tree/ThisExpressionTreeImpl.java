@@ -1,9 +1,9 @@
 package com.mindlin.jsast.impl.tree;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.fs.SourceRange;
 import com.mindlin.jsast.impl.lexer.Token;
 import com.mindlin.jsast.tree.ThisExpressionTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class ThisExpressionTreeImpl extends AbstractTree implements ThisExpressionTree {
 	public ThisExpressionTreeImpl(Token t) {

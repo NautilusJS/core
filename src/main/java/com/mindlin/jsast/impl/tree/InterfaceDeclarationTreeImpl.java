@@ -3,12 +3,12 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.HeritageClauseTree;
 import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.type.InterfaceDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeElementTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class InterfaceDeclarationTreeImpl extends AbstractTree implements InterfaceDeclarationTree {
 	protected final IdentifierTree name;

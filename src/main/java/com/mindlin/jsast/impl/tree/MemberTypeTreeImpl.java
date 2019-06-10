@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.type.MemberTypeTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class MemberTypeTreeImpl extends AbstractTypeTree implements MemberTypeTree {
 	protected final TypeTree base;

@@ -1,7 +1,7 @@
 package com.mindlin.jsast.impl.parser;
 
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseStatement;
 
 import org.junit.Test;
 

@@ -3,10 +3,10 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.SwitchCaseTree;
 import com.mindlin.jsast.tree.SwitchTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class SwitchTreeImpl extends AbstractTree implements SwitchTree {
 	protected final List<? extends SwitchCaseTree> cases;

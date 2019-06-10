@@ -1,10 +1,10 @@
 package com.mindlin.jsast.impl.tree;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.PropertyName;
 import com.mindlin.jsast.tree.PropertySignatureTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class PropertySignatureTreeImpl extends AbstractTree implements PropertySignatureTree {
 	protected final Modifiers modifiers;

@@ -1,7 +1,11 @@
 package com.mindlin.jsast.impl.parser;
 
 import static com.mindlin.jsast.impl.TestUtils.assertNumberEquals;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,10 +28,9 @@ import com.mindlin.jsast.tree.StatementTree;
 import com.mindlin.jsast.tree.StringLiteralTree;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.Tree.Kind;
-
 import com.mindlin.jsast.tree.type.SpecialTypeTree;
-import com.mindlin.jsast.tree.type.TypeTree;
 import com.mindlin.jsast.tree.type.SpecialTypeTree.SpecialType;
+import com.mindlin.jsast.tree.type.TypeTree;
 
 @RunWith(Suite.class)
 @SuiteClasses({ArrayLiteralTest.class, AssignmentTest.class, BinaryExpressionTest.class, ClassDeclarationTest.class, DoLoopTest.class, ForLoopTest.class, IdentifierTest.class, ImportStatementTest.class, InterfaceDeclarationTest.class, LambdaTest.class, OperatorTest.class, RegExpLiteralTest.class, StatementTest.class, TemplateLiteralTest.class, TypeTest.class, UnaryOperatorTest.class, VariableDeclarationTest.class })

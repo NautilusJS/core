@@ -1,14 +1,17 @@
 package com.mindlin.jsast.impl.parser;
 
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertModifiers;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertSingleElementKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseStatement;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ClassTreeBase.ClassDeclarationTree;
 import com.mindlin.jsast.tree.HeritageClauseTree;
 import com.mindlin.jsast.tree.HeritageExpressionTree;
+import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 

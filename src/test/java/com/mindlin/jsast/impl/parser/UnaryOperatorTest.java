@@ -1,14 +1,16 @@
 package com.mindlin.jsast.impl.parser;
 
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertExceptionalExpression;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertLiteral;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpression;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpressionWith;
 
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.SpreadElementTree;
-import com.mindlin.jsast.tree.UnaryTree;
 import com.mindlin.jsast.tree.Tree.Kind;
-
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
+import com.mindlin.jsast.tree.UnaryTree;
 
 public class UnaryOperatorTest {
 	@Test

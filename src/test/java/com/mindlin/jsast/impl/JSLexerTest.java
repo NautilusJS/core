@@ -1,10 +1,9 @@
 package com.mindlin.jsast.impl;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.mindlin.jsast.impl.TestUtils.assertNumberEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import static com.mindlin.jsast.impl.TestUtils.assertNumberEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;

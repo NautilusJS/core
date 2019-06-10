@@ -1,16 +1,23 @@
 package com.mindlin.jsast.impl.parser;
 
-import static org.junit.Assert.*;
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertExceptionalExpression;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertLiteral;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertSpecialType;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseStatement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.BinaryExpressionTree;
+import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.VariableDeclarationTree;
+import com.mindlin.jsast.tree.VariableDeclarationTree.VariableDeclarationKind;
 import com.mindlin.jsast.tree.VariableDeclaratorTree;
 import com.mindlin.jsast.tree.type.SpecialTypeTree.SpecialType;
-import com.mindlin.jsast.tree.Tree.Kind;
-import com.mindlin.jsast.tree.VariableDeclarationTree.VariableDeclarationKind;
 
 public class VariableDeclarationTest {
 	

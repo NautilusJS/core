@@ -2,12 +2,12 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.AssignmentPatternTree;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.PatternTree;
 import com.mindlin.jsast.tree.PropertyName;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class AssignmentPatternTreeImpl extends AbstractTree implements AssignmentPatternTree {
 	protected final PropertyName name;

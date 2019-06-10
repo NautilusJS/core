@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.RegExpLiteralTree;
 import com.mindlin.jsast.tree.Tree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class RegExpLiteralTreeImpl extends AbstractTree implements RegExpLiteralTree {
 	protected final String body;

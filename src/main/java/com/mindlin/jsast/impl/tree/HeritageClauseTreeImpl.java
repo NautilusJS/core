@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.List;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.HeritageClauseTree;
 import com.mindlin.jsast.tree.HeritageExpressionTree;
 import com.mindlin.jsast.tree.Tree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class HeritageClauseTreeImpl extends AbstractTree implements HeritageClauseTree {
 	protected final Tree.Kind kind;

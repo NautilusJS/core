@@ -3,7 +3,6 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.DecoratorTree;
 import com.mindlin.jsast.tree.FunctionDeclarationTree;
 import com.mindlin.jsast.tree.FunctionExpressionTree;
@@ -16,6 +15,7 @@ import com.mindlin.jsast.tree.PropertyName;
 import com.mindlin.jsast.tree.StatementTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public abstract class AbstractFunctionTree extends AbstractTree implements FunctionTree {
 	protected final Modifiers modifiers;

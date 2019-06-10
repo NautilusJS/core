@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
 import com.mindlin.jsast.tree.StringLiteralTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class StringLiteralTreeImpl extends AbstractTree implements StringLiteralTree {
 	protected final String value;

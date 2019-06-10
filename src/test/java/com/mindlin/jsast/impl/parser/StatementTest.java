@@ -1,7 +1,15 @@
 package com.mindlin.jsast.impl.parser;
 
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertExceptionalStatement;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertLiteral;
+import static com.mindlin.jsast.impl.parser.JSParserTest.createLexer;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseStatement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -14,8 +22,8 @@ import com.mindlin.jsast.tree.ContinueTree;
 import com.mindlin.jsast.tree.LabeledStatementTree;
 import com.mindlin.jsast.tree.SwitchCaseTree;
 import com.mindlin.jsast.tree.SwitchTree;
-import com.mindlin.jsast.tree.WithTree;
 import com.mindlin.jsast.tree.Tree.Kind;
+import com.mindlin.jsast.tree.WithTree;
 
 public class StatementTest {
 	

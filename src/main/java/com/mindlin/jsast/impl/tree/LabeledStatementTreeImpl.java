@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.LabeledStatementTree;
 import com.mindlin.jsast.tree.StatementTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class LabeledStatementTreeImpl extends AbstractControlStatementTree implements LabeledStatementTree {
 	protected final IdentifierTree name;

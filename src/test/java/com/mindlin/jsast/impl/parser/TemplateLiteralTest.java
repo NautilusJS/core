@@ -1,6 +1,10 @@
 package com.mindlin.jsast.impl.parser;
 
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertLiteral;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpression;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -12,8 +16,6 @@ import com.mindlin.jsast.tree.TaggedTemplateLiteralTree;
 import com.mindlin.jsast.tree.TemplateElementTree;
 import com.mindlin.jsast.tree.TemplateLiteralTree;
 import com.mindlin.jsast.tree.Tree.Kind;
-
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 
 public class TemplateLiteralTest {
 	

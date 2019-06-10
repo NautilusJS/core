@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.impl.lexer.Token.NumericLiteralToken;
 import com.mindlin.jsast.tree.NumericLiteralTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class NumericLiteralTreeImpl extends AbstractTree implements NumericLiteralTree {
 	protected final Number value;

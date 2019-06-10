@@ -1,7 +1,7 @@
 package com.mindlin.jsast.exception;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.fs.SourceRange;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class JSUnsupportedException extends JSException {
 	private static final long serialVersionUID = -1291736363417012727L;

@@ -1,10 +1,10 @@
 package com.mindlin.jsast.impl.tree;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.AssignmentTree;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.PatternTree;
 import com.mindlin.jsast.tree.Tree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class AssignmentTreeImpl extends AbstractTree implements AssignmentTree {
 	protected final Tree.Kind kind;

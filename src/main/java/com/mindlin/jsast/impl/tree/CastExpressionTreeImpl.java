@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.CastExpressionTree;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class CastExpressionTreeImpl extends AbstractTree implements CastExpressionTree {
 	protected final ExpressionTree expression;

@@ -3,13 +3,13 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.DecoratorTree;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ParameterTree;
 import com.mindlin.jsast.tree.PatternTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class ParameterTreeImpl extends AbstractTree implements ParameterTree {
 	protected final Modifiers modifiers;

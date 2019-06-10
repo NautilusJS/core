@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
-import com.mindlin.jsast.tree.type.UnaryTypeTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.jsast.tree.type.UnaryTypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class UnaryTypeTreeImpl extends AbstractTypeTree implements UnaryTypeTree {
 	protected final Kind kind;

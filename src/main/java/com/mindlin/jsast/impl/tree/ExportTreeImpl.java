@@ -1,8 +1,8 @@
 package com.mindlin.jsast.impl.tree;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ExportTree;
 import com.mindlin.jsast.tree.ExpressionTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class ExportTreeImpl extends AbstractTree implements ExportTree {
 	protected final boolean isDefault;

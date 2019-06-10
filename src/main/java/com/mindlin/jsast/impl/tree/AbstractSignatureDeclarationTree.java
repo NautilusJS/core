@@ -2,7 +2,6 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.List;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.DecoratorTree;
 import com.mindlin.jsast.tree.MethodSignatureTree;
 import com.mindlin.jsast.tree.Modifiers;
@@ -13,6 +12,7 @@ import com.mindlin.jsast.tree.type.ConstructorTypeTree;
 import com.mindlin.jsast.tree.type.FunctionTypeTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public abstract class AbstractSignatureDeclarationTree extends AbstractTree implements SignatureDeclarationTree {
 	protected final PropertyName name;

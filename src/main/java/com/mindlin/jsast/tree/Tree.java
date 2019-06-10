@@ -3,7 +3,6 @@ package com.mindlin.jsast.tree;
 import java.util.Iterator;
 import java.util.List;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.fs.SourceRange;
 import com.mindlin.jsast.tree.ClassTreeBase.ClassDeclarationTree;
 import com.mindlin.jsast.tree.ClassTreeBase.ClassExpressionTree;
@@ -32,6 +31,7 @@ import com.mindlin.jsast.tree.type.TypeAliasTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
 import com.mindlin.jsast.tree.type.UnaryTypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 //see http://download.java.net/java/jdk9/docs/jdk/api/nashorn/jdk/nashorn/api/tree/package-summary.html
 //http://docs.oracle.com/javase/8/docs/jdk/api/javac/tree/index.html

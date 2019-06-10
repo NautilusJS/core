@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.IfTree;
 import com.mindlin.jsast.tree.StatementTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class IfTreeImpl extends AbstractTree implements IfTree {
 	protected final ExpressionTree expression;

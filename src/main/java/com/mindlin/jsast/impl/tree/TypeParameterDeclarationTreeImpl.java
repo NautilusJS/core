@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class TypeParameterDeclarationTreeImpl extends AbstractTree implements TypeParameterDeclarationTree {
 	protected final IdentifierTree name;

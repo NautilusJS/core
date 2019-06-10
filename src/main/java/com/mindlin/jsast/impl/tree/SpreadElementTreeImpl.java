@@ -2,9 +2,9 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.SpreadElementTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class SpreadElementTreeImpl extends AbstractTree implements SpreadElementTree {
 	protected final ExpressionTree expr;

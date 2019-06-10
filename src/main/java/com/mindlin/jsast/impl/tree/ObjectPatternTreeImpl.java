@@ -3,8 +3,8 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ObjectPatternTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class ObjectPatternTreeImpl extends AbstractTree implements ObjectPatternTree {
 	protected final List<ObjectPatternElement> properties;

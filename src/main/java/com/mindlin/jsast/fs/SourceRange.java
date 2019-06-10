@@ -3,6 +3,8 @@ package com.mindlin.jsast.fs;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.mindlin.nautilus.fs.SourcePosition;
+
 public class SourceRange implements Serializable {
 	private static final long serialVersionUID = -1130923738278939904L;
 	
@@ -80,6 +82,6 @@ public class SourceRange implements Serializable {
 			return String.format("<%s(%d:%d - %d:%d)>", name, start.getLine(), start.getCol(), end.getLine(), end.getCol());
 		}
 		
-		return String.format("<%s(%d:%d-%d)>", name, start.line, start.col, end.col);
+		return String.format("<%s(%d:%d-%d)>", name, start.getLine(), start.getCol(), end.getCol());
 	}
 }

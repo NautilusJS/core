@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.StatementTree;
 import com.mindlin.jsast.tree.WithTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class WithTreeImpl extends AbstractControlStatementTree implements WithTree {
 	protected final ExpressionTree scope;

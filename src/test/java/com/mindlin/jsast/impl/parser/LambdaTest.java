@@ -1,6 +1,16 @@
 package com.mindlin.jsast.impl.parser;
 
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertExceptionalExpression;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertLiteral;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertModifiers;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertSpecialType;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpression;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -12,8 +22,6 @@ import com.mindlin.jsast.tree.ParameterTree;
 import com.mindlin.jsast.tree.ReturnTree;
 import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.type.SpecialTypeTree.SpecialType;
-
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 
 public class LambdaTest {
 	

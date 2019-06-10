@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import com.mindlin.jsast.fs.SourceFile;
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.impl.util.LongStack;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 /**
  * Provider for mapping raw offsets to {@link SourcePosition SourcePositions}. 

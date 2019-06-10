@@ -1,13 +1,12 @@
 package com.mindlin.jsast.impl.parser;
 
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpression;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 import com.mindlin.jsast.tree.RegExpLiteralTree;
 import com.mindlin.jsast.tree.Tree.Kind;
-
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
 
 
 public class RegExpLiteralTest {

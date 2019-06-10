@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.impl.lexer.JSSyntaxKind;
 import com.mindlin.jsast.impl.lexer.Token;
 import com.mindlin.jsast.tree.BooleanLiteralTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class BooleanLiteralTreeImpl extends AbstractTree implements BooleanLiteralTree {
 	protected final boolean value;

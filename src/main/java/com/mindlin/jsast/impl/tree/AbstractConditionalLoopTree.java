@@ -2,10 +2,10 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
 import com.mindlin.jsast.tree.ConditionalLoopTree;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.StatementTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public abstract class AbstractConditionalLoopTree extends AbstractLoopTree implements ConditionalLoopTree {
 	protected final ExpressionTree condition;

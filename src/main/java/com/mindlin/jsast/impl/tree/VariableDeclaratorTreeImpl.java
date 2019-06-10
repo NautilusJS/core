@@ -2,12 +2,11 @@ package com.mindlin.jsast.impl.tree;
 
 import java.util.Objects;
 
-import com.mindlin.jsast.fs.SourcePosition;
-import com.mindlin.jsast.impl.lexer.Token;
 import com.mindlin.jsast.tree.DeclarationName;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.VariableDeclaratorTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.nautilus.fs.SourcePosition;
 
 public class VariableDeclaratorTreeImpl extends AbstractTree implements VariableDeclaratorTree {
 	protected final DeclarationName identifier;
