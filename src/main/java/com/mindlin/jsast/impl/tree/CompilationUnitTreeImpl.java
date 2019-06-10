@@ -3,9 +3,9 @@ package com.mindlin.jsast.impl.tree;
 import java.util.List;
 import java.util.Objects;
 
-import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.jsast.tree.CompilationUnitTree;
 import com.mindlin.jsast.tree.StatementTree;
+import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.nautilus.fs.SourcePosition;
 
 public class CompilationUnitTreeImpl extends AbstractTree implements CompilationUnitTree {
@@ -46,6 +46,12 @@ public class CompilationUnitTreeImpl extends AbstractTree implements Compilation
 	protected int hash() {
 		//TODO include sourceFile()?
 		return Objects.hash(getKind(), getSourceElements());
+	}
+
+	@Override
+	public boolean isDeclarationFile() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

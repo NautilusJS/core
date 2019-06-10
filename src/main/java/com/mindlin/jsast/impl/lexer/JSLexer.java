@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 import com.mindlin.jsast.exception.JSEOFException;
 import com.mindlin.jsast.exception.JSSyntaxException;
 import com.mindlin.jsast.exception.JSUnexpectedTokenException;
-import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.jsast.impl.lexer.ParsedNumber.ParsedDouble;
 import com.mindlin.jsast.impl.lexer.ParsedNumber.ParsedInteger;
 import com.mindlin.jsast.impl.lexer.Token.IdentifierToken;
@@ -22,11 +21,12 @@ import com.mindlin.jsast.impl.lexer.Token.StringLiteralToken;
 import com.mindlin.jsast.impl.lexer.Token.TemplateLiteralToken;
 import com.mindlin.jsast.impl.tree.LineMap;
 import com.mindlin.jsast.impl.tree.LineMap.LineMapBuilder;
-import com.mindlin.jsast.impl.util.CharacterArrayStream;
-import com.mindlin.jsast.impl.util.CharacterStream;
 import com.mindlin.jsast.impl.util.Characters;
+import com.mindlin.nautilus.fs.SourceFile;
 import com.mindlin.nautilus.fs.SourcePosition;
 import com.mindlin.nautilus.fs.SourceRange;
+import com.mindlin.nautilus.impl.util.CharacterArrayStream;
+import com.mindlin.nautilus.util.CharacterStream;
 
 public class JSLexer implements Supplier<Token> {
 	
