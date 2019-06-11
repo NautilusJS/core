@@ -2,6 +2,7 @@ package com.mindlin.jsast.impl.analysis;
 
 import java.util.Objects;
 
+import com.mindlin.jsast.analysis.VariableInfo;
 import com.mindlin.jsast.type.Type;
 
 public abstract class AbstractVariableInfo implements VariableInfo {

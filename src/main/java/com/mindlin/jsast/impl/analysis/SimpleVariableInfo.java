@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.mindlin.jsast.analysis.VariableInfo;
 import com.mindlin.jsast.type.LiteralType;
 import com.mindlin.jsast.type.Type;
 import com.mindlin.jsast.type.TypeMember;
