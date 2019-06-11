@@ -6,39 +6,44 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import com.mindlin.jsast.impl.tree.AbstractClassTree;
 import com.mindlin.jsast.impl.tree.AbstractFunctionTree.FunctionExpressionTreeImpl;
+import com.mindlin.jsast.impl.tree.AbstractFunctionTree.MethodDeclarationTreeImpl;
 import com.mindlin.jsast.impl.tree.AssignmentTreeImpl;
 import com.mindlin.jsast.impl.tree.BlockTreeImpl;
-import com.mindlin.jsast.impl.tree.AbstractClassTree;
 import com.mindlin.jsast.impl.tree.ExpressionStatementTreeImpl;
 import com.mindlin.jsast.impl.tree.IdentifierTreeImpl;
 import com.mindlin.jsast.impl.tree.MemberExpressionTreeImpl;
-import com.mindlin.jsast.impl.tree.MethodDeclarationTreeImpl;
 import com.mindlin.jsast.impl.tree.ParameterTreeImpl;
 import com.mindlin.jsast.impl.tree.ThisExpressionTreeImpl;
 import com.mindlin.jsast.impl.tree.VariableDeclarationTreeImpl;
 import com.mindlin.jsast.impl.tree.VariableDeclaratorTreeImpl;
-import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.BlockTree;
-import com.mindlin.jsast.tree.CastTree;
-import com.mindlin.jsast.tree.ClassDeclarationTree;
-import com.mindlin.jsast.tree.ClassPropertyTree;
-import com.mindlin.jsast.tree.ClassPropertyTree.PropertyDeclarationType;
+import com.mindlin.jsast.tree.CastExpressionTree;
+import com.mindlin.jsast.tree.ClassElementTree;
+import com.mindlin.jsast.tree.ClassElementVisitor;
+import com.mindlin.jsast.tree.ClassTreeBase.ClassDeclarationTree;
+import com.mindlin.jsast.tree.ConstructorDeclarationTree;
 import com.mindlin.jsast.tree.ExpressionTree;
 import com.mindlin.jsast.tree.ForLoopTree;
 import com.mindlin.jsast.tree.FunctionCallTree;
 import com.mindlin.jsast.tree.FunctionExpressionTree;
 import com.mindlin.jsast.tree.IdentifierTree;
-import com.mindlin.jsast.tree.MethodDefinitionTree;
+import com.mindlin.jsast.tree.MethodDeclarationTree;
+import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ParameterTree;
 import com.mindlin.jsast.tree.PatternTree;
+import com.mindlin.jsast.tree.PropertyDeclarationTree;
 import com.mindlin.jsast.tree.StatementTree;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.TryTree;
-import com.mindlin.jsast.tree.TypeAliasTree;
 import com.mindlin.jsast.tree.VariableDeclarationTree;
 import com.mindlin.jsast.tree.VariableDeclaratorTree;
+import com.mindlin.jsast.tree.type.IndexSignatureTree;
+import com.mindlin.jsast.tree.type.TypeAliasTree;
+import com.mindlin.nautilus.fs.SourcePosition;
+import com.mindlin.nautilus.fs.SourceRange;
 
 /**
  * Compilation pass that transforms TS => ES6
@@ -47,7 +52,7 @@ import com.mindlin.jsast.tree.VariableDeclaratorTree;
 public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> {
 
 	@Override
-	public ExpressionTree visitCast(CastTree node, ASTTransformerContext d) {
+	public ExpressionTree visitCast(CastExpressionTree node, ASTTransformerContext d) {
 		return node.getExpression();
 	}
 
@@ -62,12 +67,12 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 		
 		modified |= !node.getImplementing().isEmpty();
 		
-		List<ClassPropertyTree<?>> properties = new ArrayList<>(node.getProperties());
+		List<ClassElementTree> properties = new ArrayList<>(node.getProperties());
 		//TODO optimize
 		
 		boolean ctorModified = false;
-		MethodDefinitionTree oldCtor = (MethodDefinitionTree) properties.stream()
-				.filter(prop -> prop.getDeclarationType() == PropertyDeclarationType.CONSTRUCTOR)
+		ConstructorDeclarationTree oldCtor = (ConstructorDeclarationTree) properties.stream()
+				.filter(prop -> prop.getKind() == Tree.Kind.CONSTRUCTOR_DECLARATION)
 				.findFirst()
 				.orElse(null);
 		
@@ -92,10 +97,12 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 		for (ListIterator<ParameterTree> i = ctorParams.listIterator(); i.hasNext();) {
 			final ParameterTree oldParam = i.next();
 			ParameterTree param = oldParam;
-			if (param.getModifiers() != null) {
-				boolean wasOptional = param.isOptional();
+			if (param.getModifiers() != null && param.getModifiers().any()) {
+				boolean wasOptional = param.getModifiers().isOptional();
 				
-				param = new ParameterTreeImpl(param.getStart(), param.getEnd(), param.getName(), param.isRest(), false, null, param.getInitializer());
+				//Drop type
+				//TODO: drop access modifiers
+				param = new ParameterTreeImpl(param.getStart(), param.getEnd(), param.getModifiers(), param.getName(), param.isRest(), null, param.getInitializer());
 				//Inject assignment into constructor
 				//TODO: support destructuring in parameters here
 				if (oldParam.getName().getKind() != Kind.IDENTIFIER)
@@ -103,7 +110,7 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 				
 				//this.[parameter name]
 				IdentifierTree identifier = (IdentifierTree) param.getName();
-				PatternTree lhs = new MemberExpressionTreeImpl(Kind.MEMBER_SELECT, new ThisExpressionTreeImpl(-1, -1), identifier);
+				PatternTree lhs = new MemberExpressionTreeImpl(Kind.MEMBER_SELECT, new ThisExpressionTreeImpl(SourceRange.invalid()), identifier);
 				
 				//TODO fix for optional (shouldn't overwrite default values)
 				if (wasOptional)
@@ -120,8 +127,35 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 			}
 		}
 		
-		for (Iterator<ClassPropertyTree<?>> i = properties.iterator(); i.hasNext();) {
-			ClassPropertyTree<?> property = i.next();
+		ClassElementVisitor<Boolean, Void> fieldUpdater = new ClassElementVisitor<Boolean, Void>() {
+			@Override
+			public Boolean visitConstructorDeclaration(ConstructorDeclarationTree node, Void context) {
+				return false;
+			}
+			@Override
+			public Boolean visitIndexSignature(IndexSignatureTree node, Void context) {
+				return false;
+			}
+			@Override
+			public Boolean visitMethodDeclaration(MethodDeclarationTree node, Void context) {
+				return false;
+			}
+			@Override
+			public Boolean visitPropertyDeclaration(PropertyDeclarationTree property, Void context) {
+				if (property.getInitializer() != null) {
+					//Inject initializer into constructor
+					//TODO: clean this up
+					PatternTree lhs = new MemberExpressionTreeImpl(property.getName().getKind() == Kind.IDENTIFIER ? Kind.MEMBER_SELECT : Kind.ARRAY_ACCESS, new ThisExpressionTreeImpl(SourceRange.invalid()), (ExpressionTree) property.getName());
+					StatementTree initializerStmt = new ExpressionStatementTreeImpl(new AssignmentTreeImpl(Tree.Kind.ASSIGNMENT, lhs, property.getInitializer()));
+					ctorBody.add(ctorBodyInjectOffset++, initializerStmt);
+					ctorModified = true;
+					return true;
+				}
+			}
+		};
+		
+		for (Iterator<ClassElementTree> i = properties.iterator(); i.hasNext();) {
+			ClassElementTree property = i.next();
 			switch (property.getDeclarationType()) {
 				case CONSTRUCTOR:
 					continue;
@@ -129,7 +163,7 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 					i.remove();
 					if (property.getInitializer() != null) {
 						//Inject initializer into constructor
-						PatternTree lhs = new MemberExpressionTreeImpl(property.getKey().getKind() == Kind.IDENTIFIER ? Kind.MEMBER_SELECT : Kind.ARRAY_ACCESS, new ThisExpressionTreeImpl(-1, -1), property.getKey());
+						PatternTree lhs = new MemberExpressionTreeImpl(property.getKey().getKind() == Kind.IDENTIFIER ? Kind.MEMBER_SELECT : Kind.ARRAY_ACCESS, new ThisExpressionTreeImpl(SourcePosition.invalid(), SourcePosition.invalid()), property.getKey());
 						StatementTree initializerStmt = new ExpressionStatementTreeImpl(new AssignmentTreeImpl(Tree.Kind.ASSIGNMENT, lhs, property.getInitializer()));
 						ctorBody.add(ctorBodyInjectOffset++, initializerStmt);
 						ctorModified = true;
@@ -142,31 +176,30 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 		//Rebuild constructor
 		if (ctorModified) {
 			//Copy positioning from old constructor, if possible
-			long oldStart = -1, oldEnd = -1, oldFnStart = -1, oldFnEnd = -1, oldBodyStart = -1, oldBodyEnd = -1;
+			SourceRange old = SourceRange.invalid();
+			SourceRange oldFn = SourceRange.invalid();
+			SourceRange oldBody = SourceRange.invalid();
 			Modifiers oldModifiers = Modifiers.NONE;
-			IdentifierTree name;
+			PropertyName name;
 			if (oldCtor != null) {
-				oldStart = oldCtor.getStart();
-				oldEnd = oldCtor.getEnd();
+				old = oldCtor.getRange();
 				
 				FunctionExpressionTree oldCtorFn = oldCtor.getInitializer();
-				oldFnStart = oldCtorFn.getStart();
-				oldFnEnd = oldCtorFn.getEnd();
+				oldFn = oldCtorFn.getRange();
 				
-				oldBodyStart = oldCtorFn.getBody().getStart();
-				oldBodyEnd = oldCtorFn.getBody().getEnd();
+				oldBody = oldCtorFn.getBody().getRange();
 				
 				oldModifiers = oldCtor.getModifiers();//TODO: check modifiers are good
 				name = oldCtorFn.getName();
 			} else {
-				name = new IdentifierTreeImpl(-1, -1, "constructor");
+				name = new IdentifierTreeImpl(SourcePosition.invalid(), SourcePosition.invalid(), "constructor");
 			}
 			
 			
-			BlockTree newCtorBody = new BlockTreeImpl(oldBodyStart, oldBodyEnd, ctorBody);
+			BlockTree newCtorBody = new BlockTreeImpl(oldBody.getStart(), oldBody.getEnd(), ctorBody);
 			//TODO fix isStrict
-			FunctionExpressionTree ctorFn = new FunctionExpressionTreeImpl(oldFnStart, oldFnEnd, false, name, null, ctorParams, null, false, newCtorBody, false, false);
-			MethodDefinitionTree ctor = new MethodDeclarationTreeImpl(oldStart, oldEnd, oldModifiers, PropertyDeclarationType.CONSTRUCTOR, name, null, ctorFn);
+			FunctionExpressionTree ctorFn = new FunctionExpressionTreeImpl(oldFn.getStart(), oldFn.getEnd(), false, name, null, ctorParams, null, false, newCtorBody, false, false);
+			MethodDeclarationTree ctor = new MethodDeclarationTreeImpl(old.getStart(), old.getEnd(), oldModifiers, name, null, ctorFn);
 			if (oldCtor != null)
 				properties.set(properties.indexOf(oldCtor), ctor);
 			else
@@ -178,8 +211,8 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 		//TODO check supertype
 		if (!modified)
 			return node;
-		return new AbstractClassTree(node.getStart(), node.getEnd(), node.isAbstract(), node.getName(),
-				Collections.emptyList(), node.getSuperType(), Collections.emptyList(), properties);
+		return new AbstractClassTree(node.getStart(), node.getEnd(), node.getModifiers(), node.getName(),
+				Collections.emptyList(), node.getHeritage(), Collections.emptyList(), properties);
 	}
 
 	@Override
@@ -207,7 +240,7 @@ public class ES6Transpiler implements TreeTransformation<ASTTransformerContext> 
 		}
 		
 		if (modified)
-			node = new VariableDeclarationTreeImpl(node.getStart(), node.getEnd(), node.isScoped(), node.isConst(), declarations);
+			node = new VariableDeclarationTreeImpl(node.getStart(), node.getEnd(), node.getDeclarationStyle(), declarations);
 		return node;
 	}
 }
