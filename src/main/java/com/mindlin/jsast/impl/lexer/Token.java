@@ -3,8 +3,8 @@ package com.mindlin.jsast.impl.lexer;
 import java.util.Objects;
 
 import com.mindlin.jsast.exception.JSUnexpectedTokenException;
-import com.mindlin.jsast.fs.SourcePosition;
-import com.mindlin.jsast.fs.SourceRange;
+import com.mindlin.nautilus.fs.SourcePosition;
+import com.mindlin.nautilus.fs.SourceRange;
 
 public class Token {
 	public static final int FLAG_PRECEDEING_NEWLINE = 1 << 0;
