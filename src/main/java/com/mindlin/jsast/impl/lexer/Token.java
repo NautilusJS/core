@@ -2,10 +2,13 @@ package com.mindlin.jsast.impl.lexer;
 
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.mindlin.jsast.exception.JSUnexpectedTokenException;
 import com.mindlin.nautilus.fs.SourcePosition;
 import com.mindlin.nautilus.fs.SourceRange;
 
+@NonNullByDefault
 public class Token {
 	public static final int FLAG_PRECEDEING_NEWLINE = 1 << 0;
 	public static final int FLAG_PRECEDING_JSDOC = 1 << 1;
@@ -181,6 +184,7 @@ public class Token {
 		}
 	}
 	
+	@NonNullByDefault
 	public static class RegExpToken extends Token {
 		protected final String pattern;
 		protected final String rxFlags;
