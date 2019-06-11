@@ -10,8 +10,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.mindlin.jsast.i18n.DiagnosticConsumer;
-import com.mindlin.jsast.i18n.LocalizableMessage;
 import com.mindlin.jsast.json.api.JSONInput;
+import com.mindlin.nautilus.util.i18n.LocalizableMessage;
 
 @NonNullByDefault
 public interface CompilerOption<T> {
