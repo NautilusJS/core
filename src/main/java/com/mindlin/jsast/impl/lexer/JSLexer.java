@@ -1,5 +1,7 @@
 package com.mindlin.jsast.impl.lexer;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -28,7 +30,7 @@ import com.mindlin.nautilus.fs.SourceRange;
 import com.mindlin.nautilus.impl.util.CharacterArrayStream;
 import com.mindlin.nautilus.util.CharacterStream;
 
-public class JSLexer implements Supplier<Token> {
+public class JSLexer implements Supplier<Token>, Closeable {
 	
 	protected static String decodeEASCII(byte value) {
 		Charset easciiCharset = Charset.forName("EASCII");
@@ -1409,6 +1411,11 @@ public class JSLexer implements Supplier<Token> {
 	@Override
 	public Token get() {
 		return nextToken();
+	}
+	
+	@Override
+	public void close() throws IOException {
+		this.chars.close();
 	}
 	
 	public static class TemplateTokenInfo {
