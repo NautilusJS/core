@@ -3,6 +3,7 @@ package com.mindlin.jsast.impl.analysis;
 import java.util.List;
 import java.util.Set;
 
+import com.mindlin.jsast.analysis.VariableInfo;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.type.Type;
@@ -48,6 +49,7 @@ public interface DynamicContext extends ReadonlyContext {
 	/**
 	 * Push a block scope.
 	 * Captures let and const declarations.
+	 * @return this
 	 */
 	DynamicContext pushBlock();
 	
@@ -56,13 +58,14 @@ public interface DynamicContext extends ReadonlyContext {
 	 * Push a `for` scope.
 	 * Any looping variables should be declared in this scope.
 	 * Usually a block scope is pushed after this.
+	 * @return this
 	 */
 	DynamicContext pushLoop();
 	
 	/**
 	 * Push a `class` scope.
 	 * Automatically registers 'this' and 'super' variables 
-	 * @return
+	 * @return this
 	 */
 	DynamicContext pushClass(boolean hasGenerics);
 	
@@ -75,7 +78,7 @@ public interface DynamicContext extends ReadonlyContext {
 	 * 
 	 * Captures let, const, var, and function declarations.
 	 * @param hasThis Whether or not to push a 'this' variable.
-	 * @return
+	 * @return this
 	 */
 	DynamicContext pushFunction(boolean hasThis, boolean hasGenerics);
 	
