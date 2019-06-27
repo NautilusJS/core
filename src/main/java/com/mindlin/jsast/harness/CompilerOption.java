@@ -13,6 +13,12 @@ import com.mindlin.jsast.i18n.DiagnosticConsumer;
 import com.mindlin.jsast.json.api.JSONInput;
 import com.mindlin.nautilus.util.i18n.LocalizableMessage;
 
+/**
+ * Represents a named compiler option. Provides for parsing utilities.
+ * @author mailmindlin
+ *
+ * @param <T> Value type (nullable)
+ */
 @NonNullByDefault
 public interface CompilerOption<T> {
 	/**
@@ -45,7 +51,18 @@ public interface CompilerOption<T> {
 		return Collections.emptySet();
 	}
 	
+	// ===== CLI =====
+	
+	/**
+	 * @return Expected arity of CLI. -1 for unknown.
+	 */
+	default int arity() {
+		return 0;
+	}
+	
 	@Nullable T parse(DiagnosticConsumer errorHandler, String command, Iterator<? extends String> values);
+	
+	// ===== JSON =====
 	
 	@Nullable T read(DiagnosticConsumer errorHandler, String key, JSONInput valueReader);
 	
@@ -64,22 +81,34 @@ public interface CompilerOption<T> {
 		return current;
 	}
 	
-	default int arity() {
-		return 0;
-	}
-	
 	default @Nullable OptionInferenceStrategy<T> getInference() {
 		return null;//TODO
 	}
 	
+	default void validate(DiagnosticConsumer errorHandler, CompilerOptions values, T value) {
+		
+	}
+	
 	public static interface OptionInferenceStrategy<T> {
+		/**
+		 * Get inference dependencies.
+		 * <br/>
+		 * Each dependency must be either a CompilerOption or a String {@link CompilerOption#name()}.
+		 * @return dependencies
+		 */
 		@SuppressWarnings("null")
-		default Collection<? extends String> getDependencies() {
+		default Iterable<?> getDependencies() {
 			return Collections.emptyList();
 		}
 		
+		/**
+		 * Get optional inference dependencies. During inference, optional dependencies will be computed if possible.
+		 * <br/>
+		 * Each dependency must be either a CompilerOption or a String {@link CompilerOption#name()}.
+		 * @return optional dependencies
+		 */
 		@SuppressWarnings("null")
-		default Collection<? extends String> getOptionalDependencies() {
+		default Iterable<?> getOptionalDependencies() {
 			return Collections.emptyList();
 		}
 		
