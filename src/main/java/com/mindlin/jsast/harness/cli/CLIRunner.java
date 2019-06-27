@@ -14,7 +14,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.ToIntFunction;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,10 +28,13 @@ import com.mindlin.jsast.harness.CompilerOption;
 import com.mindlin.jsast.harness.CompilerOptionProvider;
 import com.mindlin.jsast.harness.CompilerOptions;
 import com.mindlin.jsast.harness.NautilusCompiler;
+import com.mindlin.jsast.harness.NautilusCompiler.CompilationHandle;
 import com.mindlin.jsast.harness.config.CommandLineParser;
 import com.mindlin.jsast.harness.config.ConfigFileWriter;
 import com.mindlin.jsast.harness.config.ParsedCommandLine;
 import com.mindlin.jsast.harness.StandardCompilerOptions;
+import com.mindlin.jsast.harness.discovery.Program;
+import com.mindlin.jsast.harness.discovery.ProgramBuilder;
 import com.mindlin.jsast.harness.plugin.PluginManager;
 import com.mindlin.jsast.i18n.Diagnostic;
 
@@ -263,11 +265,31 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		return null;
 	}
 	
+	protected Program createSimpleProgram(List<? extends String> rootFiles, List<? extends ProjectReference> projectRefs, CompilerOptions options) {
+		ProgramBuilder builder = new ProgramBuilder();
+		builder.setOptions(options);
+		//TODO finish
+		return builder.build();
+	}
+	
 	public CLIResult compile(List<? extends String> rootFiles, List<? extends ProjectReference> projectRefs, CompilerOptions options) {
-		//TODO: build program
-		NautilusCompiler compiler = this.buildCompiler(options);
+		// TODO: build program
+		NautilusCompiler compiler;
 		try {
-			CompletableFuture<?> resultHandle = compiler.run(null);
+			compiler = this.buildCompiler(options);
+		} catch (Exception e) {
+			return CLIResult.FAILURE_NO_OUTPUT;
+		}
+		
+		Program program;
+		try {
+			program = this.createSimpleProgram(rootFiles, projectRefs, options);
+		} catch (Exception e) {
+			return CLIResult.FAILURE_NO_OUTPUT;
+		}
+		
+		try {
+			CompilationHandle resultHandle = compiler.run(program);
 			resultHandle.get();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
