@@ -272,8 +272,9 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
-		//TODO: special return code for when we want to keep running (e.g., watch)?
+		
+		// TODO: special return code for when we want to keep running (e.g.,
+		// watch)?
 		throw new NotFinishedException();
 	}
 	
@@ -369,6 +370,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			} else if (this.isIncrementalCompilation(cliArgs.getOptions())) {
 				return this.compileIncrmental(cliArgs);
 			} else {
+				// cliArgs.getProjectReferences() should be empty
 				return this.compile(cliArgs.getFileNames(), cliArgs.getProjectReferences(), cliArgs.getOptions());
 			}
 		}
