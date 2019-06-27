@@ -249,6 +249,11 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		}
 	}
 	
+	protected CLIResult compileIncrmental(ParsedCommandLine args) {
+		//TODO
+		throw new NotFinishedException();
+	}
+	
 	protected CLIResult compile(ParsedCommandLine args) {
 		return this.compile(args.getFileNames(), args.getProjectReferences(), args.getOptions());
 	}
@@ -348,8 +353,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 				// TODO: set watch of files
 				throw new NotFinishedException();
 			} else if (this.isIncrementalCompilation(configArgs.getOptions())) {
-				//TODO: incremental compilation
-				throw new NotFinishedException();
+				return this.compileIncrmental(configArgs);
 			} else {
 				return this.compile(cliArgs.getFileNames(), cliArgs.getProjectReferences(), cliArgs.getOptions());
 			}
@@ -363,8 +367,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 				// TODO: set watch of files
 				throw new NotFinishedException();
 			} else if (this.isIncrementalCompilation(cliArgs.getOptions())) {
-				//TODO: incremental compilation
-				throw new NotFinishedException();
+				return this.compileIncrmental(cliArgs);
 			} else {
 				return this.compile(cliArgs.getFileNames(), cliArgs.getProjectReferences(), cliArgs.getOptions());
 			}
