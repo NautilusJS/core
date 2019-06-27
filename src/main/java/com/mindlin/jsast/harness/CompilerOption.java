@@ -47,7 +47,7 @@ public interface CompilerOption<T> {
 	
 	@Nullable T parse(DiagnosticConsumer errorHandler, String command, Iterator<? extends String> values);
 	
-	T read(DiagnosticConsumer errorHandler, JSONInput valueReader);
+	@Nullable T read(DiagnosticConsumer errorHandler, String key, JSONInput valueReader);
 	
 	/**
 	 * When this option is set multiple times,
