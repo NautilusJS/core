@@ -272,7 +272,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		throw new NotFinishedException();
 	}
 	
-	public CLIResult callInternal(String... rawArgs) throws RuntimeException {
+	protected CLIResult callInternal(String... rawArgs) throws RuntimeException {
 		// Parse arguments
 		CompilerOptions options = this.getOptions();
 		@SuppressWarnings("null")
@@ -291,7 +291,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			AbstractDiagnosticReporter reporter = this.getReporter();
 			optionDiagnostics.forEach(reporter);
 			reporter.flush();
-			return CLIResult.FAILURE_NO_OUTPUT; //TODO: better code?
+			return CLIResult.FAILURE_NO_OUTPUT; // TODO: better code?
 		}
 		
 		if (options.get(StandardCompilerOptions.INIT))
@@ -301,20 +301,20 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			return this.printVersion();
 		
 		if (options.get(StandardCompilerOptions.PRINT_HELP))
-			return this.printHelp(false);
+			return this.printHelp(options, false);
 		
 		Path configFile = null;
 		Path projectDir = cliArgs.getOptions().get(StandardCompilerOptions.PROJECT);
 		if (projectDir != null) {
 			if (!cliArgs.getFileNames().isEmpty()) {
-				//TODO: resport diagnostic
+				// TODO: resport diagnostic
 				return CLIResult.FAILURE_NO_OUTPUT;
 			}
 			Path resolvedDir = this.resolvePath(projectDir);
 			if (Files.isDirectory(resolvedDir)) {
 				configFile = resolvedDir.resolve(CONFIG_FILE_NAME);
 				if (!Files.exists(configFile)) {
-					//TODO: report diagnostic
+					// TODO: report diagnostic
 					return CLIResult.FAILURE_NO_OUTPUT;
 				}
 			} else {
@@ -332,9 +332,8 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		if (cliArgs.getFileNames().isEmpty() && configFile == null) {
 			// We don't have any files to process
 			CLIResult res1 = this.printVersion();
-			CLIResult res2 = this.printHelp(false);//TODO: only command line
-			//TODO: merge result codes
-			return CLIResult.SUCCESS_NO_OUTPUT;
+			CLIResult res2 = this.printHelp(options, false);// TODO: only command line
+			return CLIResult.merge(res1, res2);
 		}
 		
 		if (configFile != null) {
