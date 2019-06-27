@@ -118,11 +118,13 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	/**
 	 * @return Locale to use when formatting messages
 	 */
-	@SuppressWarnings("null")
 	protected Locale getLocale() {
-		if (this.locale == null)
-			this.locale = Locale.getDefault();
-		return this.locale;
+		Locale locale = this.locale;
+		if (locale == null) {
+			this.locale = locale = Locale.getDefault();
+			assert locale != null;
+		}
+		return locale;
 	}
 	
 	public void setLocale(Locale locale) {
