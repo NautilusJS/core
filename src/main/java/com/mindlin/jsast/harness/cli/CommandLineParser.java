@@ -12,6 +12,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.mindlin.jsast.exception.NotFinishedException;
 import com.mindlin.jsast.harness.CompilerOption;
+import com.mindlin.jsast.harness.config.ParsedCommandLine;
 
 @NonNullByDefault
 public abstract class CommandLineParser {
