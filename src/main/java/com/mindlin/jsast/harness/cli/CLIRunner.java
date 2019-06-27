@@ -131,7 +131,6 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		this.locale = locale;
 	}
 	
-	
 	// ===== Helper methods =====
 	
 	protected AbstractDiagnosticReporter getReporter() {
@@ -144,8 +143,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		// Discover options
 		// TODO: plugins?
 		for (CompilerOptionProvider provider : ServiceLoader.load(CompilerOptionProvider.class))
-			provider.getOptions()
-					.forEach(result::addOption);
+			provider.getOptions().forEach(result::addOption);
 		
 		return result;
 	}
