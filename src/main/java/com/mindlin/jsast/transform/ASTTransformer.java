@@ -42,7 +42,7 @@ import com.mindlin.jsast.tree.BlockTree;
 import com.mindlin.jsast.tree.BooleanLiteralTree;
 import com.mindlin.jsast.tree.BreakTree;
 import com.mindlin.jsast.tree.CastExpressionTree;
-import com.mindlin.jsast.tree.ClassPropertyTree;
+import com.mindlin.jsast.tree.ClassElementTree;
 import com.mindlin.jsast.tree.ClassTreeBase.ClassDeclarationTree;
 import com.mindlin.jsast.tree.CompilationUnitTree;
 import com.mindlin.jsast.tree.ConditionalExpressionTree;
@@ -62,7 +62,6 @@ import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.IfTree;
 import com.mindlin.jsast.tree.ImportDeclarationTree;
 import com.mindlin.jsast.tree.LabeledStatementTree;
-import com.mindlin.jsast.tree.MethodDefinitionTree;
 import com.mindlin.jsast.tree.NewTree;
 import com.mindlin.jsast.tree.NullLiteralTree;
 import com.mindlin.jsast.tree.NumericLiteralTree;
@@ -234,9 +233,9 @@ public class ASTTransformer<D> implements TreeTransformation<D> {
 		List<TypeTree> newIfaces = new ArrayList<>();
 		modified |= this.transformAll(node.getImplementing(), newIfaces, ctx);
 		
-		List<ClassPropertyTree<?>> properties = new ArrayList<>();
-		for (ClassPropertyTree<?> oldProperty : node.getProperties()) {
-			ClassPropertyTree<?> newProperty = oldProperty;
+		List<ClassElementTree> properties = new ArrayList<>();
+		for (ClassElementTree oldProperty : node.getProperties()) {
+			ClassElementTree newProperty = oldProperty;
 			if (oldProperty.getKind() == Kind.METHOD_DEFINITION) {
 				MethodDefinitionTree methodDef = (MethodDefinitionTree) oldProperty;
 				//TODO finish (this is actually pretty hard)

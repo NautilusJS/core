@@ -8,37 +8,25 @@ import com.mindlin.jsast.impl.tree.ExpressionStatementTreeImpl;
 import com.mindlin.jsast.impl.tree.MemberExpressionTreeImpl;
 import com.mindlin.jsast.impl.tree.ParenthesizedTreeImpl;
 import com.mindlin.jsast.impl.tree.UnaryTreeImpl;
-import com.mindlin.jsast.tree.ArrayLiteralTree;
+import com.mindlin.jsast.tree.AbstractExpressionTreeVisitor;
 import com.mindlin.jsast.tree.AssignmentTree;
 import com.mindlin.jsast.tree.BinaryExpressionTree;
-import com.mindlin.jsast.tree.BinaryExpressionTree;
-import com.mindlin.jsast.tree.BooleanLiteralTree;
 import com.mindlin.jsast.tree.CastExpressionTree;
-import com.mindlin.jsast.tree.ClassTreeBase.ClassDeclarationTree;
 import com.mindlin.jsast.tree.ConditionalExpressionTree;
 import com.mindlin.jsast.tree.ExpressionStatementTree;
 import com.mindlin.jsast.tree.ExpressionTree;
-import com.mindlin.jsast.tree.ExpressionTreeVisitor;
 import com.mindlin.jsast.tree.FunctionCallTree;
-import com.mindlin.jsast.tree.FunctionExpressionTree;
-import com.mindlin.jsast.tree.IdentifierTree;
 import com.mindlin.jsast.tree.NewTree;
-import com.mindlin.jsast.tree.NullLiteralTree;
-import com.mindlin.jsast.tree.NumericLiteralTree;
 import com.mindlin.jsast.tree.ObjectLiteralTree;
-import com.mindlin.jsast.tree.ParenthesizedTree;
 import com.mindlin.jsast.tree.PatternTree;
-import com.mindlin.jsast.tree.RegExpLiteralTree;
 import com.mindlin.jsast.tree.SequenceExpressionTree;
+import com.mindlin.jsast.tree.SpreadElementTree;
 import com.mindlin.jsast.tree.StatementTree;
-import com.mindlin.jsast.tree.StringLiteralTree;
-import com.mindlin.jsast.tree.SuperExpressionTree;
+import com.mindlin.jsast.tree.TaggedTemplateLiteralTree;
 import com.mindlin.jsast.tree.TemplateLiteralTree;
-import com.mindlin.jsast.tree.ThisExpressionTree;
 import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.UnaryTree;
-import com.mindlin.jsast.tree.UnaryTree.AwaitTree;
 import com.mindlin.jsast.tree.type.TypeTree;
 
 /**
@@ -248,10 +236,9 @@ public class ExpressionFixerTf implements TreeTransformation<Void> {
 	 * For *why* this is a thing, see {@link ExpressionFixerTf#visitExpressionStatement(ExpressionStatementTree, Void)}.
 	 * @author mailmindlin
 	 */
-	private class LeftmostThingFinder implements ExpressionTreeVisitor<ExpressionTree, Void> {
-
+	private class LeftmostThingFinder extends AbstractExpressionTreeVisitor<ExpressionTree, Void> {
 		@Override
-		public ExpressionTree visitArrayLiteral(ArrayLiteralTree node, Void d) {
+		protected ExpressionTree visitDefault(ExpressionTree node, Void d) {
 			return node;
 		}
 
@@ -263,30 +250,10 @@ public class ExpressionFixerTf implements TreeTransformation<Void> {
 		}
 
 		@Override
-		public ExpressionTree visitAwait(AwaitTree node, Void d) {
-			return node;
-		}
-
-		@Override
 		public ExpressionTree visitBinary(BinaryExpressionTree node, Void d) {
 			return node.getLeftOperand().accept(this, d);
 		}
-
-		@Override
-		public ExpressionTree visitBooleanLiteral(BooleanLiteralTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitCast(CastExpressionTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitClassDeclaration(ClassDeclarationTree node, Void d) {
-			return node;
-		}
-
+		
 		@Override
 		public ExpressionTree visitConditionalExpression(ConditionalExpressionTree node, Void d) {
 			return node.getCondition().accept(this, d);
@@ -298,58 +265,8 @@ public class ExpressionFixerTf implements TreeTransformation<Void> {
 		}
 
 		@Override
-		public ExpressionTree visitFunctionExpression(FunctionExpressionTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitIdentifier(IdentifierTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitNew(NewTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitNull(NullLiteralTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitNumericLiteral(NumericLiteralTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitObjectLiteral(ObjectLiteralTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitParentheses(ParenthesizedTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitRegExpLiteral(RegExpLiteralTree node, Void d) {
-			return node;
-		}
-
-		@Override
 		public ExpressionTree visitSequence(SequenceExpressionTree node, Void d) {
 			return node.getElements().isEmpty() ? null : node.getElements().get(0);
-		}
-
-		@Override
-		public ExpressionTree visitStringLiteral(StringLiteralTree node, Void d) {
-			return node;
-		}
-
-		@Override
-		public ExpressionTree visitSuper(SuperExpressionTree node, Void d) {
-			return node;
 		}
 
 		@Override
@@ -358,15 +275,22 @@ public class ExpressionFixerTf implements TreeTransformation<Void> {
 		}
 
 		@Override
-		public ExpressionTree visitThis(ThisExpressionTree node, Void d) {
-			return node;
-		}
-
-		@Override
 		public ExpressionTree visitUnary(UnaryTree node, Void d) {
 			if (node.getKind() == Kind.POSTFIX_DECREMENT || node.getKind() == Kind.POSTFIX_INCREMENT)
 				return node.getExpression().accept(this, d);
 			return node;
+		}
+
+		@Override
+		public ExpressionTree visitSpread(SpreadElementTree node, Void d) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public ExpressionTree visitTaggedTemplate(TaggedTemplateLiteralTree node, Void d) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }
