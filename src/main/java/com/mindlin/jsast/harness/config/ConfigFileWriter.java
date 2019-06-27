@@ -1,4 +1,4 @@
-package com.mindlin.jsast.harness.cli;
+package com.mindlin.jsast.harness.config;
 
 import java.io.Closeable;
 import java.io.Flushable;
