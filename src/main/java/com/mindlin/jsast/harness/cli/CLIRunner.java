@@ -29,6 +29,8 @@ import com.mindlin.jsast.harness.CompilerOption;
 import com.mindlin.jsast.harness.CompilerOptionProvider;
 import com.mindlin.jsast.harness.CompilerOptions;
 import com.mindlin.jsast.harness.NautilusCompiler;
+import com.mindlin.jsast.harness.config.CommandLineParser;
+import com.mindlin.jsast.harness.config.ConfigFileWriter;
 import com.mindlin.jsast.harness.config.ParsedCommandLine;
 import com.mindlin.jsast.harness.StandardCompilerOptions;
 import com.mindlin.jsast.harness.plugin.PluginManager;

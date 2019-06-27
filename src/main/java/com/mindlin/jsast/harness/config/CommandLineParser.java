@@ -1,4 +1,4 @@
-package com.mindlin.jsast.harness.cli;
+package com.mindlin.jsast.harness.config;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +12,6 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.mindlin.jsast.exception.NotFinishedException;
 import com.mindlin.jsast.harness.CompilerOption;
-import com.mindlin.jsast.harness.config.ParsedCommandLine;
 
 @NonNullByDefault
 public abstract class CommandLineParser {
