@@ -143,7 +143,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		// Discover options
 		// TODO: plugins?
 		for (CompilerOptionProvider provider : ServiceLoader.load(CompilerOptionProvider.class))
-			provider.getOptions().forEach(result::addOption);
+			provider.getOptions().forEach(result::register);
 		
 		return result;
 	}
