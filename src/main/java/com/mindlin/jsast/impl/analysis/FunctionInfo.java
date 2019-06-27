@@ -2,6 +2,8 @@ package com.mindlin.jsast.impl.analysis;
 
 import java.util.List;
 
+import com.mindlin.jsast.analysis.VariableInfo;
+
 public interface FunctionInfo extends VariableInfo {
 	@Override
 	default boolean isFunction() {
