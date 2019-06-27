@@ -35,8 +35,9 @@ import com.mindlin.jsast.harness.plugin.PluginManager;
 import com.mindlin.jsast.i18n.Diagnostic;
 
 /**
- * Main entry point for CLI
+ * Main entry point for CLI.
  * 
+ * @see StandardCompilerOptions For CLI options
  * @author mailmindlin
  */
 @NonNullByDefault
@@ -71,7 +72,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		assert this.cwd != null;
 		return this.cwd;
 	}
-
+	
 	public void setBaseDirectory(Path cwd) {
 		this.cwd = cwd;
 	}
@@ -79,7 +80,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	public PrintStream getOutStream() {
 		return this.out;
 	}
-
+	
 	public void setOutStream(PrintStream out) {
 		this.out = Objects.requireNonNull(out);
 	}
@@ -87,19 +88,19 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	public PrintStream getErrorStream() {
 		return this.err;
 	}
-
+	
 	public void setErrorStream(PrintStream err) {
 		this.err = Objects.requireNonNull(err);
 	}
-
+	
 	public PrintStream getDebugStream() {
 		return this.debug;
 	}
-
+	
 	public void setDebugStream(PrintStream debug) {
 		this.debug = Objects.requireNonNull(debug);
 	}
-
+	
 	/**
 	 * @return Locale to use when formatting messages
 	 */
@@ -109,7 +110,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			this.locale = Locale.getDefault();
 		return this.locale;
 	}
-
+	
 	public void setLocale(Locale locale) {
 		this.locale = locale;
 	}
@@ -118,14 +119,14 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	// ===== Helper methods =====
 	
 	protected AbstractDiagnosticReporter getReporter() {
-		//TODO cache
+		// TODO cache
 		return new SimpleDiagnosticReporter(this.err, this.getBaseDirectory(), "\n", path -> path.toString(), this.getLocale());
 	}
 	
 	protected CompilerOptions getOptions() {
 		CompilerOptions result = new CompilerOptions();
 		// Discover options
-		//TODO: plugins?
+		// TODO: plugins?
 		for (CompilerOptionProvider provider : ServiceLoader.load(CompilerOptionProvider.class))
 			provider.getOptions()
 					.forEach(result::addOption);
@@ -167,20 +168,19 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	}
 	
 	protected ParsedCommandLine parseConfigFile(Path configFile, CompilerOptions optionsBase) {
-		//TODO: finish
+		// TODO: finish
 		throw new NotFinishedException();
 	}
 	
 	protected boolean isIncrementalCompilation(CompilerOptions options) {
 		return options.get(StandardCompilerOptions.INCREMENTAL, false) || options.get(StandardCompilerOptions.COMPOSITE, false);
 	}
-
 	
 	// ===== Execution options =====
 	
 	/**
-	 * Print help text to stdout
-	 * @param all TODO
+	 * Print version to stdout
+	 * 
 	 * @return Return code
 	 */
 	public CLIResult printHelp(boolean all) {
@@ -191,7 +191,10 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	}
 	
 	/**
-	 * Print version to stdout
+	 * Print help text to stdout
+	 * 
+	 * @param all
+	 *            TODO
 	 * @return Return code
 	 */
 	public CLIResult printVersion() {
@@ -200,21 +203,21 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	}
 	
 	protected CLIResult build(List<String> rawArgs) {
-		//TODO: finish
+		// TODO: finish
 		return CLIResult.SUCCESS_NO_OUTPUT;
 	}
 	
 	public CLIResult writeConfigFile(CompilerOptions options) {
 		Path outFile = this.resolvePath(Paths.get("tsconfig.json"));
 		if (Files.exists(outFile)) {
-			//TODO: log
+			// TODO: log
 			return CLIResult.FAILURE_NO_OUTPUT;
 		}
 		try (Writer out = Files.newBufferedWriter(outFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			return this.writeConfigFile(options, out);
 		} catch (IOException e) {
 			e.printStackTrace(this.err);
-			//TODO: emit diagnostics?
+			// TODO: emit diagnostics?
 			return CLIResult.FAILURE_NO_OUTPUT;
 		}
 	}
@@ -225,7 +228,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			return CLIResult.SUCCESS;
 		} catch (IOException e) {
 			e.printStackTrace(this.err);
-			//TODO: emit diagnostics?
+			// TODO: emit diagnostics?
 			return CLIResult.FAILURE;
 		}
 	}
@@ -235,7 +238,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	}
 	
 	protected NautilusCompiler buildCompiler(CompilerOptions options) {
-		//TODO finish
+		// TODO finish
 		return null;
 	}
 	
@@ -301,7 +304,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			} else {
 				configFile = resolvedDir;
 				if (!Files.exists(configFile)) {
-					//TODO: report diagnostic
+					// TODO: report diagnostic
 					return CLIResult.FAILURE_NO_OUTPUT;
 				}
 			}
@@ -319,7 +322,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		}
 		
 		if (configFile != null) {
-			//TODO: load from config file
+			// TODO: load from config file
 			ParsedCommandLine configArgs = this.parseConfigFile(configFile, cliArgs.getOptions());
 			if (cliArgs.getOptions().get(StandardCompilerOptions.PRINT_CONFIG, false)) {
 				this.writeConfigFile(configArgs.getOptions(), this.getOutStream());
@@ -327,13 +330,12 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			}
 			
 			if (configArgs.getOptions().get(StandardCompilerOptions.WATCH)) {
-				//TODO: set watch of files
+				// TODO: set watch of files
 				throw new NotFinishedException();
 			} else if (this.isIncrementalCompilation(configArgs.getOptions())) {
 				//TODO: incremental compilation
 				throw new NotFinishedException();
 			} else {
-				//TODO: normal compilation
 				return this.compile(cliArgs.getFileNames(), cliArgs.getProjectReferences(), cliArgs.getOptions());
 			}
 		} else {
@@ -343,18 +345,17 @@ public class CLIRunner implements ToIntFunction<String[]> {
 			}
 			
 			if (cliArgs.getOptions().get(StandardCompilerOptions.WATCH)) {
-				//TODO: set watch of files
+				// TODO: set watch of files
 				throw new NotFinishedException();
 			} else if (this.isIncrementalCompilation(cliArgs.getOptions())) {
 				//TODO: incremental compilation
 				throw new NotFinishedException();
 			} else {
-				//TODO: normal compilation
 				return this.compile(cliArgs.getFileNames(), cliArgs.getProjectReferences(), cliArgs.getOptions());
 			}
 		}
 	}
-
+	
 	@Override
 	public int applyAsInt(String[] args) {
 		try {
@@ -365,7 +366,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 		}
 	}
 	
-	public static void main(String...args) {
+	public static void main(String... args) {
 		CLIRunner runner = new CLIRunner();
 		
 		int result;
