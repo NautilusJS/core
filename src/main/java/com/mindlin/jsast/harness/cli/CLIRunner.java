@@ -45,6 +45,7 @@ import com.mindlin.jsast.i18n.Diagnostic;
 @NonNullByDefault
 public class CLIRunner implements ToIntFunction<String[]> {
 	public static final String CONFIG_FILE_NAME = "tsconfig.json";
+	public static final String VERSION = "0.0.1-alpha";
 	
 	@Nullable
 	protected Locale locale = null;
@@ -66,9 +67,20 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	
 	// ===== Getters & setters =====
 	
+	/**
+	 * @return Version string
+	 */
+	public String getVersion() {
+		Package pkg = getClass().getPackage();
+		String result = pkg.getImplementationVersion();
+		if (result == null)
+			result = VERSION;
+		return result;
+	}
+	
 	protected Path getBaseDirectory() {
 		if (this.cwd == null) {
-			// Get entry point base if not provided 
+			// Get entry point base if not provided
 			this.cwd = Paths.get("").toAbsolutePath();
 		}
 		assert this.cwd != null;
@@ -86,7 +98,7 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	public void setOutStream(PrintStream out) {
 		this.out = Objects.requireNonNull(out);
 	}
-
+	
 	public PrintStream getErrorStream() {
 		return this.err;
 	}
@@ -185,11 +197,9 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	 * 
 	 * @return Return code
 	 */
-	public CLIResult printHelp(boolean all) {
-		//TODO: finish
-		out.println("<<help message>>");
-		
-		return CLIResult.SUCCESS;
+	public CLIResult printVersion() {
+		out.printf("nautilus-core version %s\n", this.getVersion());
+		return CLIResult.SUCCESS_NO_OUTPUT;
 	}
 	
 	/**
@@ -199,9 +209,13 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	 *            TODO
 	 * @return Return code
 	 */
-	public CLIResult printVersion() {
-		//TODO: finish
-		return CLIResult.SUCCESS_NO_OUTPUT;
+	public CLIResult printHelp(CompilerOptions options, boolean all) {
+		// TODO: finish
+		out.println("<<help message>>");
+		for (CompilerOption<?> option : options.getOptions()) {
+			//TODO
+		}
+		return CLIResult.SUCCESS;
 	}
 	
 	protected CLIResult build(List<String> rawArgs) {
