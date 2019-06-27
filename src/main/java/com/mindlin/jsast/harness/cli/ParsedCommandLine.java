@@ -29,7 +29,7 @@ public class ParsedCommandLine {
 		this.fileNames.add(name);
 	}
 	
-	public void reportParseDiagnostic(Diagnostic diagnostic) {
+	public void reportParseDiagnostic(Diagnostic.Level level, Diagnostic diagnostic) {
 		this.errors.add(diagnostic);
 	}
 	
