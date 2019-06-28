@@ -30,14 +30,14 @@ import com.mindlin.jsast.harness.CompilerOptionProvider;
 import com.mindlin.jsast.harness.CompilerOptions;
 import com.mindlin.jsast.harness.NautilusCompiler;
 import com.mindlin.jsast.harness.NautilusCompiler.CompilationHandle;
+import com.mindlin.jsast.harness.StandardCompilerOptions;
 import com.mindlin.jsast.harness.config.CommandLineParser;
 import com.mindlin.jsast.harness.config.ConfigFileWriter;
 import com.mindlin.jsast.harness.config.ParsedCommandLine;
-import com.mindlin.jsast.harness.StandardCompilerOptions;
 import com.mindlin.jsast.harness.discovery.Program;
 import com.mindlin.jsast.harness.discovery.ProgramBuilder;
-import com.mindlin.jsast.harness.plugin.PluginManager;
 import com.mindlin.jsast.i18n.Diagnostic;
+import com.mindlin.nautilus.util.i18n.LocalizableMessage;
 
 /**
  * Main entry point for CLI.
@@ -63,7 +63,6 @@ public class CLIRunner implements Function<String[], CLIResult>, ToIntFunction<S
 	
 	@Nullable
 	protected AbstractDiagnosticReporter reporter;
-	protected final PluginManager plugins = new PluginManager();
 	
 	public CLIRunner() {
 	}
@@ -207,16 +206,20 @@ public class CLIRunner implements Function<String[], CLIResult>, ToIntFunction<S
 	
 	/**
 	 * Print help text to stdout
-	 * 
+	 * @param options 
 	 * @param all
 	 *            TODO
 	 * @return Return code
 	 */
 	public CLIResult printHelp(CompilerOptions options, boolean all) {
 		// TODO: finish
+		Locale locale = this.getLocale();
+		final int descrCol = 20;
 		out.println("<<help message>>");
 		for (CompilerOption<?> option : options.getOptions()) {
-			//TODO
+			String command = option.name();
+			LocalizableMessage descr = option.getDescription();
+			out.format(locale, " -%-*s %*s", descrCol, command, descr);
 		}
 		return CLIResult.SUCCESS;
 	}
