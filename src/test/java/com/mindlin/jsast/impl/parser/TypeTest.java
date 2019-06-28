@@ -1,7 +1,15 @@
 package com.mindlin.jsast.impl.parser;
 
-import static com.mindlin.jsast.impl.parser.JSParserTest.*;
-import static org.junit.Assert.*;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertIdentifier;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertSingleElementKind;
+import static com.mindlin.jsast.impl.parser.JSParserTest.assertSpecialType;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseExpression;
+import static com.mindlin.jsast.impl.parser.JSParserTest.parseType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -15,6 +23,7 @@ import com.mindlin.jsast.tree.MemberExpressionTree;
 import com.mindlin.jsast.tree.Modifiers;
 import com.mindlin.jsast.tree.ParameterTree;
 import com.mindlin.jsast.tree.PropertySignatureTree;
+import com.mindlin.jsast.tree.Tree;
 import com.mindlin.jsast.tree.Tree.Kind;
 import com.mindlin.jsast.tree.type.ArrayTypeTree;
 import com.mindlin.jsast.tree.type.CompositeTypeTree;
@@ -24,15 +33,15 @@ import com.mindlin.jsast.tree.type.FunctionTypeTree;
 import com.mindlin.jsast.tree.type.IdentifierTypeTree;
 import com.mindlin.jsast.tree.type.IndexSignatureTree;
 import com.mindlin.jsast.tree.type.InferTypeTree;
-import com.mindlin.jsast.tree.type.UnaryTypeTree;
 import com.mindlin.jsast.tree.type.MappedTypeTree;
 import com.mindlin.jsast.tree.type.MemberTypeTree;
 import com.mindlin.jsast.tree.type.ObjectTypeTree;
 import com.mindlin.jsast.tree.type.SpecialTypeTree.SpecialType;
 import com.mindlin.jsast.tree.type.TupleTypeTree;
-import com.mindlin.jsast.tree.type.TypeElementTree;
 import com.mindlin.jsast.tree.type.TypeParameterDeclarationTree;
 import com.mindlin.jsast.tree.type.TypeTree;
+import com.mindlin.jsast.tree.type.UnaryTypeTree;
+import com.mindlin.nautilus.tree.type.TypeQueryTree;
 
 public class TypeTest {
 	
@@ -269,8 +278,8 @@ public class TypeTest {
 	
 	@Test
 	public void testTypeQuery() {
-		TypeTree type = parseType("typeof X", Kind.TYPE_QUERY);
-		fail("Not implemented");
+		TypeQueryTree type = parseType("typeof X", Kind.TYPE_QUERY);
+		assertIdentifier("X", (Tree) type.getExpression());
 	}
 	
 	@Test
