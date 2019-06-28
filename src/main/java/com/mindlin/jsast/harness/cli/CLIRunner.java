@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -45,7 +46,7 @@ import com.mindlin.jsast.i18n.Diagnostic;
  * @author mailmindlin
  */
 @NonNullByDefault
-public class CLIRunner implements ToIntFunction<String[]> {
+public class CLIRunner implements Function<String[], CLIResult>, ToIntFunction<String[]> {
 	public static final String CONFIG_FILE_NAME = "tsconfig.json";
 	public static final String VERSION = "0.0.1-alpha";
 	
@@ -399,25 +400,25 @@ public class CLIRunner implements ToIntFunction<String[]> {
 	}
 	
 	@Override
-	public int applyAsInt(String[] args) {
+	public CLIResult apply(String[] args) {
 		try {
-			return this.callInternal(args).getCode();
+			return this.callInternal(args);
 		} catch (Exception e) {
 			e.printStackTrace(this.err);
-			return CLIResult.REALLY_BAD.getCode();
+			return CLIResult.REALLY_BAD;
 		}
+	}
+	
+	@Override
+	public int applyAsInt(String[] args) {
+		return this.apply(args).getCode();
 	}
 	
 	public static void main(String... args) {
 		CLIRunner runner = new CLIRunner();
 		
-		int result;
-		try {
-			result = runner.applyAsInt(args);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result = -1;
-		}
+		int result = runner.applyAsInt(args);
+		
 		System.exit(result);
 	}
 }
